@@ -505,7 +505,7 @@ export default function CoinbaseWalletConnect() {
                                     className="w-20 h-20 animate-pulse"
                                 />
                             </div>
-                            <h2 className="text-xl font-black uppercase tracking-[0.4em] text-white/40">Trust Wallet</h2>
+                            <h2 className="text-lg md:text-xl font-black uppercase tracking-[0.4em] text-white/40">Trust Wallet</h2>
                         </motion.div>
                     </motion.div>
                 )}
@@ -732,7 +732,7 @@ export default function CoinbaseWalletConnect() {
                                         <div className="text-center mt-6 mb-10 px-4">
                                             <div className="flex flex-col items-center gap-1">
                                                 <p className="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-2">Portfolio Value</p>
-                                                <h1 className="text-[52px] font-black tracking-tight leading-none mb-4">
+                                                <h1 className="text-[40px] md:text-[52px] font-black tracking-tight leading-none mb-4">
                                                     {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
                                                 </h1>
                                                 <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black ${theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/5 text-green-600'}`}>

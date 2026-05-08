@@ -216,7 +216,7 @@ export default function ReceiveModal({
                             <button onClick={onClose} className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
-                            <h2 className="text-2xl font-black uppercase tracking-widest">{step === 'setup' ? 'Deposit' : 'Address Details'}</h2>
+                            <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">{step === 'setup' ? 'Deposit' : 'Address Details'}</h2>
                         </div>
 
                         {step === 'setup' ? (
@@ -273,7 +273,7 @@ export default function ReceiveModal({
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
                                             placeholder="0.00"
-                                            className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none pr-24 text-xl font-black placeholder-gray-600 ${theme === 'dark' ? 'bg-[#121212] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
+                                            className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none pr-24 text-lg md:text-xl font-black placeholder-gray-600 ${theme === 'dark' ? 'bg-[#121212] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
                                                 }`}
                                         />
                                         <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 font-black text-sm uppercase tracking-widest">{selectedCoin}</span>

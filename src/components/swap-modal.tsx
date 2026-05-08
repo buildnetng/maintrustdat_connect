@@ -359,7 +359,7 @@ export default function SwapModal({
                         onChange={(e) => setFromAmount(e.target.value)}
                         placeholder="0.0"
                         step="any"
-                        className={`flex-1 bg-transparent text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
+                        className={`flex-1 bg-transparent text-2xl md:text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
                             }`}
                         required
                     />
@@ -441,7 +441,7 @@ export default function SwapModal({
                         type="text"
                         value={toAmount}
                         placeholder="0.0"
-                        className={`flex-1 bg-transparent text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
+                        className={`flex-1 bg-transparent text-2xl md:text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
                             }`}
                         readOnly
                     />
@@ -503,7 +503,7 @@ export default function SwapModal({
                             key={estimatedUsdValue}
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className={`font-black text-xl ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}
+                            className={`font-black text-lg md:text-xl ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}
                         >
                             {currencySymbol}{(Number(estimatedUsdValue) * fxRate).toFixed(2)}
                         </motion.div>
@@ -591,7 +591,7 @@ export default function SwapModal({
                                 </button>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
-                                        <h2 className="text-2xl font-black uppercase tracking-widest">Swap Assets</h2>
+                                        <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">Swap Assets</h2>
                                         <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-500/5 text-blue-600'}`}>
                                             Best Rate
                                         </div>

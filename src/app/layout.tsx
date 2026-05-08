@@ -1,7 +1,7 @@
 "use client";
 
 import "./globals.css";
-
+import { Outfit } from "next/font/google";
 
 // import { RecoilRoot } from "recoil";
 import { Toaster } from "react-hot-toast";
@@ -9,6 +9,11 @@ import { Suspense, useEffect, useState } from "react";
 import { WalletProvider } from "@/context/base";
 import { getModal } from '@/context/appkit'
 
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-outfit",
+});
 
 export default function RootLayout({
   children,
@@ -27,11 +32,11 @@ export default function RootLayout({
 // getModal();
 
   return (
-    <html lang="en">
+    <html lang="en" className={outfit.variable}>
       <head>
         <link rel="icon" href="/favicon.png" type="image/png" />
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className={outfit.className}>
 
         {loading && (
           <div className="fixed inset-0 bg-white flex items-center justify-center z-[9999] transition-opacity duration-500">

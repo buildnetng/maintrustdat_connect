@@ -84,7 +84,7 @@ export default function BuyModal({ address, isOpen, onClose, onSuccess, theme = 
                             >
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
-                            <h2 className="text-2xl font-black uppercase tracking-widest">Buy Crypto</h2>
+                            <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">Buy Crypto</h2>
                         </div>
 
                         <div className="mb-6">
@@ -110,7 +110,7 @@ export default function BuyModal({ address, isOpen, onClose, onSuccess, theme = 
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none transition-colors text-xl font-black placeholder-gray-600 ${theme === 'dark' ? 'bg-[#121212] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
+                                        className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none transition-colors text-lg md:text-xl font-black placeholder-gray-600 ${theme === 'dark' ? 'bg-[#121212] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
                                             }`}
                                         required
                                     />

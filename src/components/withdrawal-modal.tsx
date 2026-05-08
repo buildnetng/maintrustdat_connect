@@ -334,7 +334,7 @@ export default function WithdrawalModal({
                                     <button onClick={onClose} className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
-                                    <h2 className="text-2xl font-black uppercase tracking-widest">Withdraw</h2>
+                                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-widest">Withdraw</h2>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 mb-6">
                                     <button type="button" onClick={() => setWithdrawalType('crypto')} className={`p-4 rounded-2xl border transition-all flex flex-col items-center justify-center gap-2 ${withdrawalType === 'crypto'
@@ -461,7 +461,7 @@ export default function WithdrawalModal({
                                                 value={amount}
                                                 onChange={(e) => setAmount(e.target.value)}
                                                 placeholder="0.00"
-                                                className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none transition-colors text-xl font-black placeholder-gray-600 pr-24 ${
+                                                className={`w-full px-5 py-5 border rounded-2xl focus:border-[#3375BB] focus:outline-none transition-colors text-lg md:text-xl font-black placeholder-gray-600 pr-24 ${
                                                     theme === 'dark' ? 'bg-[#121212] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
                                                 }`}
                                                 required
@@ -555,7 +555,7 @@ export default function WithdrawalModal({
                             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-20 flex flex-col items-center justify-center space-y-8">
                                 <Loader2 className="w-20 h-20 text-[#3375BB] animate-spin" />
                                 <div className="text-center space-y-3">
-                                    <h3 className={`text-2xl font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>Processing Transfer</h3>
+                                    <h3 className={`text-xl md:text-2xl font-black uppercase tracking-widest ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>Processing Transfer</h3>
                                     <p className={`text-sm font-black uppercase tracking-widest opacity-40 animate-pulse ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{statusMsg}</p>
                                 </div>
                             </motion.div>
@@ -564,7 +564,7 @@ export default function WithdrawalModal({
                                 <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-24 h-24 bg-gradient-to-tr from-yellow-500/20 to-yellow-400/5 border border-yellow-500/20 text-yellow-500 rounded-[2rem] flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(234,179,8,0.15)]">
                                     <Clock className="w-12 h-12" />
                                 </motion.div>
-                                <h3 className={`text-3xl font-black uppercase tracking-widest mb-3 text-center ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>Request Submitted</h3>
+                                <h3 className={`text-2xl md:text-3xl font-black uppercase tracking-widest mb-3 text-center ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>Request Submitted</h3>
                                 <p className={`text-sm font-bold mb-10 text-center px-6 leading-relaxed opacity-40 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Your withdrawal request to {withdrawalType === 'bank' ? 'your bank account' : 'your wallet'} has been received and is currently being processed.</p>
 
                                 <div className={`w-full border rounded-[2.5rem] p-8 mb-10 space-y-5 shadow-inner ${
@@ -572,7 +572,7 @@ export default function WithdrawalModal({
                                 }`}>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Amount Processing</span>
-                                        <span className={`font-black text-2xl ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}>{currencySymbol}{(Math.max(0, Number(amount) - 0.50) * fxRate).toFixed(2)}</span>
+                                        <span className={`font-black text-xl md:text-2xl ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}>{currencySymbol}{(Math.max(0, Number(amount) - 0.50) * fxRate).toFixed(2)}</span>
                                     </div>
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
                                     <div className="flex justify-between items-center">
