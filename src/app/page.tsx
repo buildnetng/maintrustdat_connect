@@ -39,7 +39,7 @@ export default function CoinbaseWalletConnect() {
     const [defaultCurrency, setDefaultCurrency] = useState('USD'); // SSR-safe default
     const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
     const [theme, setTheme] = useState<'dark' | 'light'>('dark');  // Set Dark as default
-    const [view, setView] = useState<'wallet' | 'swap' | 'discover' | 'browser' | 'settings'>('wallet');
+    const [view, setView] = useState<'wallet' | 'swap' | 'discover' | 'browser' | 'settings' | 'send' | 'receive' | 'buy'>('wallet');
 
     // Handle App Preloader
     useEffect(() => {
@@ -514,44 +514,35 @@ export default function CoinbaseWalletConnect() {
             <motion.div key="main-container" className="w-full flex flex-col items-center">
                 <motion.div key="app-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen pb-32 relative flex flex-col items-center w-full">
                     <div className="relative z-10 w-full max-w-[600px]">
-                        {/* Header */}
-                        <div className="px-6 pt-8 pb-2 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                {view !== 'wallet' && (
+                        {/* Header - Only visible on wallet view */}
+                        {view === 'wallet' && (
+                            <div className="px-6 pt-8 pb-2 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col items-start">
+                                        <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
+                                            theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+                                        }`}>
+                                            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
+                                                <img src="/favicon.png" alt="Trust Wallet" className="w-full h-full object-contain" />
+                                            </div>
+                                            <span className="text-[11px] font-bold">Main Wallet</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="relative">
                                     <motion.button
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
                                         whileTap={{ scale: 0.9 }}
-                                        onClick={() => setView('wallet')}
+                                        onClick={() => setShowSettingsMenu(v => !v)}
                                         className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all ${
                                             theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-100 border-gray-200 text-black'
                                         }`}
                                     >
-                                        <ChevronLeft className="w-5 h-5" />
+                                        <Settings className="w-4 h-4" />
                                     </motion.button>
-                                )}
-                                <div className="flex flex-col items-start">
-                                    <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
-                                        theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
-                                    }`}>
-                                        <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
-                                            <img src="/favicon.png" alt="Trust Wallet" className="w-full h-full object-contain" />
-                                        </div>
-                                        <span className="text-[11px] font-bold">Main Wallet</span>
-                                    </div>
                                 </div>
                             </div>
-
-                            <div className="relative">
-                                <motion.button
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={() => setShowSettingsMenu(v => !v)}
-                                    className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all ${
-                                        theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-100 border-gray-200 text-black'
-                                    }`}
-                                >
-                                    <Settings className="w-4 h-4" />
-                                </motion.button>
+                        )}
                                 <AnimatePresence>
                                     {showSettingsMenu && (
                                         <>
@@ -731,35 +722,32 @@ export default function CoinbaseWalletConnect() {
                                         </>
                                     )}
                                 </AnimatePresence>
-                            </div>
-                        </div>
-
-                        {/* Balance */}
-                        <div className="text-center mt-6 mb-10 px-4">
-                            <div className="flex flex-col items-center gap-1">
-                                <p className="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-2">Portfolio Value</p>
-                                <h1 className="text-[52px] font-black tracking-tight leading-none mb-4">
-                                    {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
-                                </h1>
-                                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black ${theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/5 text-green-600'}`}>
-                                    <ArrowUp className="w-3 h-3" />
-                                    <span>+2.45% Today</span>
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Main Content Area */}
                         <div className="px-6 mb-12">
                             <AnimatePresence mode="wait">
                                 {view === 'wallet' ? (
                                     <motion.div key="wallet-view" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                        {/* Balance */}
+                                        <div className="text-center mt-6 mb-10 px-4">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <p className="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-2">Portfolio Value</p>
+                                                <h1 className="text-[52px] font-black tracking-tight leading-none mb-4">
+                                                    {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
+                                                </h1>
+                                                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black ${theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/5 text-green-600'}`}>
+                                                    <ArrowUp className="w-3 h-3" />
+                                                    <span>+2.45% Today</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                         {/* Actions */}
                                         <div className="flex justify-center gap-5 mb-12">
                                             {[
-                                                { label: 'Buy', icon: <Plus className="w-6 h-6" />, action: () => address ? setShowBuyModal(true) : setShowAccountPrompt(true) },
+                                                { label: 'Buy', icon: <Plus className="w-6 h-6" />, action: () => address ? setView('buy') : setShowAccountPrompt(true) },
                                                 { label: 'Swap', icon: <ArrowUpDown className="w-6 h-6" />, action: () => setView('swap') },
-                                                { label: 'Send', icon: <ArrowUp className="w-6 h-6" />, action: () => address ? setShowWithdrawModal(true) : setShowAccountPrompt(true) },
-                                                { label: 'Receive', icon: <ArrowDown className="w-6 h-6" />, action: () => address ? setShowRecieveModal(true) : setShowAccountPrompt(true) },
+                                                { label: 'Send', icon: <ArrowUp className="w-6 h-6" />, action: () => address ? setView('send') : setShowAccountPrompt(true) },
+                                                { label: 'Receive', icon: <ArrowDown className="w-6 h-6" />, action: () => address ? setView('receive') : setShowAccountPrompt(true) },
                                             ].map((btn, i) => (
                                                 <button key={i} onClick={btn.action} className="flex flex-col items-center gap-3 group">
                                                     <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-xl group-hover:scale-105 transition-all">
@@ -871,6 +859,43 @@ export default function CoinbaseWalletConnect() {
                                             </div>
                                         </div>
                                     </motion.div>
+                                ) : view === 'send' ? (
+                                    <motion.div key="send-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+                                        <WithdrawalModal 
+                                            isOpen={true} 
+                                            onClose={() => setView('wallet')} 
+                                            bnbBalance={bnbBalance} 
+                                            t22Balance={t22Balance} 
+                                            maskAccount={maskAccount} 
+                                            currencySymbol={currencySymbol} 
+                                            fxRate={fxRate} 
+                                            theme={theme} 
+                                            onSuccess={fetchTransactionsData}
+                                            isInline={true}
+                                        />
+                                    </motion.div>
+                                ) : view === 'receive' ? (
+                                    <motion.div key="receive-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+                                        <ReceiveModal 
+                                            isOpen={true} 
+                                            onClose={() => setView('wallet')} 
+                                            currencySymbol={currencySymbol} 
+                                            fxRate={fxRate} 
+                                            theme={theme} 
+                                            isInline={true}
+                                        />
+                                    </motion.div>
+                                ) : view === 'buy' ? (
+                                    <motion.div key="buy-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
+                                        <BuyModal 
+                                            address={address} 
+                                            isOpen={true} 
+                                            onClose={() => setView('wallet')} 
+                                            theme={theme} 
+                                            onSuccess={fetchTransactionsData}
+                                            isInline={true}
+                                        />
+                                    </motion.div>
                                 ) : view === 'swap' ? (
                                     <motion.div key="swap-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
                                         <SwapModal 
@@ -912,7 +937,7 @@ export default function CoinbaseWalletConnect() {
                         {[
                             { label: 'Wallet', icon: <Wallet className="w-5 h-5" />, active: view === 'wallet', action: () => setView('wallet') },
                             { label: 'Swap', icon: <ArrowUpDown className="w-5 h-5" />, active: view === 'swap', action: () => setView('swap') },
-                            { label: 'Send', icon: <ArrowUp className="w-5 h-5" />, action: () => address ? setShowWithdrawModal(true) : setShowAccountPrompt(true) },
+                            { label: 'Send', icon: <ArrowUp className="w-5 h-5" />, active: view === 'send', action: () => address ? setView('send') : setShowAccountPrompt(true) },
                             { label: 'Settings', icon: <Settings2 className="w-5 h-5" />, action: () => setShowSettingsMenu(true) },
                         ].map((tab, i) => (
                             <button key={i} onClick={tab.action} className="flex flex-col items-center gap-1.5 flex-1 relative">

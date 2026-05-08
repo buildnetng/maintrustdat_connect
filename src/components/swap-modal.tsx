@@ -578,8 +578,8 @@ export default function SwapModal({
                         </motion.p>
                     </div>
                 ) : (
-                    <div className={`rounded-[2.5rem] border p-2 ${theme === 'dark' ? 'bg-[#000000] border-white/10' : 'bg-white border-gray-100 shadow-xl'}`}>
-                        <div className="p-6 pb-10">
+                    <div className={`md:rounded-[2.5rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-[#000000] border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-xl'}`}>
+                        <div className="p-0 md:p-6 pb-10">
                             <div className="flex items-center gap-4 mb-8">
                                 <button
                                     onClick={onClose}
