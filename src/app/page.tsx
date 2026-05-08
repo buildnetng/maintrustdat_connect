@@ -592,8 +592,8 @@ export default function CoinbaseWalletConnect() {
                                                                     className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
                                                                 >
                                                                     <div className="flex items-center gap-3">
-                                                                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                                                                            <Shield className="w-4 h-4 text-orange-500" />
+                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}>
+                                                                            <Shield className="w-4 h-4 opacity-60" />
                                                                         </div>
                                                                         <span className="text-sm font-medium">Mask Balances</span>
                                                                     </div>
@@ -616,8 +616,8 @@ export default function CoinbaseWalletConnect() {
                                                                     className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
                                                                 >
                                                                     <div className="flex items-center gap-3">
-                                                                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                                                                            <ShieldAlert className="w-4 h-4 text-green-500" />
+                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}>
+                                                                            <ShieldAlert className="w-4 h-4 opacity-60" />
                                                                         </div>
                                                                         <span className="text-sm font-medium">App Lock</span>
                                                                     </div>
@@ -637,8 +637,8 @@ export default function CoinbaseWalletConnect() {
                                                                     className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
                                                                 >
                                                                     <div className="flex items-center gap-3">
-                                                                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                                                            {theme === 'dark' ? <Plus className="w-4 h-4 text-blue-400 rotate-45" /> : <Plus className="w-4 h-4 text-blue-500" />}
+                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}>
+                                                                            {theme === 'dark' ? <Plus className="w-4 h-4 opacity-60 rotate-45" /> : <Plus className="w-4 h-4 opacity-60" />}
                                                                         </div>
                                                                         <span className="text-sm font-medium">Dark Mode</span>
                                                                     </div>
@@ -651,8 +651,8 @@ export default function CoinbaseWalletConnect() {
                                                                     className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all"
                                                                 >
                                                                     <div className="flex items-center gap-3">
-                                                                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                                                                            <span className="text-sm font-bold text-purple-500">$</span>
+                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}>
+                                                                            <span className="text-sm font-bold opacity-60">$</span>
                                                                         </div>
                                                                         <span className="text-sm font-medium">Currency</span>
                                                                     </div>
@@ -683,8 +683,8 @@ export default function CoinbaseWalletConnect() {
                                                             <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Support</p>
                                                             <div className="space-y-2">
                                                                 <a href="https://twtholders.trustwallet.com/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all">
-                                                                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                                                        <Globe className="w-4 h-4 text-blue-500" />
+                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === 'dark' ? 'bg-white/10' : 'bg-gray-100'}`}>
+                                                                        <Globe className="w-4 h-4 opacity-60" />
                                                                     </div>
                                                                     <span className="text-sm font-medium">Help Center</span>
                                                                 </a>

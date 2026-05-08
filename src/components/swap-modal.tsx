@@ -512,9 +512,9 @@ export default function SwapModal({
             <button
                 type="submit"
                 disabled={!fromAmount || Number(fromAmount) <= 0}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg mt-4"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-base mt-4"
             >
-                {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : `Swap ${fromToken}`}
+                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : `Swap ${fromToken}`}
             </button>
         </form>
     );
@@ -552,7 +552,7 @@ export default function SwapModal({
                                 <h2 className="text-base font-semibold tracking-tight">Swap Tokens</h2>
                             </div>
                             {/* Scrollable Content */}
-                            <div className="px-6 md:px-8 pb-12 mt-4">
+                            <div className="px-6 md:px-8 pb-12 mt-8">
                             {renderForm()}
                         </div>
                     </div>

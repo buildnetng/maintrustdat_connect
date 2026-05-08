@@ -330,13 +330,16 @@ export default function WithdrawalModal({
                     <div className={`${isInline ? 'p-0 md:p-6 pb-10' : ''}`}>
                         {step === 'input' ? (
                             <div className="w-full">
-                                <div className="flex items-center gap-3 mb-10">
+                                {/* Sticky Header */}
+                                <div className={`sticky top-0 z-10 px-0 pt-0 pb-4 flex items-center gap-3 mb-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                                     <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
                                     <h2 className="text-base font-semibold tracking-tight">Send Crypto</h2>
                                 </div>
 
+                                {/* Scrollable Content */}
+                                <div className="mt-8">
                                 <div className="grid grid-cols-2 gap-4 mb-8">
                                     <button type="button" onClick={() => setWithdrawalType('crypto')} className={`p-5 rounded-[2rem] border transition-all flex flex-col items-center justify-center gap-2 ${withdrawalType === 'crypto'
                                         ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-500' : 'text-blue-600'}`
@@ -538,11 +541,12 @@ export default function WithdrawalModal({
                                     <button
                                         disabled={withdrawLoading || !isFormValid || !isSufficientBalance}
                                         type="submit"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-base"
                                     >
-                                        {withdrawLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "Continue"}
+                                        {withdrawLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Continue"}
                                     </button>
                                 </form>
+                                </div>
                             </div>
                         ) : step === 'processing' ? (
                             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-24 flex flex-col items-center justify-center space-y-8">
