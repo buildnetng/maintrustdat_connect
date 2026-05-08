@@ -515,6 +515,7 @@ export default function CoinbaseWalletConnect() {
                 <motion.div key="app-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen pb-32 relative flex flex-col items-center w-full">
                     <div className="relative z-10 w-full max-w-[600px]">
                         {/* Header - Only visible on wallet view */}
+                        {view === 'wallet' && (
                             <div className="px-6 pt-8 pb-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
@@ -535,6 +536,7 @@ export default function CoinbaseWalletConnect() {
                                     </div>
                                 </button>
                             </div>
+                        )}
                                 <AnimatePresence>
                                     {showSettingsMenu && (
                                         <>
