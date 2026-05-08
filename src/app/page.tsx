@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { createCoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Outfit } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
 import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ChevronLeft, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint, Maximize, RefreshCw, ArrowUpRight } from 'lucide-react';
 
@@ -19,7 +19,7 @@ import ReceiveModal from '@/components/recieve-modal';
 import { getModal } from '@/context/appkit';
 // import { useAppKit } from '@reown/appkit/react';
 
-const outfit = Outfit({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] });
+const inter = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] });
 
 export default function CoinbaseWalletConnect() {
     const searchParams = useSearchParams();
@@ -493,7 +493,7 @@ export default function CoinbaseWalletConnect() {
     const [selectedAssetForSwap, setSelectedAssetForSwap] = useState<string>('');
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'} ${outfit.className}`}>
+        <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'} ${inter.className}`}>
             <AnimatePresence>
                 {pageLoading && (
                     <motion.div key="preloader" initial={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black">
