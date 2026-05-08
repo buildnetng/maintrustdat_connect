@@ -130,7 +130,7 @@ export default function BuyModal({ address, isOpen, onClose, onSuccess, theme = 
                                                 type="button"
                                                 onClick={() => setCrypto(coin)}
                                                 className={`py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${crypto === coin
-                                                    ? `border-blue-600/50 bg-blue-600/10 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
+                                                    ? `border-transparent ${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'}`
                                                     : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}
                                             >
                                                 {coin}
