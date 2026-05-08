@@ -516,31 +516,43 @@ export default function CoinbaseWalletConnect() {
                     <div className="relative z-10 w-full max-w-[600px]">
                         {/* Header - Only visible on wallet view */}
                         {view === 'wallet' && (
-                            <div className="px-6 pt-8 pb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex flex-col items-start">
-                                        <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
-                                            theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
-                                        }`}>
-                                            <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
-                                                <img src="/favicon.png" alt="Trust Wallet" className="w-full h-full object-contain" />
-                                            </div>
-                                            <span className="text-[11px] font-bold">Main Wallet</span>
-                                        </div>
-                                    </div>
-                                </div>
-
+                            <div className="px-4 pt-6 pb-2 flex items-center gap-3">
                                 <div className="relative">
-                                    <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => setShowSettingsMenu(v => !v)}
-                                        className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all ${
-                                            theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-100 border-gray-200 text-black'
+                                    <button
+                                        onClick={() => setShowSettingsMenu(true)}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                                            theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
                                         }`}
                                     >
-                                        <Settings className="w-4 h-4" />
-                                    </motion.button>
+                                        <div className="relative">
+                                            <Settings className="w-6 h-6 stroke-[1.5]" />
+                                            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-black" />
+                                        </div>
+                                    </button>
                                 </div>
+
+                                <div className="flex-1 relative">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                                        <Search className="w-5 h-5 text-gray-400" />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search" 
+                                        value={assetSearchQuery}
+                                        onChange={(e) => setAssetSearchQuery(e.target.value)}
+                                        className={`w-full h-11 pl-11 pr-4 rounded-full text-base font-medium transition-all ${
+                                            theme === 'dark' ? 'bg-white/10 text-white placeholder-gray-500' : 'bg-[#f0f0f2] text-black placeholder-gray-500'
+                                        }`}
+                                    />
+                                </div>
+
+                                <button
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                                        theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <Maximize className="w-6 h-6 stroke-[1.5]" />
+                                </button>
                             </div>
                         )}
                                 <AnimatePresence>
@@ -728,33 +740,51 @@ export default function CoinbaseWalletConnect() {
                             <AnimatePresence mode="wait">
                                 {view === 'wallet' ? (
                                     <motion.div key="wallet-view" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                                        {/* Wallet Badge */}
+                                        <div className="flex justify-center mt-6 mb-4">
+                                            <button 
+                                                onClick={copyAddress}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
+                                                    theme === 'dark' ? 'bg-white/10 hover:bg-white/20' : 'bg-[#f0f0f2] hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <span className="text-sm font-bold">Main Wallet 1</span>
+                                                <ChevronRight className="w-4 h-4 opacity-40" />
+                                                <Copy className={`w-3.5 h-3.5 transition-opacity ${copied ? 'text-green-500' : 'opacity-40'}`} />
+                                            </button>
+                                        </div>
+
                                         {/* Balance */}
-                                        <div className="text-center mt-6 mb-10 px-4">
-                                            <div className="flex flex-col items-center gap-1">
-                                                <p className="text-[11px] font-black uppercase tracking-[0.4em] opacity-30 mb-2">Portfolio Value</p>
-                                                <h1 className="text-[40px] md:text-[52px] font-black tracking-tight leading-none mb-4">
+                                        <div className="text-center mb-10 px-4">
+                                            <div className="flex flex-col items-center">
+                                                <h1 className="text-[48px] font-bold tracking-tight leading-tight mb-1">
                                                     {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
                                                 </h1>
-                                                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black ${theme === 'dark' ? 'bg-green-500/10 text-green-400' : 'bg-green-500/5 text-green-600'}`}>
-                                                    <ArrowUp className="w-3 h-3" />
-                                                    <span>+2.45% Today</span>
+                                                <div className={`flex items-center gap-1 text-[15px] font-bold ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                                                    <span className="text-sm">▼</span>
+                                                    <span>$0.01 (-1.01%)</span>
                                                 </div>
                                             </div>
                                         </div>
                                         {/* Actions */}
-                                        <div className="flex justify-center gap-5 mb-12">
+                                        <div className="flex justify-center gap-4 mb-10 px-4">
                                             {[
-                                                { label: 'Buy', icon: <Plus className="w-6 h-6" />, action: () => address ? setView('buy') : setShowAccountPrompt(true) },
-                                                { label: 'Swap', icon: <ArrowUpDown className="w-6 h-6" />, action: () => setView('swap') },
-                                                { label: 'Send', icon: <ArrowUp className="w-6 h-6" />, action: () => address ? setView('send') : setShowAccountPrompt(true) },
-                                                { label: 'Receive', icon: <ArrowDown className="w-6 h-6" />, action: () => address ? setView('receive') : setShowAccountPrompt(true) },
+                                                { label: 'Send', icon: <ArrowUpRight className="w-7 h-7" />, action: () => address ? setView('send') : setShowAccountPrompt(true) },
+                                                { label: 'Receive', icon: <ArrowDown className="w-7 h-7" />, action: () => address ? setView('receive') : setShowAccountPrompt(true) },
+                                                { label: 'Swap', icon: <RefreshCw className="w-7 h-7" />, action: () => setView('swap') },
+                                                { label: 'Buy', icon: <Plus className="w-7 h-7" />, action: () => address ? setView('buy') : setShowAccountPrompt(true) },
                                             ].map((btn, i) => (
-                                                <button key={i} onClick={btn.action} className="flex flex-col items-center gap-3 group">
-                                                    <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-xl group-hover:scale-105 transition-all">
-                                                        <div className="text-black">{btn.icon}</div>
-                                                    </div>
-                                                    <span className="text-[11px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">{btn.label}</span>
-                                                </button>
+                                                <div key={i} className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                                                    <button 
+                                                        onClick={btn.action} 
+                                                        className={`w-[68px] h-[68px] rounded-[1.5rem] flex items-center justify-center transition-all active:scale-95 ${
+                                                            theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-[#f0f0f2] hover:bg-gray-200 text-black'
+                                                        }`}
+                                                    >
+                                                        {btn.icon}
+                                                    </button>
+                                                    <span className="text-[13px] font-bold opacity-80">{btn.label}</span>
+                                                </div>
                                             ))}
                                         </div>
 
