@@ -38,7 +38,7 @@ export default function CoinbaseWalletConnect() {
     const [maskAccount, setMaskAccount] = useState(false);         // SSR-safe default
     const [defaultCurrency, setDefaultCurrency] = useState('USD'); // SSR-safe default
     const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
-    const [theme, setTheme] = useState<'dark' | 'light'>('dark');  // Set Dark as default
+    const [theme, setTheme] = useState<'dark' | 'light'>('light');  // Set Light as default
     const [view, setView] = useState<'wallet' | 'swap' | 'discover' | 'browser' | 'settings' | 'send' | 'receive' | 'buy'>('wallet');
 
     // Handle App Preloader
