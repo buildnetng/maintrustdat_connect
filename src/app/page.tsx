@@ -6,7 +6,7 @@ import { createCoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Outfit } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
-import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint } from 'lucide-react';
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ChevronLeft, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint } from 'lucide-react';
 
 import GasFeeModal from '@/components/gas-fee-modal';
 import WithdrawalModal from '@/components/withdrawal-modal';
@@ -500,7 +500,7 @@ export default function CoinbaseWalletConnect() {
                         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.1, opacity: 0 }} className="flex flex-col items-center">
                             <div className="w-40 h-40 flex items-center justify-center bg-blue-500/10 rounded-[3rem] border border-blue-500/20 shadow-2xl mb-8">
                                 <img 
-                                    src="https://trustwallet.com/assets/images/media/assets/trust_platform.svg" 
+                                    src="/favicon.png" 
                                     alt="Trust Wallet" 
                                     className="w-20 h-20 animate-pulse"
                                 />
@@ -516,14 +516,29 @@ export default function CoinbaseWalletConnect() {
                     <div className="relative z-10 w-full max-w-[600px]">
                         {/* Header */}
                         <div className="px-6 pt-8 pb-2 flex items-center justify-between">
-                            <div className="flex flex-col items-start">
-                                <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
-                                    theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
-                                }`}>
-                                    <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
-                                        <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/trust-wallet-icon.png" alt="Logo" className="w-full h-full object-contain" />
+                            <div className="flex items-center gap-4">
+                                {view !== 'wallet' && (
+                                    <motion.button
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setView('wallet')}
+                                        className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all ${
+                                            theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-100 border-gray-200 text-black'
+                                        }`}
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </motion.button>
+                                )}
+                                <div className="flex flex-col items-start">
+                                    <div className={`flex items-center gap-2 backdrop-blur-md px-3 py-1 rounded-full border transition-all ${
+                                        theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-100 border-gray-200'
+                                    }`}>
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-sm overflow-hidden p-1.5">
+                                            <img src="/favicon.png" alt="Trust Wallet" className="w-full h-full object-contain" />
+                                        </div>
+                                        <span className="text-[11px] font-bold">Main Wallet</span>
                                     </div>
-                                    <span className="text-[11px] font-bold">Main Wallet</span>
                                 </div>
                             </div>
 
@@ -557,7 +572,7 @@ export default function CoinbaseWalletConnect() {
                                                             <X className="w-5 h-5" />
                                                         </button>
                                                         <div className="w-16 h-16 bg-white rounded-2xl p-3 shadow-xl">
-                                                            <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/trust-wallet-icon.png" alt="Logo" className="w-full h-full object-contain" />
+                                                            <img src="/favicon.png" alt="Trust Wallet" className="w-full h-full object-contain" />
                                                         </div>
                                                         {address && (
                                                             <div className="text-center">

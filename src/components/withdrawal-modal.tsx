@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, Wallet, Building2, ArrowRight, Loader2, Check, Copy, Clock, AlertCircle } from 'lucide-react';
+import { X, Wallet, Building2, ArrowRight, Loader2, Check, Copy, Clock, AlertCircle, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { useWallet } from '@/context/base';
@@ -343,11 +343,11 @@ export default function WithdrawalModal({
                     >
                         {step === 'input' ? (
                             <>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-bold">Withdraw</h2>
-                                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-colors text-gray-400 hover:text-white">
-                                        <X className="w-5 h-5" />
+                                <div className="flex items-center gap-4 mb-4">
+                                    <button onClick={onClose} className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                        <ChevronLeft className="w-5 h-5" />
                                     </button>
+                                    <h2 className="text-lg font-bold">Withdraw</h2>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <button type="button" onClick={() => setWithdrawalType('crypto')} className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-1.5 ${withdrawalType === 'crypto'

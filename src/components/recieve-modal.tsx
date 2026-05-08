@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, Copy, Check, ArrowRight, Loader2, Info, Clock } from 'lucide-react';
+import { X, Copy, Check, ArrowRight, Loader2, Info, Clock, ChevronLeft } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useWallet } from '@/context/base';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -225,11 +225,11 @@ export default function ReceiveModal({
                         className={`relative w-full md:max-w-[420px] ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
                             } border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 shadow-2xl pb-10 md:pb-6 md:m-4`}
                     >
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-bold">{step === 'setup' ? 'Deposit' : 'Address Details'}</h2>
-                            <button onClick={onClose} className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800/50 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
-                                <X className="w-5 h-5" />
+                        <div className="flex items-center gap-4 mb-6">
+                            <button onClick={onClose} className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
+                            <h2 className="text-lg font-bold">{step === 'setup' ? 'Deposit' : 'Address Details'}</h2>
                         </div>
 
                         {step === 'setup' ? (

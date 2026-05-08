@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { X, ArrowRight } from 'lucide-react';
+import { X, ArrowRight, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 
@@ -90,18 +90,18 @@ export default function BuyModal({ address, isOpen, onClose, onSuccess, theme = 
                             } border rounded-[2.5rem] p-6 shadow-2xl m-4`}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold">Buy Crypto</h2>
+                        <div className="flex items-center gap-4 mb-4">
                             <button
                                 onClick={onClose}
-                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${
                                     theme === 'dark' 
-                                    ? 'bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white' 
+                                    ? 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white' 
                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-500'
                                 }`}
                             >
-                                <X className="w-5 h-5" />
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
+                            <h2 className="text-lg font-bold">Buy Crypto</h2>
                         </div>
 
                         {/* Payment Method Selector - Only Bank */}
