@@ -431,11 +431,6 @@ export default function ReceiveModal({
             </div>
         );
     };
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     if (isInline) {
         return renderContent();
