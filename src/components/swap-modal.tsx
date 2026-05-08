@@ -344,7 +344,7 @@ export default function SwapModal({
     };
 
     const renderForm = () => (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className={`rounded-[2rem] p-6 transition-all ${theme === 'dark' ? 'bg-white/5 border border-white/5 focus-within:border-blue-600/50' : 'bg-gray-50 border border-gray-100 focus-within:border-blue-600/50'}`}>
                 <div className="flex justify-between items-center mb-4">
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">From</span>
@@ -540,7 +540,7 @@ export default function SwapModal({
                 ) : (
                     <div className={`md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}`}>
                             <div className="px-6 md:px-8 py-8 md:py-8 pb-12">
-                                <div className="flex items-center gap-4 mb-8">
+                                <div className="flex items-center gap-4 mb-12">
                                     <button
                                         onClick={onClose}
                                         className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${
