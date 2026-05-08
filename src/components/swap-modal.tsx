@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft } from 'lucide-react';
+import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { COIN_MAP, getDynamicExchangeRates } from '@/lib/utils';
