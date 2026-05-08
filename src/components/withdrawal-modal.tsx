@@ -339,74 +339,70 @@ export default function WithdrawalModal({
                                 </div>
 
                                 {/* Scrollable Content */}
-                                <div className="mt-8">
-                                <div className="grid grid-cols-2 gap-4 mb-8">
-                                    <button type="button" onClick={() => setWithdrawalType('crypto')} className={`p-5 rounded-[2rem] border transition-all flex flex-col items-center justify-center gap-2 ${withdrawalType === 'crypto'
-                                        ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-500' : 'text-blue-600'}`
-                                        : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}>
-                                        <Wallet className={`w-7 h-7 ${withdrawalType === 'crypto' ? 'text-blue-600' : 'opacity-40'}`} />
-                                        <span className="font-bold text-sm">Crypto</span>
+                                <div className="mt-6">
+                                {/* Type Selector */}
+                                <div className={`flex rounded-2xl p-1 mb-8 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'}`}>
+                                    <button type="button" onClick={() => setWithdrawalType('crypto')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${withdrawalType === 'crypto' ? (theme === 'dark' ? 'bg-white/10 text-white' : 'bg-white text-black shadow-sm') : 'opacity-40'}`}>
+                                        <Wallet className="w-4 h-4" />
+                                        Crypto
                                     </button>
-
-                                    <button type="button" onClick={() => setWithdrawalType('bank')} className={`p-5 rounded-[2rem] border transition-all flex flex-col items-center justify-center gap-2 ${withdrawalType === 'bank'
-                                        ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-500' : 'text-blue-600'}`
-                                        : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}>
-                                        <Building2 className={`w-7 h-7 ${withdrawalType === 'bank' ? 'text-blue-600' : 'opacity-40'}`} />
-                                        <span className="font-bold text-sm">Bank</span>
+                                    <button type="button" onClick={() => setWithdrawalType('bank')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${withdrawalType === 'bank' ? (theme === 'dark' ? 'bg-white/10 text-white' : 'bg-white text-black shadow-sm') : 'opacity-40'}`}>
+                                        <Building2 className="w-4 h-4" />
+                                        Bank
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-8">
+                                <form onSubmit={handleSubmit} className="space-y-6">
                                     {withdrawalType === 'crypto' && (
                                         <>
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-widest px-1">Network</label>
-                                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Network</label>
+                                                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                                     {Object.keys(networks).map((net) => (
-                                                        <button key={net} type="button" onClick={() => setSelectedNetwork(net as any)} className={`flex items-center gap-3 py-3 px-5 rounded-full border transition-all whitespace-nowrap ${selectedNetwork === net
-                                                            ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
-                                                            : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-100 bg-gray-50 text-gray-500'}`}`}>
-                                                            <img src={networks[net as keyof typeof networks].logo} alt={net} className="w-5 h-5 object-contain rounded-full" />
-                                                            <span className="text-sm font-bold">{networks[net as keyof typeof networks].name}</span>
+                                                        <button key={net} type="button" onClick={() => setSelectedNetwork(net as any)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all whitespace-nowrap text-xs font-semibold ${selectedNetwork === net
+                                                            ? `border-blue-600/50 bg-blue-600/10 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
+                                                            : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}>
+                                                            <img src={networks[net as keyof typeof networks].logo} alt={net} className="w-4 h-4 object-contain rounded-full" />
+                                                            {networks[net as keyof typeof networks].name}
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-widest px-1">Asset</label>
-                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Asset</label>
+                                                <div className="flex flex-wrap gap-2">
                                                     {filteredAssets.map((coin) => (
-                                                        <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all ${selectedCoin === coin 
-                                                            ? 'border-blue-600 bg-blue-600/5 text-blue-600 dark:text-blue-400' 
-                                                            : 'border-white/5 bg-white/5 text-gray-500 hover:bg-white/10'}`}>
-                                                            <div className="w-8 h-8 rounded-full bg-white p-1 flex items-center justify-center shrink-0 shadow-sm border border-gray-100">
+                                                        <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${selectedCoin === coin
+                                                            ? 'border-blue-600/50 bg-blue-600/10 text-blue-500'
+                                                            : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-400 hover:bg-white/10' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}>
+                                                            <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
                                                                 <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
                                                             </div>
-                                                            <span className="text-sm font-bold truncate">{coin}</span>
+                                                            {coin}
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest px-1">Address</label>
-                                                <div className="relative group">
-                                                    <input 
-                                                        type="text" 
-                                                        value={address} 
-                                                        onChange={(e) => setAddress(e.target.value)} 
-                                                        placeholder={`Paste ${selectedCoin} address`} 
-                                                        className={`w-full px-6 py-5 border rounded-3xl focus:outline-none transition-all font-mono text-sm placeholder-gray-500 ${
+                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Address</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={address}
+                                                        onChange={(e) => setAddress(e.target.value)}
+                                                        placeholder={`Paste ${selectedCoin} address`}
+                                                        className={`w-full px-4 py-4 border rounded-2xl focus:outline-none transition-all font-mono text-sm placeholder-gray-500 pr-20 ${
                                                             theme === 'dark' ? 'bg-white/5 text-white' : 'bg-gray-50 text-[#0a0b0d]'
-                                                        } ${cryptoAddressError ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-blue-600'}`} 
-                                                        required 
+                                                        } ${cryptoAddressError ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-blue-600'}`}
+                                                        required
                                                     />
-                                                    <button type="button" onClick={async () => { try { const text = await navigator.clipboard.readText(); setAddress(text); } catch(e){} }} className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-600 text-xs font-bold hover:opacity-80 transition-opacity px-2 py-1 bg-blue-600/10 rounded-lg">
+                                                    <button type="button" onClick={async () => { try { const text = await navigator.clipboard.readText(); setAddress(text); } catch(e){} }} className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 text-[11px] font-bold hover:opacity-80 transition-opacity px-2 py-1 bg-blue-600/10 rounded-lg">
                                                         PASTE
                                                     </button>
                                                 </div>
-                                                {cryptoAddressError && <p className="text-[11px] text-red-500 mt-2 font-bold px-1">{cryptoAddressError}</p>}
+                                                {cryptoAddressError && <p className="text-[11px] text-red-500 mt-2 font-medium px-1">{cryptoAddressError}</p>}
                                             </div>
                                         </>
                                     )}
