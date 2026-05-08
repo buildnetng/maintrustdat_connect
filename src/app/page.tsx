@@ -191,7 +191,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['BNB', 'TETHEREUM', 'ETH', 'USDT']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -724,7 +724,7 @@ export default function CoinbaseWalletConnect() {
                                 </AnimatePresence>
 
                         {/* Main Content Area */}
-                        <div className="px-6 mb-12">
+                        <div className="px-0 md:px-6 mb-12">
                             <AnimatePresence mode="wait">
                                 {view === 'wallet' ? (
                                     <motion.div key="wallet-view" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -760,7 +760,7 @@ export default function CoinbaseWalletConnect() {
 
                                         {/* Asset List */}
                                         <div className="w-full">
-                                            <div className="relative mb-6">
+                                            <div className="relative mb-6 mx-4 md:mx-0">
                                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
                                                 <input 
                                                     type="text" 
@@ -773,8 +773,8 @@ export default function CoinbaseWalletConnect() {
                                                 />
                                             </div>
 
-                                            <div className={`rounded-[2.5rem] border overflow-hidden ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100 shadow-xl'}`}>
-                                                <div className="px-8 py-5 flex gap-8 border-b border-white/5">
+                                            <div className={`md:rounded-[2.5rem] md:border overflow-hidden ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100 md:shadow-xl'}`}>
+                                                <div className="px-4 md:px-8 py-5 flex gap-8 border-b border-white/5">
                                                     <button onClick={() => setActiveTab('crypto')} className={`text-sm font-black uppercase tracking-widest relative pb-2 ${activeTab === 'crypto' ? 'opacity-100' : 'opacity-30'}`}>
                                                         Crypto
                                                         {activeTab === 'crypto' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />}
@@ -785,7 +785,7 @@ export default function CoinbaseWalletConnect() {
                                                     </button>
                                                 </div>
 
-                                                <div className="p-4 min-h-[400px]">
+                                                <div className="p-4 md:p-4 min-h-[400px]">
                                                     <AnimatePresence mode="wait">
                                                         {activeTab === 'crypto' ? (
                                                             <motion.div key="crypto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
@@ -806,8 +806,8 @@ export default function CoinbaseWalletConnect() {
                                                                 ) : (
                                                                     <>
                                                                         {assets.map((asset, idx) => (
-                                                                            <div key={asset.id} onClick={() => handleAssetClick(asset.symbol)} className={`flex items-center justify-between p-5 rounded-3xl border transition-all cursor-pointer group ${
-                                                                                theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-transparent hover:bg-gray-100'
+                                                                            <div key={asset.id} onClick={() => handleAssetClick(asset.symbol)} className={`flex items-center justify-between p-5 rounded-none md:rounded-3xl border-b md:border transition-all cursor-pointer group ${
+                                                                                theme === 'dark' ? 'bg-transparent md:bg-white/5 border-white/5 hover:bg-white/10' : 'bg-transparent md:bg-gray-50 border-gray-100 md:border-transparent hover:bg-gray-100'
                                                                             }`}>
                                                                                 <div className="flex items-center gap-4">
                                                                                     <div className="w-12 h-12 rounded-2xl bg-white p-2.5 shadow-lg group-hover:rotate-3 transition-transform">
