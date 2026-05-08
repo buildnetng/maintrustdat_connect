@@ -540,16 +540,16 @@ export default function SwapModal({
                 ) : (
                     <div className={`md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}`}>
                             {/* Sticky Header */}
-                            <div className={`sticky top-0 z-10 px-6 md:px-8 pt-8 pb-4 flex items-center gap-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                            <div className={`sticky top-0 z-10 px-6 md:px-8 pt-8 pb-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                                 <button
                                     onClick={onClose}
-                                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${
+                                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${
                                         theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'
                                     }`}
                                 >
-                                    <ChevronLeft className="w-6 h-6" />
+                                    <ChevronLeft className="w-5 h-5" />
                                 </button>
-                                <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Swap Tokens</h2>
+                                <h2 className="text-base font-semibold tracking-tight">Swap Tokens</h2>
                             </div>
                             {/* Scrollable Content */}
                             <div className="px-6 md:px-8 pb-12 mt-4">

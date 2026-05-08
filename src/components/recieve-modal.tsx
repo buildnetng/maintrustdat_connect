@@ -212,11 +212,11 @@ export default function ReceiveModal({
             <div className={`${isInline ? 'w-full max-w-[600px] mx-auto' : ''} ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
                 <div className={`${isInline ? `md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}` : ''}`}>
                     <div className={`${isInline ? 'p-0 md:p-8 pb-12' : ''}`}>
-                        <div className="flex items-center gap-4 mb-10">
-                            <button onClick={onClose} className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
-                                <ChevronLeft className="w-6 h-6" />
+                        <div className="flex items-center gap-3 mb-10">
+                            <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
-                            <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">{step === 'setup' ? 'Receive Crypto' : 'Deposit Details'}</h2>
+                            <h2 className="text-base font-semibold tracking-tight">{step === 'setup' ? 'Receive Crypto' : 'Deposit Details'}</h2>
                         </div>
 
                         {step === 'setup' ? (

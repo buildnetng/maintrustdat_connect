@@ -330,11 +330,11 @@ export default function WithdrawalModal({
                     <div className={`${isInline ? 'p-0 md:p-6 pb-10' : ''}`}>
                         {step === 'input' ? (
                             <div className="w-full">
-                                <div className="flex items-center gap-4 mb-10">
-                                    <button onClick={onClose} className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
-                                        <ChevronLeft className="w-6 h-6" />
+                                <div className="flex items-center gap-3 mb-10">
+                                    <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                        <ChevronLeft className="w-5 h-5" />
                                     </button>
-                                    <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Send Crypto</h2>
+                                    <h2 className="text-base font-semibold tracking-tight">Send Crypto</h2>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-8">
