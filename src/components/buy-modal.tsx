@@ -77,7 +77,7 @@ export default function BuyModal({ address, isOpen, onClose, onSuccess, theme = 
                             <button onClick={onClose} className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
-                            <h2 className="text-2xl font-bold">Buy Crypto</h2>
+                            <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Buy Crypto</h2>
                         </div>
 
                         <div className="mb-8">

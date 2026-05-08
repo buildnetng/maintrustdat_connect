@@ -549,7 +549,7 @@ export default function SwapModal({
                                     >
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
-                                    <h2 className="text-xl font-black uppercase tracking-widest opacity-90">Swap Tokens</h2>
+                                    <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Swap Tokens</h2>
                                 </div>
                             {renderForm()}
                         </div>
