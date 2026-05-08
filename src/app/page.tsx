@@ -6,7 +6,7 @@ import { createCoinbaseWalletSDK } from '@coinbase/wallet-sdk';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Outfit } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
-import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ChevronLeft, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint } from 'lucide-react';
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ChevronLeft, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint, Maximize, RefreshCw, ArrowUpRight } from 'lucide-react';
 
 import GasFeeModal from '@/components/gas-fee-modal';
 import WithdrawalModal from '@/components/withdrawal-modal';
