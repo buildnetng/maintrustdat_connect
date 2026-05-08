@@ -742,10 +742,20 @@ export default function CoinbaseWalletConnect() {
                                                 <h1 className="text-[48px] font-bold tracking-tight leading-tight mb-1">
                                                     {address ? (maskAccount ? '••••••' : formatFiat(totalBalance)) : `${currencySymbol}0.00`}
                                                 </h1>
-                                                <div className={`flex items-center gap-1 text-[15px] font-bold ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                                                    <span className="text-sm">▼</span>
-                                                    <span>$0.01 (-1.01%)</span>
-                                                </div>
+                                                {address && assets.length > 0 && (() => {
+                                                    const totalUsd = assets.reduce((s, a) => s + a.usdValue, 0);
+                                                    const weightedChange = totalUsd > 0
+                                                        ? assets.reduce((s, a) => s + (a.priceChange * (a.usdValue / totalUsd)), 0)
+                                                        : 0;
+                                                    const changeUsd = totalUsd * (weightedChange / 100);
+                                                    const isPositive = weightedChange >= 0;
+                                                    return (
+                                                        <div className={`flex items-center gap-1 text-[15px] font-bold ${isPositive ? (theme === 'dark' ? 'text-green-400' : 'text-green-600') : (theme === 'dark' ? 'text-red-400' : 'text-red-600')}`}>
+                                                            <span className="text-sm">{isPositive ? '▲' : '▼'}</span>
+                                                            <span>{maskAccount ? '••••' : `${currencySymbol}${Math.abs(changeUsd * fxRate).toFixed(2)} (${isPositive ? '+' : ''}${weightedChange.toFixed(2)}%)`}</span>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
                                         {/* Actions */}
