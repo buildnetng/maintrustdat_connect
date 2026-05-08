@@ -520,7 +520,7 @@ export default function CoinbaseWalletConnect() {
                                     <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
                                         <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
                                     </div>
-                                    <h2 className="text-lg font-bold tracking-tight">Trust Wallet</h2>
+                                    <h2 className="text-base font-semibold tracking-tight">Trust Wallet</h2>
                                 </div>
 
                                 <button
@@ -770,7 +770,7 @@ export default function CoinbaseWalletConnect() {
 
 
                                             <div className={`md:rounded-[2.5rem] md:border overflow-hidden ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100 md:shadow-xl'}`}>
-                                                <div className="px-4 md:px-8 py-5 flex gap-8 border-b border-gray-100 dark:border-white/5">
+                                                <div className="px-4 md:px-8 py-5 flex gap-8">
                                                     <button onClick={() => setActiveTab('crypto')} className={`text-sm font-bold relative pb-2 transition-all ${activeTab === 'crypto' ? 'text-blue-600 dark:text-blue-500' : 'opacity-40'}`}>
                                                         Crypto
                                                         {activeTab === 'crypto' && <div className="absolute -bottom-5 left-0 right-0 h-[3px] bg-blue-600 dark:bg-blue-500" />}
