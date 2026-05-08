@@ -331,7 +331,7 @@ export default function WithdrawalModal({
                         {step === 'input' ? (
                             <div className="w-full">
                                 {/* Sticky Header */}
-                                <div className={`sticky top-0 z-10 px-0 pt-0 pb-4 flex items-center gap-3 mb-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                                <div className={`sticky top-0 z-10 px-5 pt-2 pb-4 flex items-center gap-3 mb-2 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                                     <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
@@ -339,7 +339,7 @@ export default function WithdrawalModal({
                                 </div>
 
                                 {/* Scrollable Content */}
-                                <div className="mt-6">
+                                <div className="mt-6 px-5">
                                 {/* Type Selector */}
                                 <div className={`flex rounded-2xl p-1 mb-8 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'}`}>
                                     <button type="button" onClick={() => setWithdrawalType('crypto')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${withdrawalType === 'crypto' ? (theme === 'dark' ? 'bg-white/10 text-white' : 'bg-white text-black shadow-sm') : 'opacity-40'}`}>
@@ -352,11 +352,11 @@ export default function WithdrawalModal({
                                     </button>
                                 </div>
 
-                                <form onSubmit={handleSubmit} className="space-y-6">
+                                <form onSubmit={handleSubmit} className="space-y-7">
                                     {withdrawalType === 'crypto' && (
                                         <>
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Network</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Network</label>
                                                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                                     {Object.keys(networks).map((net) => (
                                                         <button key={net} type="button" onClick={() => setSelectedNetwork(net as any)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all whitespace-nowrap text-xs font-semibold ${selectedNetwork === net
@@ -370,7 +370,7 @@ export default function WithdrawalModal({
                                             </div>
 
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Asset</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Asset</label>
                                                 <div className="flex flex-wrap gap-2">
                                                     {filteredAssets.map((coin) => (
                                                         <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${selectedCoin === coin
@@ -386,7 +386,7 @@ export default function WithdrawalModal({
                                             </div>
 
                                             <div>
-                                                <label className="block text-[11px] font-semibold text-gray-500 mb-3 uppercase tracking-widest px-1">Address</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Address</label>
                                                 <div className="relative">
                                                     <input
                                                         type="text"
@@ -410,7 +410,7 @@ export default function WithdrawalModal({
                                     {withdrawalType === 'bank' && (
                                         <div className="space-y-6">
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-1">Routing Number</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Routing Number</label>
                                                 <div className="relative">
                                                     <input 
                                                         type="text" 
@@ -440,7 +440,7 @@ export default function WithdrawalModal({
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-1">Account Number</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Account Number</label>
                                                 <input
                                                     type="text"
                                                     inputMode="numeric"
@@ -458,7 +458,7 @@ export default function WithdrawalModal({
                                     )}
 
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest px-1">Amount</label>
+                                        <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Amount</label>
                                         <div className="relative group">
                                             <input
                                                 type="number"
@@ -496,7 +496,7 @@ export default function WithdrawalModal({
 
                                         {/* Summary Box */}
                                         {amount && Number(amount) > 0 && (
-                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-[2.5rem] p-6 space-y-4 mt-8 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl p-5 space-y-4 mt-6 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
                                                 {(() => {
                                                     const feeMap: Record<string, number> = { 'BNB': 0.15, 'ETH': 2.50, 'USDT': 1.00, 'BTC': 1.50 };
                                                     const networkFee = withdrawalType === 'bank' ? 0.00 : (feeMap[selectedCoin] || 0.00);
