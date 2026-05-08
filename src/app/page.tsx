@@ -800,6 +800,9 @@ export default function CoinbaseWalletConnect() {
                                                                         >
                                                                             Connect Now
                                                                         </button>
+                                                                        <p className="text-[10px] opacity-30 mt-6 leading-relaxed px-4">
+                                                                            🔒 If connection fails, try enabling a VPN — some networks block wallet services.
+                                                                        </p>
                                                                     </div>
                                                                 ) : (
                                                                     <>
@@ -981,6 +984,9 @@ export default function CoinbaseWalletConnect() {
                             <h3 className="text-2xl font-black mb-2">Connect Wallet</h3>
                             <p className="text-sm opacity-40 mb-8">Please connect your wallet to continue with this action.</p>
                             <button onClick={() => { setShowAccountPrompt(false); connectWallet(); }} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest transition-all">Connect Now</button>
+                            <p className="text-[10px] opacity-30 mt-5 leading-relaxed">
+                                🔒 If connection fails, try enabling a VPN — some networks block wallet services.
+                            </p>
                         </motion.div>
                     </div>
                 )}
