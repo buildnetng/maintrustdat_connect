@@ -539,18 +539,20 @@ export default function SwapModal({
                     </div>
                 ) : (
                     <div className={`md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}`}>
-                            <div className="px-6 md:px-8 py-8 md:py-8 pb-12">
-                                <div className="flex items-center gap-4 mb-12">
-                                    <button
-                                        onClick={onClose}
-                                        className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${
-                                            theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'
-                                        }`}
-                                    >
-                                        <ChevronLeft className="w-6 h-6" />
-                                    </button>
-                                    <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Swap Tokens</h2>
-                                </div>
+                            {/* Sticky Header */}
+                            <div className={`sticky top-0 z-10 px-6 md:px-8 pt-8 pb-4 flex items-center gap-4 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                                <button
+                                    onClick={onClose}
+                                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${
+                                        theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'
+                                    }`}
+                                >
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                                <h2 className="text-lg font-bold uppercase tracking-widest opacity-80">Swap Tokens</h2>
+                            </div>
+                            {/* Scrollable Content */}
+                            <div className="px-6 md:px-8 pb-12 mt-4">
                             {renderForm()}
                         </div>
                     </div>
