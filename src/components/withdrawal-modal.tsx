@@ -331,7 +331,7 @@ export default function WithdrawalModal({
                         {step === 'input' ? (
                             <div className="w-full">
                                 {/* Sticky Header */}
-                                <div className={`sticky top-0 z-10 px-5 pt-2 pb-4 flex items-center gap-3 mb-2 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                                <div className={`sticky top-0 z-10 px-5 pt-8 pb-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                                     <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
@@ -393,7 +393,7 @@ export default function WithdrawalModal({
                                                         value={address}
                                                         onChange={(e) => setAddress(e.target.value)}
                                                         placeholder={`Paste ${selectedCoin} address`}
-                                                        className={`w-full px-4 py-4 border rounded-2xl focus:outline-none transition-all font-mono text-sm placeholder-gray-500 pr-20 ${
+                                                        className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-mono text-sm placeholder-gray-500 pr-20 ${
                                                             theme === 'dark' ? 'bg-white/5 text-white' : 'bg-gray-50 text-[#0a0b0d]'
                                                         } ${cryptoAddressError ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-blue-600'}`}
                                                         required
@@ -417,7 +417,7 @@ export default function WithdrawalModal({
                                                         value={routingNumber} 
                                                         onChange={handleRoutingChange} 
                                                         placeholder="9-digit routing number" 
-                                                        className={`w-full px-6 py-5 border rounded-3xl focus:outline-none transition-all font-bold text-lg placeholder-gray-500 ${
+                                                        className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-medium text-sm placeholder-gray-500 ${
                                                             theme === 'dark' ? 'bg-white/5 text-white' : 'bg-gray-50 text-[#0a0b0d]'
                                                         } ${routingError ? 'border-red-500/50 focus:border-red-500' : bankName ? 'border-emerald-500/50 focus:border-emerald-500' : 'border-transparent focus:border-blue-600'}`} 
                                                         maxLength={9} 
@@ -447,7 +447,7 @@ export default function WithdrawalModal({
                                                     value={accountNumber}
                                                     onChange={handleAccountChange}
                                                     placeholder="Enter account number"
-                                                    className={`w-full px-6 py-5 border rounded-3xl focus:outline-none transition-all font-bold text-lg placeholder-gray-500 ${
+                                                    className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-medium text-sm placeholder-gray-500 ${
                                                         theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
                                                     }`}
                                                     maxLength={12}
@@ -465,7 +465,7 @@ export default function WithdrawalModal({
                                                 value={amount}
                                                 onChange={(e) => setAmount(e.target.value)}
                                                 placeholder="0.00"
-                                                className={`w-full px-6 py-6 border rounded-[2rem] focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-28 ${
+                                                className={`w-full px-5 py-[14px] border rounded-2xl focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-28 ${
                                                     theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
                                                 }`}
                                                 required
