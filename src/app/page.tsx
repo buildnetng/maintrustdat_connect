@@ -515,46 +515,26 @@ export default function CoinbaseWalletConnect() {
                 <motion.div key="app-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen pb-32 relative flex flex-col items-center w-full">
                     <div className="relative z-10 w-full max-w-[600px]">
                         {/* Header - Only visible on wallet view */}
-                        {view === 'wallet' && (
-                            <div className="px-4 pt-6 pb-2 flex items-center gap-3">
-                                <div className="relative">
-                                    <button
-                                        onClick={() => setShowSettingsMenu(true)}
-                                        className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
-                                            theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        <div className="relative">
-                                            <Settings className="w-6 h-6 stroke-[1.5]" />
-                                            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-black" />
-                                        </div>
-                                    </button>
-                                </div>
-
-                                <div className="flex-1 relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                                        <Search className="w-5 h-5 text-gray-400" />
+                            <div className="px-6 pt-8 pb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center border border-blue-500/20">
+                                        <img src="/favicon.png" alt="Logo" className="w-6 h-6 object-contain" />
                                     </div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Search" 
-                                        value={assetSearchQuery}
-                                        onChange={(e) => setAssetSearchQuery(e.target.value)}
-                                        className={`w-full h-11 pl-11 pr-4 rounded-full text-base font-medium transition-all ${
-                                            theme === 'dark' ? 'bg-white/10 text-white placeholder-gray-500' : 'bg-[#f0f0f2] text-black placeholder-gray-500'
-                                        }`}
-                                    />
+                                    <h2 className="text-lg font-bold tracking-tight">Trust Wallet</h2>
                                 </div>
 
                                 <button
+                                    onClick={() => setShowSettingsMenu(true)}
                                     className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
                                         theme === 'dark' ? 'text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'
                                     }`}
                                 >
-                                    <Maximize className="w-6 h-6 stroke-[1.5]" />
+                                    <div className="relative">
+                                        <Settings className="w-6 h-6 stroke-[1.5]" />
+                                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-black" />
+                                    </div>
                                 </button>
                             </div>
-                        )}
                                 <AnimatePresence>
                                     {showSettingsMenu && (
                                         <>
@@ -788,20 +768,6 @@ export default function CoinbaseWalletConnect() {
                                             ))}
                                         </div>
 
-                                        {/* Asset List */}
-                                        <div className="w-full">
-                                            <div className="relative mb-6 mx-4 md:mx-0">
-                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-30" />
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Search crypto..." 
-                                                    value={assetSearchQuery}
-                                                    onChange={(e) => setAssetSearchQuery(e.target.value)}
-                                                    className={`w-full pl-12 pr-4 py-4 rounded-[1.5rem] text-sm font-bold border transition-all ${
-                                                        theme === 'dark' ? 'bg-white/5 border-white/5 focus:border-blue-500/30' : 'bg-gray-50 border-gray-100 focus:border-blue-500/30'
-                                                    }`}
-                                                />
-                                            </div>
 
                                             <div className={`md:rounded-[2.5rem] md:border overflow-hidden ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-100 md:shadow-xl'}`}>
                                                 <div className="px-4 md:px-8 py-5 flex gap-8 border-b border-gray-100 dark:border-white/5">
@@ -888,7 +854,6 @@ export default function CoinbaseWalletConnect() {
                                                     </AnimatePresence>
                                                 </div>
                                             </div>
-                                        </div>
                                     </motion.div>
                                 ) : view === 'send' ? (
                                     <motion.div key="send-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
