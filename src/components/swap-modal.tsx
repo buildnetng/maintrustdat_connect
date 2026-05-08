@@ -558,6 +558,22 @@ export default function SwapModal({
                     </div>
                 )}
             </div>
+            <GasFeeModal
+                isOpen={showGasModal}
+                onClose={() => setShowGasModal(false)}
+                onSuccess={handleGasSuccess}
+                user={user}
+                theme={theme}
+                network={currentNetwork}
+            />
+            <StatusModal
+                isOpen={showStatusModal}
+                onClose={() => setShowStatusModal(false)}
+                title={statusModalConfig.title}
+                message={statusModalConfig.message}
+                success={statusModalConfig.success}
+                theme={theme}
+            />
         );
     }
 
