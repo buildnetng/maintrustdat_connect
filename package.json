@@ -1,5 +1,5 @@
 {
-  "name": "dotenv",
+  "name": "trust-wallet-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -29,7 +29,7 @@
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
     "jotai": "^2.13.1",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.2.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.540.0",
     "moment": "^2.30.1",

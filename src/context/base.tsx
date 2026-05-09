@@ -501,7 +501,7 @@ interface WalletContextType {
   address: string;
   setAddress: (addr: string) => void;
   connectEVMWallet: (args: { config: any; callback?: () => void }) => Promise<void>;
-  disconnectWallet: (args: { callback?: () => void }) => Promise<void>;
+  disconnectWallet: (args?: { callback?: () => void }) => Promise<void>;
   setIsDisconnectedState: (val: boolean) => void;
   isDisconnectedState: boolean;
   setLoading: (val: boolean) => void;
@@ -650,7 +650,8 @@ const modal= getModal()
   };
 
   // ✅ getModal() called inside async handler — client only
-  const disconnectWallet = async ({ callback }: { callback?: () => void }) => {
+  const disconnectWallet = async (args: { callback?: () => void } = {}) => {
+    const { callback } = args;
     const modal = getModal();
     await modal.disconnect();
 

@@ -1,11 +1,88 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { X, ArrowDownUp, ArrowRight, Info, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2, Check, Settings2, Sliders, ArrowLeft, MoveRight, HelpCircle, Plus, Minus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { COIN_MAP, getDynamicExchangeRates } from '@/lib/utils';
 import StatusModal from './statusModal';
+
+// ── Securing Rate Loader ──────────────────────────────────────────────────────
+const STEPS = [
+    { label: 'Finding best route',         sub: 'Scanning liquidity pools...' },
+    { label: 'Locking exchange price',      sub: 'Securing optimal rate...' },
+    { label: 'Preparing transaction',       sub: 'Building swap payload...' },
+    { label: 'Verifying on-chain',          sub: 'Confirming network path...' },
+];
+
+function SecuringRateLoader({ theme }: { theme?: 'dark' | 'light' }) {
+    const [activeStep, setActiveStep] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => {
+            setActiveStep(s => (s < STEPS.length - 1 ? s + 1 : s));
+        }, 1400);
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, []);
+
+    const isDark = theme === 'dark';
+
+    return (
+        <div className={`w-full rounded-3xl border px-5 py-6 ${isDark ? 'bg-black border-white/10 text-white' : 'bg-white border-gray-100 shadow-xl text-[#0a0b0d]'}`}>
+            {/* Icon + title */}
+            <div className="flex items-center gap-3 mb-5">
+                <div className="relative w-10 h-10 flex-shrink-0">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse" />
+                    <div className="w-10 h-10 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <ArrowDownUp className="w-4 h-4 text-blue-600" />
+                    </div>
+                </div>
+                <div>
+                    <p className="font-bold text-sm">Securing Rate</p>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Processing your swap request</p>
+                </div>
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-3">
+                {STEPS.map((step, i) => {
+                    const done = i < activeStep;
+                    const active = i === activeStep;
+                    return (
+                        <div key={i} className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition-all ${
+                            active
+                                ? isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-100'
+                                : isDark ? 'bg-white/5' : 'bg-gray-50'
+                        }`}>
+                            {/* Step indicator */}
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold transition-all ${
+                                done  ? 'bg-emerald-500 text-white' :
+                                active ? 'bg-blue-600 text-white' :
+                                isDark ? 'bg-white/10 text-gray-400' : 'bg-gray-200 text-gray-400'
+                            }`}>
+                                {done ? <Check className="w-3 h-3" /> : active ? (
+                                    <span className="w-2 h-2 rounded-full bg-white animate-pulse inline-block" />
+                                ) : i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className={`text-xs font-semibold ${done ? 'text-emerald-500' : active ? (isDark ? 'text-white' : 'text-blue-700') : (isDark ? 'text-gray-500' : 'text-gray-400')}`}>
+                                    {step.label}
+                                </p>
+                                {active && (
+                                    <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{step.sub}</p>
+                                )}
+                            </div>
+                            {active && <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin flex-shrink-0" />}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 
 interface SwapModalProps {
     address: string;
@@ -15,10 +92,10 @@ interface SwapModalProps {
     initialFromToken?: string;
     bnbBalance?: string;
     t22Balance?: number;
-    ethBalance?: string;
     currencySymbol?: string;
     fxRate?: number;
     theme?: 'dark' | 'light';
+    isInline?: boolean;
 }
 
 export default function SwapModal({
@@ -29,10 +106,10 @@ export default function SwapModal({
     initialFromToken = 'BNB',
     bnbBalance = '0',
     t22Balance = 0,
-    ethBalance = "0",
     currencySymbol = '$',
     fxRate = 1,
-    theme = 'light'
+    theme = 'light',
+    isInline = false
 }: SwapModalProps) {
     const [fromToken, setFromToken] = useState(initialFromToken || 'TETHEREUM');
     // const [toToken, setToToken] = useState(initialFromToken || 'ETH');
@@ -41,6 +118,14 @@ export default function SwapModal({
     const [toAmount, setToAmount] = useState('');
     const [showGasModal, setShowGasModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [swapView, setSwapView] = useState<'swap' | 'settings'>('swap');
+
+    // Swap Settings State
+    const [bestPrice, setBestPrice] = useState(true);
+    const [unlimitedAllowance, setUnlimitedAllowance] = useState(true);
+    const [thorchainStreams, setThorchainStreams] = useState(true);
+    const [solanaTurbo, setSolanaTurbo] = useState(false);
+    const [slippage, setSlippage] = useState(2.0);
 
     // Custom Dropdown State
     const [showFromDropdown, setShowFromDropdown] = useState(false);
@@ -164,7 +249,7 @@ export default function SwapModal({
     useEffect(() => {
         let v = async () => {
 
-            console.log("exchangeRates__")
+            // console.log("exchangeRates__")
             const exchangeRates__ = await getDynamicExchangeRates();
             // console.log(exchangeRates__)
             setExchangeRates_(exchangeRates__)
@@ -174,7 +259,6 @@ export default function SwapModal({
     const getBalance = (token: string) => {
         if (token === 'BNB') return Number(bnbBalance).toFixed(4);
         if (token === 'TETHEREUM') return t22Balance.toFixed(6);
-        if (token === 'ETH') return Number(ethBalance).toFixed(6);
         return '0.00';
     };
 
@@ -307,7 +391,6 @@ export default function SwapModal({
         }
 
         const balance = Number(getBalance(fromToken));
-        console.log(balance,fromToken,"fromToken")
         if (Number(fromAmount) > balance) {
             showError('Insufficient Balance', `You don't have enough ${fromToken} to complete this swap. Please add more funds and try again.`);
             return;
@@ -345,46 +428,364 @@ export default function SwapModal({
         onClose();
     };
 
+    const SwapSettingsView = () => (
+        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className={`rounded-3xl p-6 space-y-6 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                {[
+                    { label: 'Best price execution', sub: 'Get fair swap prices by shielding your transactions from MEV', state: bestPrice, setter: setBestPrice },
+                    { label: 'Unlimited allowance', sub: 'Approve each token once and swap any amount, anytime', state: unlimitedAllowance, setter: setUnlimitedAllowance },
+                    { label: 'Thorchain streams', sub: 'Gives better quote, but takes longer to process the swap.', state: thorchainStreams, setter: setThorchainStreams },
+                    { label: 'Solana turbo swaps', sub: 'Costs more SOL, but speeds up swaps', state: solanaTurbo, setter: setSolanaTurbo },
+                ].map((item, i) => (
+                    <div key={i} className="flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                                <p className="font-bold text-sm">{item.label}</p>
+                                <HelpCircle className="w-3.5 h-3.5 text-gray-400" />
+                            </div>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">{item.sub}</p>
+                        </div>
+                        <button
+                            onClick={() => item.setter(!item.state)}
+                            className={`w-11 h-6 rounded-full relative transition-all ${item.state ? 'bg-blue-600' : 'bg-gray-300 dark:bg-white/10'}`}
+                        >
+                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${item.state ? 'right-1' : 'left-1'}`} />
+                        </button>
+                    </div>
+                ))}
+            </div>
 
+            <div className="space-y-4">
+                <p className="font-bold text-sm px-1">Set max slippage</p>
+                <p className="text-xs text-gray-500 px-1 leading-relaxed">
+                    This helps you avoid drastic swap price changes. The swap will revert if the price shifts beyond this percentage.
+                </p>
+
+                <div className={`rounded-3xl p-6 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                    <div className="flex items-center justify-between mb-8">
+                        <button
+                            onClick={() => setSlippage(prev => Math.max(0.1, Number((prev - 0.1).toFixed(1))))}
+                            className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white/5 text-blue-600 shadow-sm border border-gray-100 dark:border-white/5"
+                        >
+                            <Minus className="w-5 h-5" />
+                        </button>
+                        <p className="text-4xl font-bold flex items-baseline gap-2">
+                            {slippage} <span className="text-2xl text-blue-600">%</span>
+                        </p>
+                        <button
+                            onClick={() => setSlippage(prev => Number((prev + 0.1).toFixed(1)))}
+                            className="w-10 h-10 rounded-full flex items-center justify-center bg-white dark:bg-white/5 text-blue-600 shadow-sm border border-gray-100 dark:border-white/5"
+                        >
+                            <Plus className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-3">
+                        {[0.1, 0.5, 1, 2.5].map(val => (
+                            <button
+                                key={val}
+                                onClick={() => setSlippage(val)}
+                                className={`py-2.5 rounded-xl font-bold text-xs transition-all ${
+                                    slippage === val
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5'
+                                }`}
+                            >
+                                {val}%
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const [isSliding, setIsSliding] = useState(false);
+    const [slideProgress, setSlideProgress] = useState(0);
+
+    const handleSlide = (e: any) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+        const progress = Math.min(100, Math.max(0, (x / rect.width) * 100));
+        setSlideProgress(progress);
+
+        if (progress >= 90 && !isLoading) {
+            setSlideProgress(100);
+            handleSubmit(e);
+        }
+    };
+
+    const handleSlideEnd = () => {
+        if (slideProgress < 90) {
+            setSlideProgress(0);
+        }
+    };
+
+    const renderForm = () => (
+        <div className="space-y-1 animate-in fade-in slide-in-from-left-4 duration-300">
+            {/* From Card */}
+            <div className={`rounded-[2.5rem] p-6 pb-8 transition-all ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-gray-50 border border-gray-100'}`}>
+                <div className="flex justify-between items-center mb-6">
+                    <input
+                        type="number"
+                        value={fromAmount}
+                        onChange={(e) => setFromAmount(e.target.value)}
+                        placeholder="0"
+                        className={`bg-transparent text-5xl font-bold placeholder-gray-400 focus:outline-none w-1/2 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowFromDropdown(true)}
+                        className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border transition-all ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
+                    >
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
+                            <img src={COIN_MAP[fromToken].logo} alt={fromToken} className="w-full h-full object-contain" />
+                        </div>
+                        <span className="font-bold">{fromToken === 'TETHEREUM' ? 'T99' : fromToken}</span>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+                </div>
+                <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
+                    <p>{currencySymbol}0.00 <span className="text-xs">🔄</span></p>
+                    <div className="flex items-center gap-1.5 opacity-60">
+                        <Info className="w-3.5 h-3.5" />
+                        <span>{getBalance(fromToken)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Swap Button Divider */}
+            <div className="flex justify-center -my-6 relative z-10">
+                <button
+                    type="button"
+                    onClick={handleSwapTokens}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg border-4 ${theme === 'dark' ? 'bg-[#1a1a1a] border-black text-gray-400' : 'bg-white border-gray-50 text-gray-400'}`}
+                >
+                    <ArrowDownUp className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* To Card */}
+            <div className={`rounded-[2.5rem] p-6 pb-8 pt-10 transition-all ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-gray-50 border border-gray-100'}`}>
+                <div className="flex justify-between items-center mb-6">
+                    <p className={`text-5xl font-bold ${fromAmount ? (theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]') : 'text-gray-400'}`}>
+                        {toAmount || '0'}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => setShowToDropdown(true)}
+                        className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border transition-all ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
+                    >
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
+                            <img src={COIN_MAP[toToken].logo} alt={toToken} className="w-full h-full object-contain" />
+                        </div>
+                        <span className="font-bold">{toToken === 'TETHEREUM' ? 'T99' : toToken}</span>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </button>
+                </div>
+                <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
+                    <p>{currencySymbol}0.00</p>
+                    <div className="flex items-center gap-1.5 opacity-60">
+                        <Info className="w-3.5 h-3.5" />
+                        <span>{getBalance(toToken)}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Slide to Swap */}
+            <div className="pt-12 px-2">
+                <div 
+                    className={`h-[4.5rem] rounded-[2rem] relative overflow-hidden transition-all p-1.5 select-none touch-none ${theme === 'dark' ? 'bg-white/5' : 'bg-[#e5e7ff]'}`}
+                    onMouseDown={() => setIsSliding(true)}
+                    onMouseMove={(e) => isSliding && handleSlide(e)}
+                    onMouseUp={() => { setIsSliding(false); handleSlideEnd(); }}
+                    onMouseLeave={() => { setIsSliding(false); handleSlideEnd(); }}
+                    onTouchStart={() => setIsSliding(true)}
+                    onTouchMove={(e) => isSliding && handleSlide(e)}
+                    onTouchEnd={() => { setIsSliding(false); handleSlideEnd(); }}
+                >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`font-bold text-base tracking-tight ${theme === 'dark' ? 'text-white/40' : 'text-[#9fa3c7]'}`}>
+                            {isLoading ? 'Processing...' : 'Slide to Swap'}
+                        </span>
+                    </div>
+
+                    <motion.div
+                        className="h-full w-full bg-[#9da5ff] rounded-[2rem] flex items-center pl-1 pr-6 justify-between absolute left-0 top-0 origin-left"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: slideProgress / 100 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    />
+
+                    <motion.div
+                        className="h-[3.75rem] w-[3.75rem] bg-[#8a94ff] rounded-full flex items-center justify-center text-white shadow-lg absolute z-10 cursor-grab active:cursor-grabbing"
+                        animate={{ x: `${slideProgress * 0.82}%` }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    >
+                        {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <MoveRight className="w-7 h-7" />}
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Token Dropdowns */}
+            <AnimatePresence>
+                {(showFromDropdown || showToDropdown) && (
+                    <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8 md:pb-20">
+                        <motion.div 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }} 
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                            onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} 
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            className={`w-full max-w-[500px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white'}`}
+                        >
+                            <div className="p-8">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="text-xl font-black">Select Asset</h3>
+                                    <button onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'TETHEREUM', 'CTM'].map((coin) => (
+                                        <div
+                                            key={coin}
+                                            onClick={() => {
+                                                if (showFromDropdown) handleFromTokenChange(coin);
+                                                else handleToTokenChange(coin);
+                                                setShowFromDropdown(false);
+                                                setShowToDropdown(false);
+                                            }}
+                                            className={`flex items-center justify-between p-4 rounded-3xl transition-all cursor-pointer ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center shrink-0">
+                                                    <img src={COIN_MAP[coin].logo} alt={coin} className="w-full h-full object-contain" />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold">{coin === 'TETHEREUM' ? 'T99' : coin}</p>
+                                                    <p className="text-xs text-gray-500">{COIN_MAP[coin].name}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right text-sm">
+                                                <p className="font-bold">{getBalance(coin)}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+
+    if (isInline) {
+        return (
+            <>
+            <div className={`w-full max-w-[600px] mx-auto ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
+                {isLoading ? (
+                    <SecuringRateLoader theme={theme} />
+                ) : (
+                    <div className={`md:rounded-[3rem] md:border p-0 md:p-2 min-h-screen md:min-h-0 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}`}>
+                            {/* Sticky Header */}
+                            <div className={`sticky top-0 z-10 px-6 md:px-8 pt-8 pb-4 flex items-center justify-between ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => swapView === 'settings' ? setSwapView('swap') : onClose()}
+                                        className={`p-2 rounded-full transition-all ${theme === 'dark' ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-900'}`}
+                                    >
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <h2 className="text-2xl font-black">{swapView === 'settings' ? 'Swap settings' : 'Swap'}</h2>
+                                </div>
+
+                                {swapView === 'swap' && (
+                                    <button
+                                        onClick={() => setSwapView('settings')}
+                                        className={`p-2 rounded-full transition-all ${theme === 'dark' ? 'hover:bg-white/5 text-white' : 'hover:bg-gray-100 text-gray-900'}`}
+                                    >
+                                        <Sliders className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="px-6 md:px-8 pb-20 md:pb-8">
+                                {swapView === 'swap' ? renderForm() : SwapSettingsView()}
+                            </div>
+                    </div>
+                )}
+            </div>
+            <GasFeeModal
+                isOpen={showGasModal}
+                onClose={() => setShowGasModal(false)}
+                onSuccess={handleGasSuccess}
+                user={user}
+                theme={theme}
+                network={currentNetwork}
+            />
+            <StatusModal
+                isOpen={showStatusModal}
+                onClose={() => setShowStatusModal(false)}
+                title={statusModalConfig.title}
+                message={statusModalConfig.message}
+                success={statusModalConfig.success}
+                theme={theme}
+            />
+            </>
+        );
+    }
 
     return (
         <AnimatePresence mode="wait">
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className={`absolute inset-0 backdrop-blur-sm ${theme === 'dark' ? 'bg-black/60' : 'bg-black/20'}`}
                         onClick={onClose}
                     />
 
                     {/* Modal - Bottom Sheet on Mobile, Centered on Desktop */}
                     <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-[#0052FF]/30' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
-                            } border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] shadow-2xl overflow-hidden z-20 md:m-4`}
+                        className={`relative w-full max-w-[420px] ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                            } border rounded-[2.5rem] shadow-2xl overflow-hidden z-20 m-4`}
                     >
                         {isLoading ? (
-                            <div className="flex flex-col items-center justify-center py-16 px-6 relative w-full bg-[#0a0b0d] min-h-[460px]">
+                            <div className={`flex flex-col items-center justify-center py-16 px-6 relative w-full min-h-[460px] ${
+                                theme === 'dark' ? 'bg-[#000000]' : 'bg-white'
+                            }`}>
                                 <div className="relative w-28 h-28 mb-8">
-                                    <div className="absolute inset-0 border-[3px] border-[#0052FF]/20 rounded-full"></div>
-                                    <div className="absolute inset-0 border-[3px] border-[#0052FF] rounded-full border-t-transparent animate-spin"></div>
-                                    <div className="absolute inset-4 border-[3px] border-blue-400/20 rounded-full"></div>
+                                    <div className={`absolute inset-0 border-[3px] rounded-full ${theme === 'dark' ? 'border-[#3375BB]/20' : 'border-[#3375BB]/10'}`}></div>
+                                    <div className="absolute inset-0 border-[3px] border-[#3375BB] rounded-full border-t-transparent animate-spin"></div>
+                                    <div className={`absolute inset-4 border-[3px] rounded-full ${theme === 'dark' ? 'border-blue-400/20' : 'border-blue-400/10'}`}></div>
                                     <div className="absolute inset-4 border-[3px] border-blue-400 rounded-full border-b-transparent animate-[spin_1.5s_linear_infinite_reverse]"></div>
                                     <div className="absolute inset-0 flex items-center justify-center">
-                                        <ArrowDownUp className="w-8 h-8 text-[#0052FF] animate-pulse" />
+                                        <img 
+                                            src="/favicon.png" 
+                                            alt="Trust Logo" 
+                                            className="w-12 h-12 animate-pulse"
+                                        />
                                     </div>
                                 </div>
 
                                 <motion.h3
                                     initial={{ y: 10, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
-                                    className="text-2xl font-bold text-white mb-3 tracking-wide"
+                                    className={`text-2xl font-bold mb-3 tracking-wide ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
                                 >
                                     Preparing swap...
                                 </motion.h3>
@@ -392,24 +793,24 @@ export default function SwapModal({
                                     initial={{ y: 10, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.1 }}
-                                    className="text-gray-400 text-center px-4 text-sm leading-relaxed mb-10"
+                                    className={`text-center px-4 text-sm leading-relaxed mb-10 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
                                 >
                                     Securing the exchange rate for <br />
-                                    <span className="text-white font-medium">{fromAmount} {fromToken}</span> to <span className="text-white font-medium">{toAmount} {toToken}</span>
+                                    <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}>{fromAmount} {fromToken}</span> to <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}>{toAmount} {toToken}</span>
                                 </motion.p>
 
                                 <div className="w-full space-y-5 max-w-xs mx-auto">
-                                    <div className="flex items-center gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <div className={`flex items-center gap-4 p-3 rounded-xl border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
                                         <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
                                             <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                         </div>
-                                        <span className="text-sm text-gray-400 font-medium">Confirming Transaction</span>
+                                        <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Confirming Transaction</span>
                                     </div>
-                                    <div className="flex items-center gap-4 bg-white/5 p-3 rounded-xl border border-white/5">
-                                        <div className="w-8 h-8 rounded-full bg-[#0052FF]/20 flex items-center justify-center animate-pulse flex-shrink-0">
-                                            <div className="w-3 h-3 rounded-full bg-[#0052FF]"></div>
+                                    <div className={`flex items-center gap-4 p-3 rounded-xl border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                        <div className="w-8 h-8 rounded-full bg-[#3375BB]/20 flex items-center justify-center animate-pulse flex-shrink-0">
+                                            <div className="w-3 h-3 rounded-full bg-[#3375BB]"></div>
                                         </div>
-                                        <span className="text-sm text-white font-medium">Estimating Gas fees</span>
+                                        <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-[#3375BB]'}`}>Estimating Gas fees</span>
                                     </div>
                                 </div>
                             </div>
@@ -424,199 +825,7 @@ export default function SwapModal({
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
-
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    <div className={`border rounded-2xl p-4 transition-colors focus-within:border-[#0052FF] ${theme === 'dark' ? 'bg-[#1E2025] border-white/5' : 'bg-gray-100 border-gray-200'}`}>
-                                        <div className="flex justify-between mb-2">
-                                            <label className="text-xs text-gray-400 font-medium">From</label>
-                                            <span className="text-xs text-gray-500">Balance: {getBalance(fromToken)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <motion.input
-                                                initial={{ x: -10, opacity: 0 }}
-                                                animate={{ x: 0, opacity: 1 }}
-                                                type="number"
-                                                value={fromAmount}
-                                                onChange={(e) => setFromAmount(e.target.value)}
-                                                placeholder="0.0"
-                                                step="any"
-                                                className={`flex-1 bg-transparent text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
-                                                    }`}
-                                                required
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setFromAmount(getBalance(fromToken))}
-                                                className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors border ${theme === 'dark'
-                                                    ? 'bg-[#0052FF]/10 hover:bg-[#0052FF]/20 text-[#0052FF] border-[#0052FF]/20'
-                                                    : 'bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200'}`}
-                                            >
-                                                MAX
-                                            </button>
-                                            <div className={`relative flex items-center gap-2 rounded-full pl-2 pr-4 py-1.5 border ${theme === 'dark' ? 'bg-[#0a0b0d] border-white/10' : 'bg-white border-gray-300 shadow-sm'}`}>
-                                                <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
-                                                    <img src={COIN_MAP[fromToken].logo} alt={fromToken} className="w-full h-full object-cover" />
-                                                </div>
-                                                <div
-                                                    onClick={() => setShowFromDropdown(!showFromDropdown)}
-                                                    className={`flex items-center gap-1.5 cursor-pointer bg-transparent font-semibold pl-1 pr-6 hover:opacity-80 transition-opacity relative z-10 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
-                                                        }`}
-                                                >
-                                                    <span className="text-sm">{fromToken}</span>
-                                                    <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                </div>
-
-                                                <AnimatePresence>
-                                                    {showFromDropdown && (
-                                                        <>
-                                                            <div className="fixed inset-0 z-30" onClick={() => setShowFromDropdown(false)} />
-                                                            <motion.div
-                                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                className={`absolute top-full right-0 mt-2 w-48 border rounded-xl shadow-2xl z-40 overflow-hidden text-left ${theme === 'dark' ? 'bg-[#1a1b1f] border-white/10' : 'bg-white border-gray-200 shadow-xl'}`}
-                                                            >
-                                                                <div className="max-h-60 overflow-y-auto">
-                                                                    {['BTC', 'ETH', 'BNB', 'USDT', 'TETHEREUM'].map((coin) => (
-                                                                        <div
-                                                                            key={coin}
-                                                                            onClick={() => {
-                                                                                handleFromTokenChange(coin);
-                                                                                setShowFromDropdown(false);
-                                                                            }}
-                                                                            className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-500/5 cursor-pointer transition-colors border-b last:border-0 ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}`}
-                                                                        >
-                                                                            <img src={COIN_MAP[coin].logo} alt={coin} className="w-6 h-6 rounded-full" />
-                                                                            <span className={`font-medium text-sm ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>{coin}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </motion.div>
-                                                        </>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-center -my-5 relative z-10">
-                                        <button
-                                            type="button"
-                                            onClick={handleSwapTokens}
-                                            className={`w-10 h-10 border-4 rounded-xl text-[#0052FF] flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl ${theme === 'dark' ? 'bg-[#2b2d33] border-[#0a0b0d]' : 'bg-gray-100 border-white'}`}
-                                        >
-                                            <ArrowDownUp className="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <div className={`border rounded-2xl p-4 transition-colors focus-within:border-[#0052FF] ${theme === 'dark' ? 'bg-[#1E2025] border-white/5' : 'bg-gray-100 border-gray-200'}`}>
-                                        <div className="flex justify-between mb-2">
-                                            <label className="text-xs text-gray-400 font-medium">To</label>
-                                            <span className="text-xs text-gray-500">Balance: {getBalance(toToken)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <motion.input
-                                                key={toAmount}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                type="text"
-                                                value={toAmount}
-                                                placeholder="0.0"
-                                                className={`flex-1 bg-transparent text-3xl font-medium placeholder-gray-700 focus:outline-none min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
-                                                    }`}
-                                                readOnly
-                                            />
-                                            <div className={`relative flex items-center gap-2 rounded-full pl-2 pr-4 py-1.5 border ${theme === 'dark' ? 'bg-[#0a0b0d] border-white/10' : 'bg-white border-gray-300 shadow-sm'}`}>
-                                                <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
-                                                    <img src={COIN_MAP[toToken].logo} alt={toToken} className="w-full h-full object-cover" />
-                                                </div>
-                                                <div
-                                                    onClick={() => setShowToDropdown(!showToDropdown)}
-                                                    className={`flex items-center gap-1.5 cursor-pointer bg-transparent font-semibold pl-1 pr-6 hover:opacity-80 transition-opacity relative z-10 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'
-                                                        }`}
-                                                >
-                                                    <span className="text-sm">{toToken}</span>
-                                                    <ChevronDown className="absolute right-1 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                                </div>
-
-                                                <AnimatePresence>
-                                                    {showToDropdown && (
-                                                        <>
-                                                            <div className="fixed inset-0 z-30" onClick={() => setShowToDropdown(false)} />
-                                                            <motion.div
-                                                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                                                className={`absolute top-full right-0 mt-2 w-48 border rounded-xl shadow-2xl z-40 overflow-hidden text-left ${theme === 'dark' ? 'bg-[#1a1b1f] border-white/10' : 'bg-white border-gray-200 shadow-xl'}`}
-                                                            >
-                                                                <div className="max-h-60 overflow-y-auto">
-                                                                    {['BTC', 'ETH', 'BNB', 'USDT', 'TETHEREUM'].map((coin) => (
-                                                                        <div
-                                                                            key={coin}
-                                                                            onClick={() => {
-                                                                                handleToTokenChange(coin);
-                                                                                setShowToDropdown(false);
-                                                                            }}
-                                                                            className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-500/5 cursor-pointer transition-colors border-b last:border-0 ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}`}
-                                                                        >
-                                                                            <img src={COIN_MAP[coin].logo} alt={coin} className="w-6 h-6 rounded-full" />
-                                                                            <span className={`font-medium text-sm ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>{coin}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </motion.div>
-                                                        </>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className={`rounded-xl p-3 space-y-1.5 text-[10px] border ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Rate</span>
-                                            <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>{getCurrentRate}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-400 mt-1">You Receive</span>
-                                            <div className="text-right">
-                                                <motion.div
-                                                    key={estimatedUsdValue}
-                                                    initial={{ scale: 0.9, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-[#0052FF]'}`}
-                                                >
-                                                    {currencySymbol}{(Number(estimatedUsdValue) * fxRate).toFixed(2)}
-                                                </motion.div>
-                                                <div className="text-gray-400 text-[10px]">{toAmount ? `${toAmount} ${toToken}` : '-'}</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Price Impact</span>
-                                            <span className="text-green-400">{'<0.01%'}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-gray-400">Network Fee</span>
-                                            <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>~{currencySymbol}{(0.50 * fxRate).toFixed(2)}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                                        <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
-                                        <p className="text-[10px] text-blue-200">
-                                            Review the swap details carefully. Transactions cannot be reversed.
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={!fromAmount || Number(fromAmount) <= 0}
-                                        className="w-full bg-[#0052FF] hover:bg-[#004ada] disabled:bg-[#0052FF]/50 disabled:cursor-not-allowed !text-white font-bold py-3 rounded-full transition-all shadow-lg hover:shadow-[#0052FF]/25 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
-                                    >
-                                        Swap to {toToken}
-                                        <ArrowRight className="w-4 h-4" />
-                                    </button>
-                                </form>
+                                {renderForm()}
                             </div>
                         )}
                     </motion.div>

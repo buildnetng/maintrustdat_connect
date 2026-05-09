@@ -45,7 +45,7 @@ export default function StatusModal({
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className={`relative w-full max-w-sm border rounded-[2.5rem] p-8 shadow-2xl ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                        className={`relative w-full max-w-sm border rounded-[2.5rem] p-8 shadow-2xl ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
                             }`}
                     >
 
@@ -57,7 +57,7 @@ export default function StatusModal({
                             <X className="w-5 h-5" />
                         </button>
 
-                        <div className="flex flex-col items-center text-center space-y-6">
+                        <div className="flex flex-col items-center text-center space-y-8">
                             {/* Icon Section */}
                             <motion.div
                                 initial={{ scale: 0.5, opacity: 0 }}
@@ -66,28 +66,34 @@ export default function StatusModal({
                                 className="mt-4"
                             >
                                 {customLogo ? (
-                                    <div className="w-20 h-20 flex items-center justify-center">
+                                    <div className="w-24 h-24 flex items-center justify-center">
                                         {customLogo}
                                     </div>
                                 ) : success ? (
-                                    <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/20">
-                                        <CheckCircle2 className="w-10 h-10 text-green-500" />
+                                    <div className="relative w-24 h-24">
+                                        <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-20 animate-pulse" />
+                                        <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center border-2 border-emerald-500/20 relative">
+                                            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+                                        </div>
                                     </div>
                                 ) : (
-                                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
-                                        <AlertCircle className="w-10 h-10 text-red-500" />
+                                    <div className="relative w-24 h-24">
+                                        <div className="absolute inset-0 bg-red-500 blur-3xl opacity-20 animate-pulse" />
+                                        <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center border-2 border-red-500/20 relative">
+                                            <AlertCircle className="w-12 h-12 text-red-500" />
+                                        </div>
                                     </div>
                                 )}
                             </motion.div>
 
                             {/* Text Content */}
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {title && (
                                     <motion.h2
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.3 }}
-                                        className="text-xl font-bold tracking-tight"
+                                        className="text-2xl font-bold tracking-tight"
                                     >
                                         {title}
                                     </motion.h2>
@@ -96,7 +102,7 @@ export default function StatusModal({
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
-                                    className="text-gray-400 text-sm leading-relaxed px-2"
+                                    className="text-gray-500 font-medium leading-relaxed px-4"
                                 >
                                     {message}
                                 </motion.p>
@@ -111,10 +117,11 @@ export default function StatusModal({
                             >
                                 <button
                                     onClick={onAction || onClose}
-                                    className={`w-full py-4 rounded-full font-bold transition-all active:scale-95 shadow-lg ${success
-                                        ? 'bg-[#0052FF] hover:bg-[#004ada] shadow-[#0052FF]/20'
-                                        : 'bg-white/10 hover:bg-white/20'
-                                        }`}
+                                    className={`w-full py-6 rounded-[2rem] font-bold text-lg transition-all shadow-xl active:scale-[0.98] ${
+                                        success
+                                        ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20 text-white'
+                                        : theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'
+                                    }`}
                                 >
                                     {actionLabel || (success ? 'Done' : 'Try Again')}
                                 </button>

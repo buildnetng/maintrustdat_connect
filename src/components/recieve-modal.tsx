@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, Copy, Check, ArrowRight, Loader2, Info, Clock } from 'lucide-react';
+import { X, Copy, Check, ArrowRight, Loader2, Info, Clock, ChevronLeft } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useWallet } from '@/context/base';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +12,7 @@ interface ReceiveModalProps {
     currencySymbol?: string;
     fxRate?: number;
     theme?: 'dark' | 'light';
+    isInline?: boolean;
 }
 
 type Step = 'setup' | 'display';
@@ -21,7 +22,8 @@ export default function ReceiveModal({
     onClose,
     currencySymbol = '$',
     fxRate = 1,
-    theme = 'light'
+    theme = 'light',
+    isInline = false
 }: ReceiveModalProps) {
     const [step, setStep] = useState<Step>('setup');
     const [amount, setAmount] = useState('');
@@ -78,6 +80,22 @@ export default function ReceiveModal({
         'BTC': {
             name: 'Bitcoin', logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png',
             walletAddress: adminAddresses['btc_address'] || "", supportedNetworks: { "BTC": {} }
+        },
+        'TETHEREUM': {
+            name: 'Tethereum T99', logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'CTM': {
+            name: 'CTM', logo: '/ctm_logo.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'USDT_BSC': {
+            name: 'USDT (BSC)', logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'TETH': {
+            name: 'Tether (TETH)', logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
         }
     }), [adminAddresses]);
 
@@ -205,95 +223,86 @@ export default function ReceiveModal({
         }
     };
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={onClose}
-                    />
-
-                    <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-[#0052FF]/30' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
-                            } border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 shadow-2xl pb-10 md:pb-6 md:m-4`}
-                    >
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-bold">{step === 'setup' ? 'Deposit' : 'Address Details'}</h2>
-                            <button onClick={onClose} className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${theme === 'dark' ? 'bg-gray-800/50 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
-                                <X className="w-5 h-5" />
+    const renderContent = () => {
+        return (
+            <div className={`${isInline ? 'w-full max-w-[600px] mx-auto' : ''} ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
+                <div className={`${isInline ? `md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}` : ''}`}>
+                    <div className={`${isInline ? 'p-0 md:p-8 pb-12' : ''}`}>
+                        {/* Sticky Header */}
+                        <div className={`sticky top-0 z-10 px-5 pt-8 pb-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                            <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                <ChevronLeft className="w-5 h-5" />
                             </button>
+                            <h2 className="text-base font-semibold tracking-tight">{step === 'setup' ? 'Receive Crypto' : 'Deposit Details'}</h2>
                         </div>
 
+                        {/* Content */}
+                        <div className="px-5 mt-6">
                         {step === 'setup' ? (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="space-y-6"
+                                className="space-y-7"
                             >
+                                {/* Network - compact chips */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-400 mb-2">Choose Network Type</label>
-                                    <div className="flex flex-wrap gap-2">
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Network</label>
+                                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                         {(Object.keys(networks) as Array<keyof typeof networks>).map((net) => (
                                             <button
                                                 key={net}
                                                 onClick={() => setSelectedNetwork(net)}
-                                                className={`flex-1 min-w-[100px] py-3 px-2 rounded-xl flex flex-col items-center justify-center gap-2 border text-[10px] font-bold transition-all ${selectedNetwork === net
-                                                        ? `border-[#0052FF] bg-[#0052FF]/10 ${theme === 'dark' ? 'text-white' : 'text-blue-600 font-bold'}`
-                                                        : `${theme === 'dark' ? 'border-white/5 bg-[#1E2025] text-gray-400 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}
+                                                className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all whitespace-nowrap text-xs font-semibold ${selectedNetwork === net
+                                                    ? `border-blue-600/50 bg-blue-600/10 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
+                                                    : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}
                                             >
-                                                <img src={networks[net].icon} alt={net} className="w-6 h-6 object-contain" />
-                                                <div className="text-center">
-                                                    <p className="text-[10px] font-bold">{networks[net].name}</p>
-                                                    <p className="text-[9px] opacity-60 font-medium">{networks[net].symbol}</p>
-                                                </div>
+                                                <img src={networks[net].icon} alt={net} className="w-4 h-4 object-contain rounded-full" />
+                                                {networks[net].name}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
+                                {/* Asset - compact chips */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-400 mb-2">Select Asset</label>
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Asset</label>
                                     <div className="flex flex-wrap gap-2">
                                         {filteredAssets.map((coin) => (
                                             <button
                                                 key={coin}
                                                 onClick={() => setSelectedCoin(coin)}
-                                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all text-[10px] font-bold ${selectedCoin === coin
-                                                        ? `border-[#0052FF] bg-[#0052FF]/10 ${theme === 'dark' ? 'text-white' : 'text-blue-600 font-bold'}`
-                                                        : `${theme === 'dark' ? 'border-white/5 bg-[#1E2025] text-gray-400 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}
+                                                className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${selectedCoin === coin
+                                                    ? `border-transparent ${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'}`
+                                                    : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}
                                             >
-                                                <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-4 h-4 object-contain rounded-full bg-white/10" />
-                                                {availableCoins[coin as keyof typeof availableCoins]?.name || coin}
+                                                <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
+                                                    <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
+                                                </div>
+                                                {coin === 'TETHEREUM' ? 'T99' : coin}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
+                                {/* Amount */}
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-400 mb-2">Enter Amount</label>
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Amount to receive</label>
                                     <div className="relative">
                                         <input
                                             type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
                                             placeholder="0.00"
-                                            className={`w-full px-4 py-4 border rounded-2xl focus:border-[#0052FF] focus:outline-none pr-16 ${theme === 'dark' ? 'bg-[#1E2025] border-white/5 text-white' : 'bg-gray-100 border-gray-200 text-[#0a0b0d]'
-                                                }`}
+                                            className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-20 ${
+                                                theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
+                                            }`}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">{selectedCoin}</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm uppercase">{selectedCoin === 'TETHEREUM' ? 'T99' : selectedCoin}</span>
                                     </div>
 
                                     {amount && Number(amount) > 0 && (
-                                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`border rounded-xl p-3 space-y-2 text-xs mt-3 ${theme === 'dark' ? 'bg-[#1E2025]/50 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-[2.5rem] p-6 space-y-4 mt-8 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
                                             {(() => {
                                                 const feeMap: Record<string, number> = { 'BNB': 0.15, 'ETH': 2.50, 'USDT': 1.00, 'BTC': 1.50 };
                                                 const networkFee = feeMap[selectedCoin] || 0.00;
@@ -304,24 +313,24 @@ export default function ReceiveModal({
 
                                                 return (
                                                     <>
-                                                        <div className="flex justify-between items-center text-gray-400">
-                                                            <span>Conversion Rate</span>
-                                                            <span className={`font-mono text-[10px] ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>1 {selectedCoin} = {currencySymbol}{(coinPrice * fxRate).toFixed(2)}</span>
+                                                        <div className="flex justify-between items-center text-sm">
+                                                            <span className="text-gray-500 font-medium">Rate</span>
+                                                            <span className="font-bold">1 {selectedCoin} ≈ {currencySymbol}{(coinPrice * fxRate).toFixed(2)}</span>
                                                         </div>
-                                                        <div className="flex justify-between items-center text-gray-400">
-                                                            <span>Network Fee</span>
-                                                            <span className={`font-mono text-[10px] ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>~{currencySymbol}{(networkFee * fxRate).toFixed(2)}</span>
+                                                        <div className="flex justify-between items-center text-sm">
+                                                            <span className="text-gray-500 font-medium">Fee</span>
+                                                            <span className="font-bold">{currencySymbol}{(networkFee * fxRate).toFixed(2)}</span>
                                                         </div>
-                                                        <div className={`h-[1px] w-full my-1 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
-                                                        <div className="flex justify-between items-center">
-                                                            <span className="text-gray-300 font-medium">You will receive</span>
+                                                        <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                                        <div className="flex justify-between items-end">
+                                                            <span className="text-gray-500 font-bold text-sm mb-1">Estimated</span>
                                                             <div className="text-right">
-                                                                <span className="text-[#0052FF] font-bold text-sm block">
+                                                                <p className="text-2xl font-bold text-blue-600 leading-none mb-1">
                                                                     {currencySymbol}{(receivedUsd * fxRate).toFixed(2)}
-                                                                </span>
-                                                                <span className="text-gray-500 font-mono text-[10px]">
+                                                                </p>
+                                                                <p className="text-[13px] font-bold text-gray-400">
                                                                     {receivedCrypto.toFixed(6)} {selectedCoin}
-                                                                </span>
+                                                                </p>
                                                             </div>
                                                         </div>
                                                     </>
@@ -334,9 +343,9 @@ export default function ReceiveModal({
                                 <button
                                     onClick={() => setStep('display')}
                                     disabled={!amount || Number(amount) <= 0}
-                                    className="w-full bg-[#0052FF] hover:bg-[#004ada] !text-white font-bold py-3.5 rounded-full transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-[#0052FF]/25 active:scale-[0.98] text-sm"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2 text-base"
                                 >
-                                    Generate Address <ArrowRight className="w-4 h-4" />
+                                    Continue <ArrowRight className="w-5 h-5" />
                                 </button>
                             </motion.div>
                         ) : (
@@ -344,93 +353,131 @@ export default function ReceiveModal({
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="flex flex-col items-center space-y-6"
+                                className="flex flex-col items-center space-y-8"
                             >
                                 <motion.div
                                     initial={{ scale: 0.9, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    className="bg-white p-4 rounded-3xl shadow-2xl"
+                                    className={`p-8 rounded-[3rem] shadow-2xl relative ${theme === 'dark' ? 'bg-white' : 'bg-white border-8 border-gray-50'}`}
                                 >
+                                    <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-10" />
                                     {activeDepositAddress ? (
                                         <QRCodeCanvas
                                             value={activeDepositAddress}
-                                            size={160}
+                                            size={200}
                                             level={"H"}
                                             imageSettings={{
                                                 src: availableCoins[selectedCoin as keyof typeof availableCoins]?.logo || networks[selectedNetwork as keyof typeof networks]?.icon,
-                                                height: 40,
-                                                width: 40,
+                                                height: 48,
+                                                width: 48,
                                                 excavate: true,
                                             }}
                                         />
                                     ) : (
-                                        <div className="w-[160px] h-[160px] flex items-center justify-center bg-gray-100 rounded-xl">
-                                            <span className="text-gray-400 text-[10px] font-bold">No QR Code</span>
+                                        <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-50 rounded-3xl">
+                                            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
                                         </div>
                                     )}
                                 </motion.div>
 
-                                <div className="w-full space-y-2">
-                                    <p className="text-[10px] uppercase font-bold text-gray-500 text-center tracking-widest">
-                                        Your {selectedCoin} ({networks[selectedNetwork].symbol}) Address
+                                <div className="w-full space-y-4">
+                                    <p className="text-xs font-bold text-gray-500 text-center uppercase tracking-widest opacity-60">
+                                        Your {selectedCoin} {networks[selectedNetwork].symbol} Address
                                     </p>
                                     <div
                                         onClick={activeDepositAddress ? handleCopy : undefined}
-                                        className={`group flex items-center justify-between w-full p-4 border rounded-2xl transition-all ${activeDepositAddress
-                                                ? 'cursor-pointer hover:border-[#0052FF]/40 active:bg-white/5'
+                                        className={`group flex items-center justify-between w-full p-6 border rounded-3xl transition-all ${activeDepositAddress
+                                                ? 'cursor-pointer hover:border-blue-600/30'
                                                 : 'cursor-default opacity-50'
-                                            } ${theme === 'dark' ? 'bg-[#1E2025] border-white/5' : 'bg-gray-100 border-gray-200'}`}
+                                            } ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}
                                     >
-                                        <span className={`text-sm font-mono mr-2 tracking-wide uppercase ${theme === 'dark' ? 'text-gray-300' : 'text-[#0a0b0d]'}`}>
-                                            {activeDepositAddress ? (activeDepositAddress.length > 20
-                                                ? `${activeDepositAddress.slice(0, 9)}........${activeDepositAddress.slice(-14, -8)}........`
-                                                : activeDepositAddress) : "no wallet address"}
+                                        <span className={`text-sm font-mono truncate mr-4 font-bold ${theme === 'dark' ? 'text-gray-300' : 'text-[#0a0b0d]'}`}>
+                                            {activeDepositAddress || "No address found"}
                                         </span>
-                                        {activeDepositAddress && (isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className={`w-4 h-4 text-gray-500 group-hover:text-[#0052FF]`} />)}
+                                        {activeDepositAddress && (
+                                            <div className="p-2 rounded-xl bg-blue-600/10 text-blue-600">
+                                                {isCopied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="flex flex-col items-center justify-center gap-1 mt-4 text-[#0052FF] bg-[#0052FF]/10 py-2.5 px-4 rounded-xl border border-[#0052FF]/20">
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 shrink-0" />
-                                            <span className="text-xs font-bold tracking-wide">
-                                                Address expires in <span className="font-mono text-sm ml-1">{formatTime(timeLeft)}</span>
+                                    <div className="flex flex-col items-center justify-center gap-2 py-6 px-8 rounded-3xl border border-blue-600/20 bg-blue-600/5">
+                                        <div className="flex items-center gap-3 text-blue-600">
+                                            <Clock className="w-5 h-5" />
+                                            <span className="text-sm font-bold">
+                                                Address expires in <span className="font-mono text-lg ml-1">{formatTime(timeLeft)}</span>
                                             </span>
                                         </div>
-                                        <span className="text-[10px] text-[#0052FF]/70 font-medium tracking-wide">
-                                            Expires on {expiresAt ? new Date(expiresAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' }) : ''}
-                                        </span>
+                                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest opacity-60">
+                                            Auto-refreshes for your security
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="w-full space-y-3">
+                                <div className="w-full space-y-4 pt-4">
                                     {!isPending ? (
                                         <button
                                             disabled={isLoading}
                                             onClick={() => handleSubmit()}
-                                            className={`w-full py-4 rounded-full font-bold transition-all disabled:opacity-50 ${theme === 'dark' ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'
-                                                }`}
+                                            className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-xl active:scale-[0.98] ${
+                                                theme === 'dark' 
+                                                ? 'bg-white text-black hover:bg-gray-100' 
+                                                : 'bg-[#0a0b0d] text-white hover:bg-black'
+                                            }`}
                                         >
-                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "I have made payment"}
+                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "I've made the payment"}
                                         </button>
                                     ) : (
-                                        <div className="w-full py-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl flex flex-col items-center justify-center gap-1">
-                                            <div className="flex items-center gap-2 text-yellow-500 font-bold text-sm animate-pulse">
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                <span>Confirming...</span>
+                                        <div className="w-full py-6 bg-yellow-500/10 border border-yellow-500/20 rounded-[2rem] flex flex-col items-center justify-center gap-2">
+                                            <div className="flex items-center gap-3 text-yellow-600 font-bold">
+                                                <Loader2 className="w-6 h-6 animate-spin" />
+                                                <span>Confirming Deposit...</span>
                                             </div>
-                                            <p className="text-[10px] text-yellow-500/60">Awaiting block confirmation</p>
+                                            <p className="text-xs font-bold text-yellow-500/60 uppercase tracking-widest">Awaiting blockchain confirmation</p>
                                         </div>
                                     )}
-                                </div>
-
-                                <div className="flex items-start gap-3 p-3 bg-red-500/5 rounded-xl border border-red-500/10">
-                                    <Info className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                                    <p className="text-[10px] text-gray-400">
-                                        This address only accepts <span className="text-white font-bold">{selectedCoin}</span> sent via the <span className="text-white font-bold">{networks[selectedNetwork].name} ({networks[selectedNetwork].symbol})</span>.
-                                    </p>
+                                    
+                                    <div className="flex items-start gap-4 p-5 bg-red-500/5 rounded-[2rem] border border-red-500/10">
+                                        <Info className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                        <p className="text-xs text-gray-500 font-medium leading-relaxed">
+                                            Only send <span className="font-bold text-red-500/80">{selectedCoin}</span> via <span className="font-bold text-red-500/80">{networks[selectedNetwork].name}</span>. Sending other assets will result in permanent loss.
+                                        </p>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    if (isInline) {
+        return renderContent();
+    }
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className={`absolute inset-0 backdrop-blur-sm ${theme === 'dark' ? 'bg-black/60' : 'bg-black/20'}`}
+                        onClick={onClose}
+                    />
+
+                    <motion.div
+                        initial={{ y: "100%", opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: "100%", opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className={`relative w-full md:max-w-[420px] ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                            } border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 shadow-2xl pb-10 md:pb-6 md:m-4`}
+                    >
+                        {renderContent()}
                     </motion.div>
                 </div>
             )}

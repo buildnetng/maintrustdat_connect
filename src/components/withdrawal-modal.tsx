@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, Wallet, Building2, ArrowRight, Loader2, Check, Copy, Clock, AlertCircle } from 'lucide-react';
+import { X, Wallet, Building2, ArrowRight, Loader2, Check, Copy, Clock, AlertCircle, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { useWallet } from '@/context/base';
@@ -17,6 +17,7 @@ interface WithdrawalModalProps {
     fxRate?: number;
     theme?: 'dark' | 'light';
     onSuccess?: () => void;
+    isInline?: boolean;
 }
 
 export default function WithdrawalModal({
@@ -28,7 +29,8 @@ export default function WithdrawalModal({
     currencySymbol = '$',
     fxRate = 1,
     theme = 'light',
-    onSuccess
+    onSuccess,
+    isInline = false
 }: WithdrawalModalProps) {
     const [withdrawalType, setWithdrawalType] = useState<'crypto' | 'bank'>('crypto');
     const [amount, setAmount] = useState('');
@@ -58,7 +60,11 @@ export default function WithdrawalModal({
         'ETH': { supportedNetworks: ["ETH", "BNB"], name: "Ethereum", logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
         'USDT': { supportedNetworks: ["BNB", "ETH"], name: "Tether", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
         'USDC': { supportedNetworks: ["BNB", "ETH"], name: "USDC", logo: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png' },
-        'BTC': { supportedNetworks: ["BTC"], name: "Bitcoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' }
+        'BTC': { supportedNetworks: ["BTC"], name: "Bitcoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
+        'TETHEREUM': { supportedNetworks: ["BNB"], name: "Tethereum T99", logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715' },
+        'CTM': { supportedNetworks: ["BNB"], name: "CTM", logo: '/ctm_logo.png' },
+        'USDT_BSC': { supportedNetworks: ["BNB"], name: "USDT (BSC)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
+        'TETH': { supportedNetworks: ["BNB"], name: "Tether (TETH)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' }
     };
 
     const filteredAssets = useMemo(() => {
@@ -83,7 +89,7 @@ export default function WithdrawalModal({
 
     const getBalanceUsd = () => {
         if (selectedCoin === 'BNB') return (Number(bnbBalance) * 620).toFixed(2);
-        if (selectedCoin === 'T22' || selectedCoin === 'TETHEREUM') return (Number(t22Balance) * (t22Price || 0.45)).toFixed(2);
+        if (selectedCoin === 'T99' || selectedCoin === 'T22' || selectedCoin === 'TETHEREUM') return (Number(t22Balance) * (t22Price || 0.45)).toFixed(2);
         return '0.00';
     };
 
@@ -321,78 +327,46 @@ export default function WithdrawalModal({
         setShowGasModal(true);
     };
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        onClick={step === 'input' ? onClose : undefined}
-                    />
-
-                    <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-[#0052FF]/30' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
-                            } border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 shadow-2xl pb-10 md:pb-6 md:m-4`}
-                    >
+    const renderContent = () => {
+        return (
+            <div className={`${isInline ? 'w-full max-w-[600px] mx-auto' : ''} ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
+                <div className={`${isInline ? `md:rounded-[2.5rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-[#000000] border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-xl'}` : ''}`}>
+                    <div className={`${isInline ? 'p-0 md:p-6 pb-10' : ''}`}>
                         {step === 'input' ? (
-                            <>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-lg font-bold">Withdraw</h2>
-                                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700/50 rounded-full transition-colors text-gray-400 hover:text-white">
-                                        <X className="w-5 h-5" />
+                            <div className="w-full">
+                                {/* Sticky Header */}
+                                <div className={`sticky top-0 z-10 px-5 pt-8 pb-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+                                    <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
+                                        <ChevronLeft className="w-5 h-5" />
                                     </button>
+                                    <h2 className="text-base font-semibold tracking-tight">Send Crypto</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3 mb-4">
-                                    <button type="button" onClick={() => setWithdrawalType('crypto')} className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-1.5 ${withdrawalType === 'crypto'
-                                        ? `border-[#0052FF] bg-[#0052FF]/10 ${theme === 'dark' ? 'text-white' : 'text-blue-600 font-bold'}`
-                                        : `${theme === 'dark' ? 'border-white/5 bg-[#1E2025] text-gray-400 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}>
-                                        <Wallet className="w-6 h-6" />
-                                        <span className="font-medium text-xs">Crypto</span>
-                                        <span className="text-[10px] opacity-70">To wallet address</span>
-                                    </button>
 
-                                    <button type="button" onClick={() => setWithdrawalType('bank')} className={`p-3 rounded-xl border transition-all flex flex-col items-center justify-center gap-1.5 ${withdrawalType === 'bank'
-                                        ? `border-[#0052FF] bg-[#0052FF]/10 ${theme === 'dark' ? 'text-white' : 'text-blue-600 font-bold'}`
-                                        : `${theme === 'dark' ? 'border-white/5 bg-[#1E2025] text-gray-400 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}>
-                                        <Building2 className="w-6 h-6" />
-                                        <span className="font-medium text-xs">Bank</span>
-                                        <span className="text-[10px] opacity-70">To bank account</span>
+                                {/* Scrollable Content */}
+                                <div className="mt-6 px-5">
+                                {/* Type Selector */}
+                                <div className={`flex rounded-2xl p-1 mb-8 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'}`}>
+                                    <button type="button" onClick={() => setWithdrawalType('crypto')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${withdrawalType === 'crypto' ? (theme === 'dark' ? 'bg-white/10 text-white' : 'bg-white text-black shadow-sm') : 'opacity-40'}`}>
+                                        <Wallet className="w-4 h-4" />
+                                        Crypto
+                                    </button>
+                                    <button type="button" onClick={() => setWithdrawalType('bank')} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${withdrawalType === 'bank' ? (theme === 'dark' ? 'bg-white/10 text-white' : 'bg-white text-black shadow-sm') : 'opacity-40'}`}>
+                                        <Building2 className="w-4 h-4" />
+                                        Bank
                                     </button>
                                 </div>
 
-                                {withdrawalType === 'bank' && (
-                                    <div className="mb-4">
-                                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Asset to Sell</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {filteredAssets.map((coin) => (
-                                                <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${selectedCoin === coin ? 'border-[#0052FF] bg-[#0052FF]/10 dark:!text-white !text-black' : 'border-white/5 bg-[#1E2025] text-gray-500 hover:bg-white/5 dark:hover:!text-white hover:!text-black'}`}>
-                                                    <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-4 h-4 object-contain rounded-full bg-white/10" />
-                                                    {availableCoins[coin as keyof typeof availableCoins]?.name || coin}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <form onSubmit={handleSubmit} className="space-y-4">
-
+                                <form onSubmit={handleSubmit} className="space-y-7">
                                     {withdrawalType === 'crypto' && (
                                         <>
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Choose Network</label>
-                                                <div className="flex flex-wrap gap-2">
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Network</label>
+                                                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                                     {Object.keys(networks).map((net) => (
-                                                        <button key={net} type="button" onClick={() => setSelectedNetwork(net as any)} className={`flex-1 min-w-[100px] py-3 px-2 flex items-center justify-center gap-2 flex-col rounded-xl border text-[10px] font-bold transition-all ${selectedNetwork === net
-                                                            ? `border-[#0052FF] bg-[#0052FF]/10 ${theme === 'dark' ? 'text-white' : 'text-blue-600'}`
-                                                            : `${theme === 'dark' ? 'border-white/5 bg-[#1E2025] text-gray-500 hover:text-white' : 'border-gray-100 bg-gray-50 text-gray-500 hover:text-[#0a0b0d]'}`}`}>
-                                                            <img src={networks[net as keyof typeof networks].logo} alt={net} className="w-6 h-6 object-contain" />
+                                                        <button key={net} type="button" onClick={() => setSelectedNetwork(net as any)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all whitespace-nowrap text-xs font-semibold ${selectedNetwork === net
+                                                            ? `border-blue-600/50 bg-blue-600/10 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
+                                                            : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}>
+                                                            <img src={networks[net as keyof typeof networks].logo} alt={net} className="w-4 h-4 object-contain rounded-full" />
                                                             {networks[net as keyof typeof networks].name}
                                                         </button>
                                                     ))}
@@ -400,132 +374,161 @@ export default function WithdrawalModal({
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Select Asset</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Asset</label>
                                                 <div className="flex flex-wrap gap-2">
                                                     {filteredAssets.map((coin) => (
-                                                        <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${selectedCoin === coin ? 'border-[#0052FF] bg-[#0052FF]/10 dark:!text-white !text-black' : 'border-white/5 bg-[#1E2025] text-gray-500 hover:bg-white/5 dark:hover:!text-white hover:!text-black'}`}>
-                                                            <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-4 h-4 object-contain rounded-full bg-white/10" />
-                                                            {availableCoins[coin as keyof typeof availableCoins]?.name || coin}
+                                                        <button key={coin} type="button" onClick={() => setSelectedCoin(coin)} className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${selectedCoin === coin
+                                                            ? 'border-blue-600/50 bg-blue-600/10 text-blue-500'
+                                                            : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-400 hover:bg-white/10' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}>
+                                                            <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
+                                                                <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
+                                                            </div>
+                                                            {coin === 'TETHEREUM' ? 'T99' : coin}
                                                         </button>
                                                     ))}
                                                 </div>
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Enter {selectedCoin} Address</label>
-                                                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="0x..." className={`w-full px-4 py-3 border rounded-xl focus:outline-none transition-colors font-mono text-xs placeholder-gray-600 ${theme === 'dark' ? 'bg-[#1E2025] text-white' : 'bg-gray-100 text-[#0a0b0d]'
-                                                    } ${cryptoAddressError ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-[#0052FF]'}`} required />
-                                                {cryptoAddressError && <p className="text-[10px] text-red-400 mt-1.5">{cryptoAddressError}</p>}
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Address</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={address}
+                                                        onChange={(e) => setAddress(e.target.value)}
+                                                        placeholder={`Paste ${selectedCoin} address`}
+                                                        className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-mono text-sm placeholder-gray-500 pr-20 ${
+                                                            theme === 'dark' ? 'bg-white/5 text-white' : 'bg-gray-50 text-[#0a0b0d]'
+                                                        } ${cryptoAddressError ? 'border-red-500/50 focus:border-red-500' : 'border-transparent focus:border-blue-600'}`}
+                                                        required
+                                                    />
+                                                    <button type="button" onClick={async () => { try { const text = await navigator.clipboard.readText(); setAddress(text); } catch(e){} }} className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-600 text-[11px] font-bold hover:opacity-80 transition-opacity px-2 py-1 bg-blue-600/10 rounded-lg">
+                                                        PASTE
+                                                    </button>
+                                                </div>
+                                                {cryptoAddressError && <p className="text-[11px] text-red-500 mt-2 font-medium px-1">{cryptoAddressError}</p>}
                                             </div>
                                         </>
                                     )}
 
                                     {withdrawalType === 'bank' && (
-                                        <>
+                                        <div className="space-y-6">
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Routing Number (Lookup)</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Routing Number</label>
                                                 <div className="relative">
-                                                    <input type="text" value={routingNumber} onChange={handleRoutingChange} placeholder="9-digit routing number" className={`w-full px-4 py-3 bg-[#1E2025] border rounded-xl focus:outline-none transition-colors text-white placeholder-gray-600 text-xs ${routingError ? 'border-red-500/50 focus:border-red-500' : bankName ? 'border-green-500/50 focus:border-green-500' : 'border-white/5 focus:border-[#0052FF]'}`} maxLength={9} required />
-                                                    {isVerifyingRouting && <div className="absolute right-4 top-1/2 -translate-y-1/2"><Loader2 className="w-3 h-3 animate-spin text-gray-400" /></div>}
+                                                    <input 
+                                                        type="text" 
+                                                        value={routingNumber} 
+                                                        onChange={handleRoutingChange} 
+                                                        placeholder="9-digit routing number" 
+                                                        className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-medium text-sm placeholder-gray-500 ${
+                                                            theme === 'dark' ? 'bg-white/5 text-white' : 'bg-gray-50 text-[#0a0b0d]'
+                                                        } ${routingError ? 'border-red-500/50 focus:border-red-500' : bankName ? 'border-emerald-500/50 focus:border-emerald-500' : 'border-transparent focus:border-blue-600'}`} 
+                                                        maxLength={9} 
+                                                        required 
+                                                    />
+                                                    {isVerifyingRouting && <div className="absolute right-5 top-1/2 -translate-y-1/2"><Loader2 className="w-5 h-5 animate-spin text-blue-600" /></div>}
                                                 </div>
                                                 {bankName && (
-                                                    <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2">
-                                                        <Building2 className="w-3 h-3 text-green-400" />
-                                                        <span className="text-[10px] text-green-300 font-medium">{(routingDetails?.bank_name) ? `${routingDetails?.bank_name} . ${routingDetails?.state} . ${routingDetails?.city}` : "Routing number is valid"}</span>
-                                                    </div>
+                                                    <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`mt-3 p-4 rounded-2xl border flex items-center gap-4 ${theme === 'dark' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-emerald-50 border-emerald-100'}`}>
+                                                        <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+                                                            <Building2 className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className={`text-[10px] font-bold uppercase tracking-widest opacity-50 ${theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'}`}>Verified Bank</p>
+                                                            <p className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-emerald-900'}`}>{(routingDetails?.bank_name) ? `${routingDetails?.bank_name}` : "Routing number confirmed"}</p>
+                                                        </div>
+                                                    </motion.div>
                                                 )}
-                                                {routingError && <p className="text-[10px] text-red-400 mt-1">{routingError}</p>}
+                                                {routingError && <p className="text-xs text-red-500 mt-2 font-bold px-1 flex items-center gap-1.5"><AlertCircle className="w-4 h-4" /> {routingError}</p>}
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-400 mb-1.5">Account Number</label>
+                                                <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Account Number</label>
                                                 <input
                                                     type="text"
                                                     inputMode="numeric"
-                                                    pattern="\d*"
                                                     value={accountNumber}
                                                     onChange={handleAccountChange}
-                                                    placeholder="Enter 10-12 digit account number"
-                                                    className="w-full px-4 py-3 bg-[#1E2025] border border-white/5 rounded-xl focus:border-[#0052FF] focus:outline-none transition-colors text-white placeholder-gray-600 text-xs"
+                                                    placeholder="Enter account number"
+                                                    className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all font-medium text-sm placeholder-gray-500 ${
+                                                        theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
+                                                    }`}
                                                     maxLength={12}
                                                     required
                                                 />
                                             </div>
-                                        </>
+                                        </div>
                                     )}
 
                                     <div>
-                                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Enter Amount</label>
-                                        <div className="relative">
+                                        <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Amount</label>
+                                        <div className="relative group">
                                             <input
                                                 type="number"
                                                 value={amount}
                                                 onChange={(e) => setAmount(e.target.value)}
                                                 placeholder="0.00"
-                                                className="w-full px-4 py-3 bg-[#1E2025] border border-white/5 rounded-xl focus:border-[#0052FF] focus:outline-none transition-colors text-white text-base placeholder-gray-600 pr-20"
+                                                className={`w-full px-5 py-[14px] border rounded-2xl focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-28 ${
+                                                    theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
+                                                }`}
                                                 required
                                             />
-                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => setAmount(getBalanceUsd())}
-                                                    className="bg-[#0052FF]/10 hover:bg-[#0052FF]/20 text-[#0052FF] text-[10px] font-bold px-2 py-1 rounded transition-colors border border-[#0052FF]/20"
+                                                    className="bg-blue-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
                                                 >
                                                     MAX
                                                 </button>
-                                                <span className="text-gray-400 font-medium text-xs">USD</span>
+                                                <span className="text-gray-400 font-bold text-sm uppercase mr-2">USD</span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between mt-1.5">
+                                        <div className="flex justify-between items-center mt-3 px-1">
                                             <div className="flex-1">
                                                 {amount && !isSufficientBalance && (
-                                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-red-400 flex items-center gap-1">
-                                                        <AlertCircle className="w-3 h-3" /> Insufficient balance
-                                                    </motion.p>
+                                                    <p className="text-[11px] text-red-500 font-bold flex items-center gap-1.5">
+                                                        <AlertCircle className="w-4 h-4" /> Insufficient balance
+                                                    </p>
                                                 )}
                                             </div>
-                                            <motion.div
-                                                key={amount}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                className="text-[10px] text-gray-400 text-right"
-                                            >
-                                                <span>Available: {maskAccount ? '••••••' : `${currencySymbol}${(Number(getBalanceUsd()) * fxRate).toFixed(2)}`}</span>
-                                            </motion.div>
+                                            <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                                                Available: {maskAccount ? '••••••' : `${currencySymbol}${(Number(getBalanceUsd()) * fxRate).toFixed(2)}`}
+                                            </div>
                                         </div>
 
                                         {/* Summary Box */}
                                         {amount && Number(amount) > 0 && (
-                                            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`border rounded-xl p-3 space-y-2 text-xs mt-3 ${theme === 'dark' ? 'bg-[#1E2025]/50 border-white/5' : 'bg-gray-50 border-gray-100'
-                                                }`}>
+                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`rounded-2xl p-5 space-y-4 mt-6 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
                                                 {(() => {
                                                     const feeMap: Record<string, number> = { 'BNB': 0.15, 'ETH': 2.50, 'USDT': 1.00, 'BTC': 1.50 };
                                                     const networkFee = withdrawalType === 'bank' ? 0.00 : (feeMap[selectedCoin] || 0.00);
                                                     const coinPrice = selectedCoin === 'BNB' ? 620 : selectedCoin === 'USDT' ? 1 : t22Price;
-                                                    const totalUsd = Number(amount); // Withdraw amount is natively inputted as USD amount in this modal based on existing logic
+                                                    const totalUsd = Number(amount); 
                                                     const receivedUsd = Math.max(0, totalUsd - networkFee);
                                                     const receivedCrypto = receivedUsd / coinPrice;
 
                                                     return (
                                                         <>
-                                                            <div className="flex justify-between items-center text-gray-400">
-                                                                <span>Conversion Rate</span>
-                                                                <span className={`font-mono text-[10px] ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>1 {selectedCoin} = {currencySymbol}{(coinPrice * fxRate).toFixed(2)}</span>
+                                                            <div className="flex justify-between items-center text-sm">
+                                                                <span className="text-gray-500 font-medium">Rate</span>
+                                                                <span className="font-bold">1 {selectedCoin} ≈ {currencySymbol}{(coinPrice * fxRate).toFixed(2)}</span>
                                                             </div>
-                                                            <div className="flex justify-between items-center text-gray-400">
-                                                                <span>Network Fee</span>
-                                                                <span className={`font-mono text-[10px] ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>~{currencySymbol}{(networkFee * fxRate).toFixed(2)}</span>
+                                                            <div className="flex justify-between items-center text-sm">
+                                                                <span className="text-gray-500 font-medium">Fee</span>
+                                                                <span className="font-bold">{currencySymbol}{(networkFee * fxRate).toFixed(2)}</span>
                                                             </div>
-                                                            <div className={`h-[1px] w-full my-1 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
-                                                            <div className="flex justify-between items-center">
-                                                                <span className="text-gray-300 font-medium">You will receive</span>
+                                                            <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                                            <div className="flex justify-between items-end">
+                                                                <span className="text-gray-500 font-bold text-sm mb-1">Receive</span>
                                                                 <div className="text-right">
-                                                                    <span className="text-[#0052FF] font-bold text-sm block">
+                                                                    <p className="text-2xl font-bold text-blue-600 leading-none mb-1">
                                                                         {currencySymbol}{(receivedUsd * fxRate).toFixed(2)}
-                                                                    </span>
-                                                                    <span className="text-gray-500 font-mono text-[10px]">
+                                                                    </p>
+                                                                    <p className="text-[13px] font-bold text-gray-400">
                                                                         {receivedCrypto.toFixed(6)} {selectedCoin}
-                                                                    </span>
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         </>
@@ -538,67 +541,101 @@ export default function WithdrawalModal({
                                     <button
                                         disabled={withdrawLoading || !isFormValid || !isSufficientBalance}
                                         type="submit"
-                                        className="w-full bg-[#0052FF] hover:bg-[#004ada] disabled:bg-[#0052FF]/50 disabled:cursor-not-allowed !text-white font-bold py-3 rounded-full transition-all shadow-lg hover:shadow-[#0052FF]/25 active:scale-[0.98] flex items-center justify-center gap-2 mt-4 text-sm"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-base"
                                     >
-                                        {withdrawLoading ? "Processing..." : "Continue"}
-                                        <ArrowRight className="w-4 h-4" />
+                                        {withdrawLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Continue"}
                                     </button>
                                 </form>
-                                <p className="text-[10px] text-gray-500 text-center mt-5">
-                                    {withdrawalType === 'crypto'
-                                        ? 'Network fees will be deducted from your withdrawal amount'
-                                        : 'Bank transfers typically take 1-3 business days'}
-                                </p>
-                            </>
+                                </div>
+                            </div>
                         ) : step === 'processing' ? (
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-12 flex flex-col items-center justify-center space-y-6">
-                                <Loader2 className="w-16 h-16 text-[#0052FF] animate-spin" />
-                                <div className="text-center space-y-2">
-                                    <h3 className="text-white text-xl font-bold tracking-tight">Processing Transfer</h3>
-                                    <p className="text-gray-400 text-sm animate-pulse">{statusMsg}</p>
+                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-24 flex flex-col items-center justify-center space-y-8">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-20 animate-pulse" />
+                                    <Loader2 className="w-20 h-20 text-blue-600 animate-spin relative z-10" />
+                                </div>
+                                <div className="text-center space-y-3">
+                                    <h3 className="text-2xl font-bold">Transferring...</h3>
+                                    <p className="text-sm text-gray-500 font-medium animate-pulse">{statusMsg}</p>
                                 </div>
                             </motion.div>
                         ) : (
                             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center py-4">
-                                <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-16 h-16 bg-gradient-to-tr from-yellow-500/20 to-yellow-400/5 border border-yellow-500/20 text-yellow-500 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(234,179,8,0.15)]">
-                                    <Clock className="w-8 h-8" />
-                                </motion.div>
-                                <h3 className="text-2xl font-bold text-white mb-2 tracking-tight text-center">Request Submitted</h3>
-                                <p className="text-gray-400 text-sm mb-8 text-center px-4 leading-relaxed">Your withdrawal request to {withdrawalType === 'bank' ? 'your bank account' : 'your wallet'} has been received and is currently being processed.</p>
+                                <div className="w-24 h-24 bg-green-500/10 border border-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-green-500/10">
+                                    <Check className="w-12 h-12" />
+                                </div>
+                                <h3 className="text-3xl font-bold mb-3 text-center">Transfer Sent</h3>
+                                <p className="text-sm font-medium mb-10 text-center px-6 leading-relaxed text-gray-500">Your withdrawal request has been received and is being processed.</p>
 
-                                <div className="w-full bg-[#1a1b1f] border border-white/5 rounded-2xl p-5 mb-8 space-y-4 shadow-inner">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400">Amount Processing</span>
-                                        <span className="text-white font-bold text-lg">{currencySymbol}{(Math.max(0, Number(amount) - 0.50) * fxRate).toFixed(2)}</span>
+                                <div className={`w-full rounded-[2.5rem] p-8 mb-10 space-y-5 ${
+                                    theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'
+                                }`}>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-500 font-bold text-xs uppercase tracking-widest">Amount</span>
+                                        <span className="font-bold text-2xl text-blue-600">{currencySymbol}{(Math.max(0, Number(amount) - 0.50) * fxRate).toFixed(2)}</span>
                                     </div>
-                                    <div className="h-[1px] w-full bg-white/5"></div>
+                                    <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400">Destination</span>
-                                        <span className="text-white font-medium">{withdrawalType === 'crypto' ? networks[selectedNetwork as keyof typeof networks]?.name : 'Bank Transfer'}</span>
+                                        <span className="text-gray-500 font-medium">Destination</span>
+                                        <span className="font-bold">{withdrawalType === 'crypto' ? networks[selectedNetwork as keyof typeof networks]?.name : 'Bank Transfer'}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400">Date</span>
-                                        <span className="text-white font-medium">{new Date().toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+                                        <span className="text-gray-500 font-medium">Status</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                                            <span className="font-bold text-yellow-600">Processing</span>
+                                        </div>
                                     </div>
                                     {withdrawalType === 'crypto' && txHash && (
                                         <>
-                                            <div className="h-[1px] w-full bg-white/5"></div>
-                                            <div className="flex justify-between items-center text-sm">
-                                                <span className="text-gray-400">Tx Hash</span>
-                                                <div className="flex items-center gap-2 group cursor-pointer bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={() => { navigator.clipboard.writeText(txHash); setTxCopied(true); setTimeout(() => setTxCopied(false), 2000); }}>
-                                                    <span className="text-[#0052FF] font-mono tracking-tight">{txHash.substring(0, 8)}...{txHash.substring(txHash.length - 6)}</span>
-                                                    {txCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#0052FF]" />}
-                                                </div>
+                                            <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-500 font-medium text-sm">Tx ID</span>
+                                                <button onClick={() => { navigator.clipboard.writeText(txHash); setTxCopied(true); setTimeout(() => setTxCopied(false), 2000); }} className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/10 rounded-xl hover:bg-blue-600/20 transition-all">
+                                                    <span className="text-blue-600 font-mono font-bold text-xs">{txHash.substring(0, 8)}...{txHash.substring(txHash.length - 6)}</span>
+                                                    {txCopied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5 text-blue-600" />}
+                                                </button>
                                             </div>
                                         </>
                                     )}
                                 </div>
 
-                                <button onClick={onClose} className="w-full bg-[#0052FF] hover:bg-[#004ada] !text-white font-bold py-3.5 rounded-full transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] text-sm">
+                                <button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98]">
                                     Done
                                 </button>
                             </motion.div>
                         )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    if (isInline) {
+        return renderContent();
+    }
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className={`absolute inset-0 backdrop-blur-sm ${theme === 'dark' ? 'bg-black/60' : 'bg-black/20'}`}
+                        onClick={step === 'input' ? onClose : undefined}
+                    />
+
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className={`relative w-full max-w-[420px] ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                            } border rounded-[2.5rem] p-6 shadow-2xl m-4`}
+                    >
+                        {renderContent()}
 
                         <AnimatePresence>
                             {showGasModal && (
@@ -624,9 +661,8 @@ export default function WithdrawalModal({
                             )}
                         </AnimatePresence>
                     </motion.div>
-                </div >
-            )
-            }
-        </AnimatePresence >
+                </div>
+            )}
+        </AnimatePresence>
     );
 }
