@@ -121,7 +121,7 @@ export default function SwapModal({
     theme = 'light',
     isInline = false
 }: SwapModalProps) {
-    const [fromToken, setFromToken] = useState(initialFromToken || 'TETHEREUM');
+    const [fromToken, setFromToken] = useState(initialFromToken || 'ETH');
     // const [toToken, setToToken] = useState(initialFromToken || 'ETH');
     const [toToken, setToToken] = useState('ETH');
     const [fromAmount, setFromAmount] = useState('');
@@ -172,7 +172,6 @@ export default function SwapModal({
     // };
 
     const exchangeRates: { [key: string]: { [key: string]: number } } = {
-        'TETHEREUM': { 'BNB': 1.0, 'USDT': 0.45, 'TETHEREUM': 1.0 },
         'BNB': {
             'BNB': 1,
             'ETH': 0.35,
@@ -719,7 +718,7 @@ export default function SwapModal({
                                         </button>
                                     </div>
                                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                        {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'TETHEREUM', 'CTM'].map((coin) => (
+                                        {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM', 'LTC'].map((coin) => (
                                             <div
                                                 key={coin}
                                                 onClick={() => {

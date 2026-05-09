@@ -15,6 +15,7 @@ export interface WithdrawalModalProps {
     usdtBalance?: string;
     usdtBnbBalance?: string;
     ctmBalance?: string;
+    ltcBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
     maskAccount?: boolean;
@@ -33,6 +34,7 @@ export default function WithdrawalModal({
     usdtBalance = '0',
     usdtBnbBalance = '0',
     ctmBalance = '0',
+    ltcBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
     maskAccount = false,
@@ -71,10 +73,9 @@ export default function WithdrawalModal({
         'USDT': { supportedNetworks: ["BNB", "ETH"], name: "Tether", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
         'USDC': { supportedNetworks: ["BNB", "ETH"], name: "USDC", logo: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png' },
         'BTC': { supportedNetworks: ["BTC"], name: "Bitcoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
-        'TETHEREUM': { supportedNetworks: ["BNB"], name: "Tethereum T99", logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715' },
-        'CTM': { supportedNetworks: ["BNB"], name: "CTM", logo: '/ctm_logo.png' },
-        'USDT_BSC': { supportedNetworks: ["BNB"], name: "USDT (BSC)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
-        'TETH': { supportedNetworks: ["BNB"], name: "Tether (TETH)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' }
+        'CTM': { supportedNetworks: ["BNB", "ETH"], name: "CTM", logo: '/ctm_logo.png' },
+        'LTC': { supportedNetworks: ["BNB"], name: "Litecoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/ltc.png' },
+        'USDT_BNB': { supportedNetworks: ["BNB"], name: "Tether (BNB)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
     };
 
     const filteredAssets = useMemo(() => {
@@ -100,16 +101,14 @@ export default function WithdrawalModal({
     const getBalanceUsd = () => {
         const coinBalances: Record<string, number> = {
             'BNB': Number(bnbBalance),
-            'TETHEREUM': Number(t22Balance),
             'T22': Number(t22Balance),
-            'T99': Number(t22Balance),
             'USDT': Number(usdtBalance),
             'USDT_BNB': Number(usdtBnbBalance),
             'CTM': Number(ctmBalance),
-            'TETH': Number(newTetherBalance)
+            'LTC': Number(ltcBalance)
         };
 
-        const price = marketPrices[selectedCoin]?.price || (selectedCoin === 'TETHEREUM' ? t22Price : 0);
+        const price = marketPrices[selectedCoin]?.price || 0;
         const bal = coinBalances[selectedCoin] || 0;
         
         // Return full precision as string
@@ -406,7 +405,7 @@ export default function WithdrawalModal({
                                                             <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
                                                                 <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
                                                             </div>
-                                                            {coin === 'TETHEREUM' ? 'T99' : coin}
+                                                            {coin}
                                                         </button>
                                                     ))}
                                                 </div>
