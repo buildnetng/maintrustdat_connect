@@ -521,6 +521,7 @@ export default function SwapModal({
 
     if (isInline) {
         return (
+            <>
             <div className={`w-full max-w-[600px] mx-auto ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
                 {isLoading ? (
                     <div className={`flex flex-col items-center justify-center py-20 px-6 relative w-full min-h-[500px] rounded-[3rem] border ${
@@ -574,6 +575,7 @@ export default function SwapModal({
                 success={statusModalConfig.success}
                 theme={theme}
             />
+            </>
         );
     }
 
