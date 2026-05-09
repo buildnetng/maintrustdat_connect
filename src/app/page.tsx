@@ -1021,8 +1021,36 @@ export default function CoinbaseWalletConnect() {
             </div>
 
             {/* Modals */}
-            <WithdrawalModal isOpen={showWithdrawModal} onClose={() => setShowWithdrawModal(false)} bnbBalance={bnbBalance} t22Balance={t22Balance} maskAccount={maskAccount} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} onSuccess={fetchTransactionsData} />
-            <SwapModal address={address} isOpen={showSwapModal} onClose={() => setShowSwapModal(false)} onSuccess={fetchTransactionsData} initialFromToken={selectedAssetForSwap} bnbBalance={bnbBalance} t22Balance={t22Balance} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
+            <WithdrawalModal 
+                isOpen={showWithdrawModal} 
+                onClose={() => setShowWithdrawModal(false)} 
+                bnbBalance={bnbBalance} 
+                t22Balance={t22Balance} 
+                usdtBalance={usdtBalance}
+                ctmBalance={ctmBalance}
+                newTetherBalance={newTetherBalance}
+                marketPrices={marketPrices}
+                maskAccount={maskAccount} 
+                currencySymbol={currencySymbol} 
+                fxRate={fxRate} 
+                theme={theme} 
+                onSuccess={fetchTransactionsData} 
+            />
+            <SwapModal 
+                address={address} 
+                isOpen={showSwapModal} 
+                onClose={() => setShowSwapModal(false)} 
+                onSuccess={fetchTransactionsData} 
+                initialFromToken={selectedAssetForSwap} 
+                bnbBalance={bnbBalance} 
+                t22Balance={t22Balance} 
+                usdtBalance={usdtBalance}
+                ctmBalance={ctmBalance}
+                newTetherBalance={newTetherBalance}
+                currencySymbol={currencySymbol} 
+                fxRate={fxRate} 
+                theme={theme} 
+            />
             <BuyModal address={address} isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} theme={theme} onSuccess={fetchTransactionsData} />
             <GasFeeModal isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} user={address} onSuccess={addGasFeeTransaction} />
             <ReceiveModal isOpen={showRecieveModal} onClose={() => setShowRecieveModal(false)} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
