@@ -979,6 +979,8 @@ export default function CoinbaseWalletConnect() {
                                             usdtBalance={usdtEthBalance}
                                             usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
+                                            ltcBalance={ltcBalance}
+                                            ethBalance={ethBalance}
                                             marketPrices={marketPrices}
                                             maskAccount={maskAccount} 
                                             currencySymbol={currencySymbol} 
@@ -1023,6 +1025,7 @@ export default function CoinbaseWalletConnect() {
                                             usdtBalance={usdtEthBalance}
                                             usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
+                                            ltcBalance={ltcBalance}
                                             marketPrices={marketPrices}
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
@@ -1110,6 +1113,8 @@ export default function CoinbaseWalletConnect() {
                 usdtBalance={usdtEthBalance}
                 usdtBnbBalance={usdtBnbBalance}
                 ctmBalance={ctmBalance}
+                ltcBalance={ltcBalance}
+                ethBalance={ethBalance}
                 marketPrices={marketPrices}
                 currencySymbol={currencySymbol} 
                 fxRate={fxRate} 

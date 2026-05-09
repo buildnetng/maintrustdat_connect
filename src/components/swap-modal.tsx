@@ -95,6 +95,8 @@ export interface SwapModalProps {
     usdtBalance?: string;
     usdtBnbBalance?: string;
     ctmBalance?: string;
+    ltcBalance?: string;
+    ethBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
     currencySymbol?: string;
@@ -114,6 +116,8 @@ export default function SwapModal({
     usdtBalance = '0',
     usdtBnbBalance = '0',
     ctmBalance = '0',
+    ltcBalance = '0',
+    ethBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
     currencySymbol = '$',
@@ -275,11 +279,11 @@ export default function SwapModal({
         };
 
         if (token === 'BNB') return formatBal(bnbBalance);
-        if (token === 'TETHEREUM') return formatBal(t22Balance);
+        if (token === 'ETH') return formatBal(ethBalance);
         if (token === 'USDT') return formatBal(usdtBalance);
-        if (token === 'USDT_BNB') return formatBal(usdtBnbBalance);
+        if (token === 'USDT_BNB' || token === 'USDT_BSC') return formatBal(usdtBnbBalance);
         if (token === 'CTM') return formatBal(ctmBalance);
-        if (token === 'TETH') return formatBal(newTetherBalance);
+        if (token === 'LTC') return formatBal(ltcBalance);
         return '0.00';
     };
 
@@ -352,7 +356,7 @@ export default function SwapModal({
     }, [fromToken, toToken, exchangeRates_]);
 
     const currentNetwork = useMemo(() => {
-        if (fromToken === 'BNB' || fromToken === 'BUSD' || fromToken === 'TETHEREUM') return 'BNB';
+        if (fromToken === 'BNB' || fromToken === 'BUSD' || fromToken === 'TETHEREUM' || fromToken === 'LTC') return 'BNB';
         if (fromToken === 'ETH' || fromToken === 'USDT' || fromToken === 'USDC') return 'ETH';
         if (fromToken === 'BTC') return 'BTC';
         return 'ETH';
@@ -548,16 +552,17 @@ export default function SwapModal({
         return (
             <>
             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                {/* Header with Back/Settings */}
-                <div className="flex justify-between items-center px-2 mb-2">
-                    <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <ArrowLeft className="w-6 h-6 text-gray-800" />
-                    </button>
-                    <h3 className="text-xl font-bold text-gray-900">Swap</h3>
-                    <button onClick={() => setSwapView('settings')} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                        <Sliders className="w-5 h-5 text-gray-800" />
-                    </button>
-                </div>
+                {!isInline && (
+                    <div className="flex justify-between items-center px-2 mb-2">
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                            <ArrowLeft className="w-6 h-6 text-gray-800" />
+                        </button>
+                        <h3 className="text-xl font-bold text-gray-900">Swap</h3>
+                        <button onClick={() => setSwapView('settings')} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                            <Sliders className="w-5 h-5 text-gray-800" />
+                        </button>
+                    </div>
+                )}
 
                 {/* From Card */}
                 <div className={`rounded-[2rem] p-6 transition-all ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
@@ -589,13 +594,13 @@ export default function SwapModal({
                                     </div>
                                 )}
                             </div>
-                            <span className="font-bold text-sm text-gray-800 uppercase">{fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BSC' ? 'USDT' : fromToken)}</span>
+                             <span className="font-bold text-sm text-gray-800 uppercase">{fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BNB' || fromToken === 'USDT_BSC' ? 'USDT' : fromToken)}</span>
                             <ChevronDown className="w-4 h-4 text-gray-400" />
                         </button>
                     </div>
                     <div className="flex justify-between items-center text-gray-400 font-semibold text-xs">
                         <p className="flex items-center gap-1">
-                            {fromAmount || '0'} {fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BSC' ? 'USDT' : fromToken)} 
+                            {fromAmount || '0'} {fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BNB' || fromToken === 'USDT_BSC' ? 'USDT' : fromToken)} 
                             <ArrowDownUp className="w-3 h-3 ml-1 opacity-60" />
                         </p>
                         <div className="flex items-center gap-1">
@@ -637,7 +642,7 @@ export default function SwapModal({
                                     </div>
                                 )}
                             </div>
-                            <span className="font-bold text-sm text-gray-800 uppercase">{toToken === 'TETHEREUM' ? 'T99' : (toToken === 'USDT_BSC' ? 'USDT' : toToken)}</span>
+                            <span className="font-bold text-sm text-gray-800 uppercase">{toToken === 'TETHEREUM' ? 'T99' : (toToken === 'USDT_BNB' || toToken === 'USDT_BSC' ? 'USDT' : toToken)}</span>
                             <ChevronDown className="w-4 h-4 text-gray-400" />
                         </button>
                     </div>
@@ -731,11 +736,11 @@ export default function SwapModal({
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center shrink-0">
-                                                        <img src={COIN_MAP[coin].logo} alt={coin} className="w-full h-full object-contain" />
+                                                        <img src={COIN_MAP[coin]?.logo || '/eth_logo.png'} alt={coin} className="w-full h-full object-contain" />
                                                     </div>
                                                     <div>
                                                         <p className="font-bold">{coin === 'TETHEREUM' ? 'T99' : coin}</p>
-                                                        <p className="text-xs text-gray-500">{COIN_MAP[coin].name}</p>
+                                                        <p className="text-xs text-gray-500">{COIN_MAP[coin]?.name || coin}</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right text-sm">
