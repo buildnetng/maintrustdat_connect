@@ -732,7 +732,8 @@ export default function SwapModal({
                 )}
             </AnimatePresence>
         </div>
-    );
+        );
+    };
 
     if (isInline) {
         return (
