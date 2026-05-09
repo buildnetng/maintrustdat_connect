@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2, Check, Settings2, Sliders, ArrowLeft, MoveRight, HelpCircle, Plus, Minus } from 'lucide-react';
+import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2, Check, Settings2, Sliders, ArrowLeft, MoveRight, HelpCircle, Plus, Minus, Clock, ArrowDown, ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { COIN_MAP, getDynamicExchangeRates } from '@/lib/utils';
@@ -544,7 +544,7 @@ export default function SwapModal({
                         <ArrowLeft className="w-6 h-6 text-gray-800" />
                     </button>
                     <h3 className="text-xl font-bold text-gray-900">Swap</h3>
-                    <button onClick={() => setShowSettings(true)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <button onClick={() => setSwapView('settings')} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
                         <Sliders className="w-5 h-5 text-gray-800" />
                     </button>
                 </div>
