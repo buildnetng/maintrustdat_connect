@@ -95,7 +95,6 @@ export interface SwapModalProps {
     usdtBalance?: string;
     usdtBnbBalance?: string;
     ctmBalance?: string;
-    ltcBalance?: string;
     ethBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
@@ -116,7 +115,6 @@ export default function SwapModal({
     usdtBalance = '0',
     usdtBnbBalance = '0',
     ctmBalance = '0',
-    ltcBalance = '0',
     ethBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
@@ -283,7 +281,6 @@ export default function SwapModal({
         if (token === 'USDT') return formatBal(usdtBalance);
         if (token === 'USDT_BNB' || token === 'USDT_BSC') return formatBal(usdtBnbBalance);
         if (token === 'CTM') return formatBal(ctmBalance);
-        if (token === 'LTC') return formatBal(ltcBalance);
         return '0.00';
     };
 
@@ -356,7 +353,7 @@ export default function SwapModal({
     }, [fromToken, toToken, exchangeRates_]);
 
     const currentNetwork = useMemo(() => {
-        if (fromToken === 'BNB' || fromToken === 'BUSD' || fromToken === 'TETHEREUM' || fromToken === 'LTC') return 'BNB';
+        if (fromToken === 'BNB' || fromToken === 'BUSD' || fromToken === 'TETHEREUM') return 'BNB';
         if (fromToken === 'ETH' || fromToken === 'USDT' || fromToken === 'USDC') return 'ETH';
         if (fromToken === 'BTC') return 'BTC';
         return 'ETH';
@@ -723,7 +720,7 @@ export default function SwapModal({
                                         </button>
                                     </div>
                                     <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                        {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM', 'LTC'].map((coin) => (
+                                        {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM'].map((coin) => (
                                             <div
                                                 key={coin}
                                                 onClick={() => {

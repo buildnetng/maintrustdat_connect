@@ -15,7 +15,6 @@ export interface WithdrawalModalProps {
     usdtBalance?: string;
     usdtBnbBalance?: string;
     ctmBalance?: string;
-    ltcBalance?: string;
     ethBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
@@ -35,7 +34,6 @@ export default function WithdrawalModal({
     usdtBalance = '0',
     usdtBnbBalance = '0',
     ctmBalance = '0',
-    ltcBalance = '0',
     ethBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
@@ -76,7 +74,6 @@ export default function WithdrawalModal({
         'USDC': { supportedNetworks: ["BNB", "ETH"], name: "USDC", logo: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png' },
         'BTC': { supportedNetworks: ["BTC"], name: "Bitcoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
         'CTM': { supportedNetworks: ["BNB", "ETH"], name: "CTM", logo: '/ctm_logo.png' },
-        'LTC': { supportedNetworks: ["BNB"], name: "Litecoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/ltc.png' },
         'USDT_BNB': { supportedNetworks: ["BNB"], name: "Tether (BNB)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' },
     };
 
@@ -107,8 +104,7 @@ export default function WithdrawalModal({
             'T22': Number(t22Balance),
             'USDT': Number(usdtBalance),
             'USDT_BNB': Number(usdtBnbBalance),
-            'CTM': Number(ctmBalance),
-            'LTC': Number(ltcBalance)
+            'CTM': Number(ctmBalance)
         };
 
         const price = marketPrices[selectedCoin]?.price || 0;

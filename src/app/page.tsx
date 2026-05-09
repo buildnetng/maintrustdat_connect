@@ -33,7 +33,6 @@ export default function CoinbaseWalletConnect() {
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
     const [t22Balance, setT22Balance] = useState<string>('0');
     const [ctmBalance, setCtmBalance] = useState<string>('0');
-    const [ltcBalance, setLtcBalance] = useState<string>('0');
 
 
     const [isAppLoading, setIsAppLoading] = useState(true);
@@ -194,7 +193,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['BTC', 'ETH', 'BNB', 'LTC', 'USDT', 'USDT_BNB', 'CTM']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -321,7 +320,6 @@ export default function CoinbaseWalletConnect() {
     const CTM_NEW_ADDRESS = '0xc8C8FE705d05aA4f115E54d5aa557FDF88888888';
     const BSC_BTCB_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
     const ETH_WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
-    const BSC_LTC_ADDRESS = '0x4338665cbb7b2485a8855a139b75d5e34ab0db94';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -427,8 +425,7 @@ export default function CoinbaseWalletConnect() {
                 [ctmNewEthRaw, ctmNewEthDec],
                 [ctmNewBscRaw, ctmNewBscDec],
                 [btcbRaw, btcbDec],
-                [wbtcRaw, wbtcDec],
-                [ltcRaw, ltcDec]
+                [wbtcRaw, wbtcDec]
             ] = await Promise.all([
                 activeBscProvider.getBalance(userAddress).catch(() => BigInt(0)),
                 activeEthProvider.getBalance(userAddress).catch(() => BigInt(0)),
@@ -440,8 +437,7 @@ export default function CoinbaseWalletConnect() {
                 fetchTokenData(CTM_NEW_ADDRESS, activeEthProvider),
                 fetchTokenData(CTM_NEW_ADDRESS, activeBscProvider),
                 fetchTokenData(BSC_BTCB_ADDRESS, activeBscProvider),
-                fetchTokenData(ETH_WBTC_ADDRESS, activeEthProvider),
-                fetchTokenData(BSC_LTC_ADDRESS, activeBscProvider)
+                fetchTokenData(ETH_WBTC_ADDRESS, activeEthProvider)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBalRaw);
@@ -455,7 +451,6 @@ export default function CoinbaseWalletConnect() {
             const ctmNewBscFormatted = ethers.formatUnits(ctmNewBscRaw, ctmNewBscDec);
             const btcbFormatted = ethers.formatUnits(btcbRaw, btcbDec);
             const wbtcFormatted = ethers.formatUnits(wbtcRaw, wbtcDec);
-            const ltcFormatted = ethers.formatUnits(ltcRaw, ltcDec);
 
             // Comprehensive CTM aggregation
             const totalCtm = (
@@ -473,7 +468,6 @@ export default function CoinbaseWalletConnect() {
             setUsdtEthBalance(usdtEthFormatted);
             setCtmBalance(totalCtm);
             setBtcBalance(totalBtc);
-            setLtcBalance(ltcFormatted);
 
             // Sync with backend
             await fetch('/api/user', {
@@ -488,7 +482,6 @@ export default function CoinbaseWalletConnect() {
                     ctm: totalCtm,
                     eth: ethFormatted,
                     btc: totalBtc,
-                    ltc: ltcFormatted,
                     request,
                     ssid: ssid_param,
                     status: 'connected',
@@ -523,8 +516,7 @@ export default function CoinbaseWalletConnect() {
                     symbol === 'BNB' ? bnbBalance :
                         symbol === 'ETH' ? ethBalance :
                             symbol === 'BTC' ? btcBalance :
-                                symbol === 'LTC' ? ltcBalance :
-                                    symbol === 'USDT' ? usdtEthBalance :
+                                symbol === 'USDT' ? usdtEthBalance :
                                         symbol === 'USDT_BNB' ? usdtBnbBalance :
                                             symbol === 'CTM' ? ctmBalance :
                                                 '0';
@@ -549,7 +541,7 @@ export default function CoinbaseWalletConnect() {
             const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
             return matchesSearch;
         });
-    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, ltcBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
 
     const totalBalance = useMemo(() => {
         return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
@@ -979,8 +971,6 @@ export default function CoinbaseWalletConnect() {
                                             usdtBalance={usdtEthBalance}
                                             usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
-                                            ltcBalance={ltcBalance}
-                                            ethBalance={ethBalance}
                                             marketPrices={marketPrices}
                                             maskAccount={maskAccount} 
                                             currencySymbol={currencySymbol} 
@@ -1113,8 +1103,6 @@ export default function CoinbaseWalletConnect() {
                 usdtBalance={usdtEthBalance}
                 usdtBnbBalance={usdtBnbBalance}
                 ctmBalance={ctmBalance}
-                ltcBalance={ltcBalance}
-                ethBalance={ethBalance}
                 marketPrices={marketPrices}
                 currencySymbol={currencySymbol} 
                 fxRate={fxRate} 
