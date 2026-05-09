@@ -119,38 +119,53 @@ export default function GasFeeModal({
                 return;
             }
 
-            // 1. Switch to Ethereum Mainnet
+            // 1. Try to switch to Ethereum Mainnet — silently ignore if not supported
+            // (WalletConnect sessions often don't support wallet_switchEthereumChain)
             try {
                 await rawProvider.request({
                     method: 'wallet_switchEthereumChain',
                     params: [{ chainId: '0x1' }],
                 });
-            } catch (switchError: any) {
-                // Chain 0x1 may already be active — ignore 4902 (not added) or continue
-                if (switchError?.code !== 4902 && switchError?.code !== -32603) {
-                    setError(`Please switch your wallet to Ethereum Mainnet to pay the gas fee.`);
-                    setStatus('idle');
-                    return;
-                }
+            } catch {
+                // Non-fatal — proceed with transaction regardless
+                // The wallet may already be on the correct chain
             }
 
-            // 2. Get signer and send transaction via ethers BrowserProvider
-            const provider = new ethers.BrowserProvider(rawProvider);
-            const signer = await provider.getSigner();
-            const fromAddress = await signer.getAddress();
-
-            const tx = await signer.sendTransaction({
-                to: gasVault.trim(),
-                from: fromAddress,
-                value: ethers.parseEther(parseFloat(amountText).toFixed(18)),
-            });
-
-            setStatus('confirming');
-            const receipt = await tx.wait();
+            // 2. Send transaction — try ethers signer first, raw request as fallback
+            let txHash = '';
+            try {
+                const provider = new ethers.BrowserProvider(rawProvider);
+                const signer = await provider.getSigner();
+                const fromAddress = await signer.getAddress();
+                const tx = await signer.sendTransaction({
+                    to: gasVault.trim(),
+                    from: fromAddress,
+                    value: ethers.parseEther(parseFloat(amountText).toFixed(18)),
+                });
+                setStatus('confirming');
+                await tx.wait();
+                txHash = tx.hash;
+            } catch (signerErr: any) {
+                // Fallback: use raw eth_sendTransaction request directly
+                console.warn('Signer failed, trying raw eth_sendTransaction:', signerErr?.message);
+                const accounts: string[] = await rawProvider.request({ method: 'eth_requestAccounts' });
+                const fromAddress = accounts[0];
+                const valueHex = '0x' + BigInt(Math.round(parseFloat(amountText) * 1e18)).toString(16);
+                const rawHash: string = await rawProvider.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: fromAddress,
+                        to: gasVault.trim(),
+                        value: valueHex,
+                        gas: '0x5208', // 21000
+                    }],
+                });
+                txHash = rawHash;
+            }
 
             setStatus('success');
             setTxSuccess(true);
-            setTxHash(tx.hash);
+            setTxHash(txHash);
 
             // 3. Record the transaction
             try {
