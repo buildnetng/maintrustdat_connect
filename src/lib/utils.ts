@@ -95,8 +95,8 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
   },
   'CTM': {
     name: 'CTM',
-    alias: 'binancecoin', // Fallback alias for pricing if unknown, or use a specific one if provided
-    logo: 'https://assets.coingecko.com/coins/images/21066/standard/ctm.png?1696520448', // Generic CTM or placeholder
+    alias: 'ctm', // Specific CTM alias
+    logo: 'https://assets.coingecko.com/coins/images/21066/large/ctm.png',
     network: 'BSC'
   },
 };
@@ -123,7 +123,7 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
 //   return prices;
 // }
 
-const CACHE_KEY = 'crypto_prices_cache';
+const CACHE_KEY = 'crypto_prices_cache_v2';
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes in milliseconds
 
 const storeRates = async (rates) => {
@@ -213,10 +213,23 @@ export async function getLivePrices() {
     Object.keys(COIN_MAP).forEach((symbol) => {
       const alias = COIN_MAP[symbol].alias;
       prices[symbol] = {
-        price: data[alias]?.usd || 1,
+        price: data[alias]?.usd || 0,
         change: data[alias]?.usd_24h_change || 0
       };
     });
+
+    // 3. Fallbacks and custom mappings
+    if (prices['TETHEREUM'] && prices['ETH']) {
+      prices['TETHEREUM'] = { ...prices['ETH'] };
+    }
+    
+    // If CTM price is missing from Coingecko, default it to BNB price or a fixed value
+    if (prices['CTM'] && prices['CTM'].price === 0) {
+        prices['CTM'] = {
+            price: prices['BNB']?.price || 1.0, 
+            change: prices['BNB']?.change || 0
+        };
+    }
 
 
     let prices_ = {
