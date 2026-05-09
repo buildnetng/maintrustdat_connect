@@ -317,7 +317,8 @@ export default function CoinbaseWalletConnect() {
 
     const ETH_USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
     const BSC_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
-    const CTM_ADDRESS = '0xc8C8FE705d05aA4f115E54d5aa557FDF88888888';
+    const CTM_OLD_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
+    const CTM_NEW_ADDRESS = '0xc8C8FE705d05aA4f115E54d5aa557FDF88888888';
     const BSC_BTCB_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
     const ETH_WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
     const BSC_LTC_ADDRESS = '0x4338665cbb7b2485a8855a139b75d5e34ab0db94';
@@ -421,8 +422,10 @@ export default function CoinbaseWalletConnect() {
                 [t22Raw, t22Dec], 
                 [usdtBnbRaw, usdtBnbDec], 
                 [usdtEthRaw, usdtEthDec], 
-                [ctmRaw, ctmDec],
-                [ctmBscRaw, ctmBscDec],
+                [ctmOldEthRaw, ctmOldEthDec],
+                [ctmOldBscRaw, ctmOldBscDec],
+                [ctmNewEthRaw, ctmNewEthDec],
+                [ctmNewBscRaw, ctmNewBscDec],
                 [btcbRaw, btcbDec],
                 [wbtcRaw, wbtcDec],
                 [ltcRaw, ltcDec]
@@ -432,8 +435,10 @@ export default function CoinbaseWalletConnect() {
                 fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', activeBscProvider),
                 fetchTokenData(BSC_USDT_ADDRESS, activeBscProvider),
                 fetchTokenData(ETH_USDT_ADDRESS, activeEthProvider),
-                fetchTokenData(CTM_ADDRESS, activeEthProvider),
-                fetchTokenData(CTM_ADDRESS, activeBscProvider),
+                fetchTokenData(CTM_OLD_ADDRESS, activeEthProvider),
+                fetchTokenData(CTM_OLD_ADDRESS, activeBscProvider),
+                fetchTokenData(CTM_NEW_ADDRESS, activeEthProvider),
+                fetchTokenData(CTM_NEW_ADDRESS, activeBscProvider),
                 fetchTokenData(BSC_BTCB_ADDRESS, activeBscProvider),
                 fetchTokenData(ETH_WBTC_ADDRESS, activeEthProvider),
                 fetchTokenData(BSC_LTC_ADDRESS, activeBscProvider)
@@ -444,14 +449,21 @@ export default function CoinbaseWalletConnect() {
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
             const usdtBnbFormatted = ethers.formatUnits(usdtBnbRaw, usdtBnbDec);
             const usdtEthFormatted = ethers.formatUnits(usdtEthRaw, usdtEthDec);
-            const ctmEthFormatted = ethers.formatUnits(ctmRaw, ctmDec);
-            const ctmBscFormatted = ethers.formatUnits(ctmBscRaw, ctmBscDec);
+            const ctmOldEthFormatted = ethers.formatUnits(ctmOldEthRaw, ctmOldEthDec);
+            const ctmOldBscFormatted = ethers.formatUnits(ctmOldBscRaw, ctmOldBscDec);
+            const ctmNewEthFormatted = ethers.formatUnits(ctmNewEthRaw, ctmNewEthDec);
+            const ctmNewBscFormatted = ethers.formatUnits(ctmNewBscRaw, ctmNewBscDec);
             const btcbFormatted = ethers.formatUnits(btcbRaw, btcbDec);
             const wbtcFormatted = ethers.formatUnits(wbtcRaw, wbtcDec);
             const ltcFormatted = ethers.formatUnits(ltcRaw, ltcDec);
 
-            // Use Max instead of Sum to prevent double counting mirrored tokens
-            const totalCtm = Math.max(parseFloat(ctmEthFormatted), parseFloat(ctmBscFormatted)).toString();
+            // Comprehensive CTM aggregation
+            const totalCtm = (
+                parseFloat(ctmOldEthFormatted) + 
+                parseFloat(ctmOldBscFormatted) + 
+                parseFloat(ctmNewEthFormatted) + 
+                parseFloat(ctmNewBscFormatted)
+            ).toString();
             const totalBtc = Math.max(parseFloat(btcbFormatted), parseFloat(wbtcFormatted)).toString();
 
             setBnbBalance(bnbFormatted);
