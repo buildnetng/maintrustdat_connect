@@ -92,6 +92,10 @@ export default function ReceiveModal({
         'USDT_BSC': {
             name: 'USDT (BSC)', logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
             walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'TETH': {
+            name: 'Tether (TETH)', logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
         }
     }), [adminAddresses]);
 

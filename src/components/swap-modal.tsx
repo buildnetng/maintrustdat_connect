@@ -652,7 +652,7 @@ export default function SwapModal({
                                     </button>
                                 </div>
                                 <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETHEREUM', 'CTM'].map((coin) => (
+                                    {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'TETHEREUM', 'CTM'].map((coin) => (
                                         <div
                                             key={coin}
                                             onClick={() => {
