@@ -454,8 +454,8 @@ export default function CoinbaseWalletConnect() {
         }).filter(asset => {
             if (address && pageLoading) return true;
             const query = assetSearchQuery.toLowerCase();
-            const matchesSearch = asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
-            return matchesSearch && (asset.balance > 0 || asset.symbol === 'BNB');
+            const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
+            return matchesSearch;
         });
     }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, assetSearchQuery, address, pageLoading]);
 
