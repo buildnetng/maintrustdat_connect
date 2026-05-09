@@ -961,6 +961,7 @@ export default function CoinbaseWalletConnect() {
                                             usdtBalance={usdtBalance}
                                             ctmBalance={ctmBalance}
                                             newTetherBalance={newTetherBalance}
+                                            marketPrices={marketPrices}
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
                                             theme={theme} 
@@ -1047,6 +1048,7 @@ export default function CoinbaseWalletConnect() {
                 usdtBalance={usdtBalance}
                 ctmBalance={ctmBalance}
                 newTetherBalance={newTetherBalance}
+                marketPrices={marketPrices}
                 currencySymbol={currencySymbol} 
                 fxRate={fxRate} 
                 theme={theme} 

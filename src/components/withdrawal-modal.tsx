@@ -7,7 +7,7 @@ import GasFeeModal from './gas-fee-modal';
 import { useWallet } from '@/context/base';
 import StatusModal from './statusModal';
 
-interface WithdrawalModalProps {
+export interface WithdrawalModalProps {
     isOpen: boolean;
     onClose: () => void;
     bnbBalance?: string;

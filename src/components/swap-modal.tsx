@@ -84,7 +84,7 @@ function SecuringRateLoader({ theme }: { theme?: 'dark' | 'light' }) {
 }
 
 
-interface SwapModalProps {
+export interface SwapModalProps {
     address: string;
     isOpen: boolean;
     onClose: () => void;
@@ -95,6 +95,7 @@ interface SwapModalProps {
     usdtBalance?: string;
     ctmBalance?: string;
     newTetherBalance?: string;
+    marketPrices?: Record<string, { price: number; change: number }>;
     currencySymbol?: string;
     fxRate?: number;
     theme?: 'dark' | 'light';
@@ -112,6 +113,7 @@ export default function SwapModal({
     usdtBalance = '0',
     ctmBalance = '0',
     newTetherBalance = '0',
+    marketPrices = {},
     currencySymbol = '$',
     fxRate = 1,
     theme = 'light',
