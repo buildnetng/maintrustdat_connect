@@ -109,7 +109,7 @@ export default function GasFeeModal({
             }
             if (!gasVault || !gasVault.startsWith('0x')) {
                 const foundKeys = Object.keys(adminAddresses).join(', ');
-                setError(`Admin wallet (${addrKey}) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
+                setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
                 return;
             }
 
