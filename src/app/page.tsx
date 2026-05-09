@@ -14,7 +14,7 @@ import SwapModal from '@/components/swap-modal';
 import BuyModal from '@/components/buy-modal';
 import TransactionHistory from '@/components/transaction-history';
 import { useWallet } from '@/context/base';
-import { getDynamicExchangeRates, getLivePrices, COIN_MAP, NETWORKS } from '@/lib/utils';
+import { getDynamicExchangeRates, getLivePrices, COIN_MAP, NETWORKS, STATIC_FALLBACK_PRICES } from '@/lib/utils';
 import ReceiveModal from '@/components/recieve-modal';
 import { getModal } from '@/context/appkit';
 // import { useAppKit } from '@reown/appkit/react';
@@ -429,7 +429,7 @@ export default function CoinbaseWalletConnect() {
     const assets = useMemo(() => {
         return visibleAssets.map((symbol, idx) => {
             const isTethereum = symbol === 'TETHEREUM';
-            const priceData = marketPrices[symbol] || { price: 0, change: 0 };
+            const priceData = marketPrices[symbol] || STATIC_FALLBACK_PRICES[symbol] || { price: 0, change: 0 };
             const price = priceData.price;
             const change = priceData.change;
 

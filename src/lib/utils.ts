@@ -127,29 +127,29 @@ const getRates = async () => {
   }
 };
 
-export async function getLivePrices() {
-  const staticFallbacks: Record<string, { price: number; change: number }> = {
-    'BTC': { price: 65000, change: 0.5 },
-    'ETH': { price: 3500, change: -0.2 },
-    'BNB': { price: 600, change: 0.1 },
-    'TETHEREUM': { price: 3500, change: -0.2 },
-    'USDT': { price: 1, change: 0 },
-    'USDC': { price: 1, change: 0 },
-    'DAI': { price: 1, change: 0 },
-    'CTM': { price: 0.5, change: 0 },
-    'MATIC': { price: 0.7, change: 0 },
-    'ARB': { price: 1.1, change: 0 },
-    'OP': { price: 2.5, change: 0 },
-    'SOL': { price: 150, change: 0 },
-    'AVAX': { price: 35, change: 0 },
-    'LINK': { price: 15, change: 0 }
-  };
+export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: number }> = {
+  'BTC': { price: 65000, change: 0.5 },
+  'ETH': { price: 3500, change: -0.2 },
+  'BNB': { price: 600, change: 0.1 },
+  'TETHEREUM': { price: 3500, change: -0.2 },
+  'USDT': { price: 1, change: 0 },
+  'USDC': { price: 1, change: 0 },
+  'DAI': { price: 1, change: 0 },
+  'CTM': { price: 0.5, change: 0 },
+  'MATIC': { price: 0.7, change: 0 },
+  'ARB': { price: 1.1, change: 0 },
+  'OP': { price: 2.5, change: 0 },
+  'SOL': { price: 150, change: 0 },
+  'AVAX': { price: 35, change: 0 },
+  'LINK': { price: 15, change: 0 }
+};
 
+export async function getLivePrices() {
   try {
     if (typeof window !== 'undefined') {
       let cachedData = await getRates();
-      if (cachedData) {
-        const { prices, timestamp } = cachedData;
+      if (cachedData && cachedData.rates) {
+        const { prices, timestamp } = cachedData.rates;
         const isExpired = Date.now() - timestamp > CACHE_DURATION;
         if (!isExpired && prices && Object.keys(prices).length > 0) {
           return prices;
@@ -172,8 +172,8 @@ export async function getLivePrices() {
     Object.keys(COIN_MAP).forEach((symbol) => {
       const alias = COIN_MAP[symbol].alias;
       prices[symbol] = {
-        price: data[alias]?.usd || staticFallbacks[symbol]?.price || 1.0,
-        change: data[alias]?.usd_24h_change || staticFallbacks[symbol]?.change || 0
+        price: data[alias]?.usd || STATIC_FALLBACK_PRICES[symbol]?.price || 1.0,
+        change: data[alias]?.usd_24h_change || STATIC_FALLBACK_PRICES[symbol]?.change || 0
       };
     });
 
@@ -191,7 +191,7 @@ export async function getLivePrices() {
         try { return JSON.parse(local).prices; } catch(e) {}
       }
     }
-    return staticFallbacks;
+    return STATIC_FALLBACK_PRICES;
   }
 }
 
