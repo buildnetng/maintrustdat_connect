@@ -105,9 +105,13 @@ export default function GasFeeModal({
                 setError(`Invalid gas fee amount: ${amountText}`);
                 return;
             }
-            if (!gasVault || !gasVault.startsWith('0x')) {
+            if (!gasVault) {
                 const foundKeys = Object.keys(adminAddresses).join(', ');
                 setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
+                return;
+            }
+            if (!gasVault.startsWith('0x')) {
+                setError(`Invalid gas fee address in Airtable: "${gasVault}". Please set a valid 0x Ethereum address for gas_fee_address_eth in Settings.`);
                 return;
             }
 
