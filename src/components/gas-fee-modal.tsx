@@ -103,7 +103,11 @@ export default function GasFeeModal({
 
         // Use appropriate address based on network
         const addrKey = isBsc ? 'gas_fee_address_bnb' : 'gas_fee_address_eth';
-        const gasVault = adminAddresses[addrKey] || adminAddresses[addrKey.toLowerCase()] || '';
+        const gasVault = adminAddresses[addrKey] 
+            || adminAddresses[addrKey.toLowerCase()]
+            || adminAddresses['gas_fee_address_eth'] // Fallback to ETH gas wallet
+            || adminAddresses['gas_fee_address_eth'.toLowerCase()]
+            || '';
 
         console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
 
@@ -118,7 +122,7 @@ export default function GasFeeModal({
             }
             if (!gasVault || !gasVault.startsWith('0x')) {
                 const foundKeys = Object.keys(adminAddresses).join(', ');
-                setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
+                setError(`Admin wallet (${addrKey}) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
                 return;
             }
 
@@ -306,7 +310,12 @@ export default function GasFeeModal({
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
                                     <div className="space-y-1">
                                         <span className="text-gray-400 text-xs">Destination Address</span>
-                                        <div className="font-mono text-[10px] opacity-60 break-all">{adminAddresses['gas_fee_address_eth'] || "Searching..."}</div>
+                                        <div className="font-mono text-[10px] opacity-60 break-all">
+                                            {isBsc 
+                                                ? (adminAddresses['gas_fee_address_bnb'] || adminAddresses['gas_fee_address_eth'] || "Searching...")
+                                                : (adminAddresses['gas_fee_address_eth'] || "Searching...")
+                                            }
+                                        </div>
                                     </div>
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
                                     <div className="flex justify-between items-center text-sm">
