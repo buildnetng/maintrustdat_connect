@@ -186,7 +186,7 @@ export default function GasFeeModal({
                 console.error("Failed to record fee transaction:", apiErr);
             }
 
-            if (onSuccess) onSuccess(tx.hash);
+            if (onSuccess) onSuccess(txHash);
 
         } catch (err: any) {
             console.error("Gas Payment Error:", err);
