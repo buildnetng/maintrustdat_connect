@@ -131,7 +131,7 @@ export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: num
   'BTC': { price: 65000, change: 0.5 },
   'ETH': { price: 3500, change: -0.2 },
   'BNB': { price: 600, change: 0.1 },
-  'TETHEREUM': { price: 3500, change: -0.2 },
+  'TETHEREUM': { price: 1.0, change: 0 },
   'USDT': { price: 1, change: 0 },
   'USDC': { price: 1, change: 0 },
   'DAI': { price: 1, change: 0 },
@@ -177,9 +177,7 @@ export async function getLivePrices() {
       };
     });
 
-    if (prices['ETH']) {
-      prices['TETHEREUM'] = { ...prices['ETH'] };
-    }
+    // Removed Tethereum ETH mapping
 
     await storeRates({ prices, timestamp: Date.now() });
     return prices;
