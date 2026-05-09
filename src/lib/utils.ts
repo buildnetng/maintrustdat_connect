@@ -96,7 +96,7 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
   'CTM': {
     name: 'CTM',
     alias: 'ctm', 
-    logo: '/ctm-logo.png',
+    logo: '/ctm_logo.png',
     network: 'BSC'
   },
 };

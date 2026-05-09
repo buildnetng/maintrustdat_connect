@@ -80,6 +80,14 @@ export default function ReceiveModal({
         'BTC': {
             name: 'Bitcoin', logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png',
             walletAddress: adminAddresses['btc_address'] || "", supportedNetworks: { "BTC": {} }
+        },
+        'TETHEREUM': {
+            name: 'Tethereum T99', logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'CTM': {
+            name: 'CTM', logo: '/ctm_logo.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
         }
     }), [adminAddresses]);
 
@@ -263,7 +271,7 @@ export default function ReceiveModal({
                                                 <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
                                                     <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
                                                 </div>
-                                                {coin}
+                                                {coin === 'TETHEREUM' ? 'T99' : coin}
                                             </button>
                                         ))}
                                     </div>
@@ -282,7 +290,7 @@ export default function ReceiveModal({
                                                 theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
                                             }`}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm uppercase">{selectedCoin}</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm uppercase">{selectedCoin === 'TETHEREUM' ? 'T99' : selectedCoin}</span>
                                     </div>
 
                                     {amount && Number(amount) > 0 && (

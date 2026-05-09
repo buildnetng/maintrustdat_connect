@@ -652,7 +652,7 @@ export default function SwapModal({
                                     </button>
                                 </div>
                                 <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    {['BTC', 'ETH', 'BNB', 'USDT', 'TETHEREUM'].map((coin) => (
+                                    {['BTC', 'ETH', 'BNB', 'USDT', 'TETHEREUM', 'CTM'].map((coin) => (
                                         <div
                                             key={coin}
                                             onClick={() => {
@@ -664,11 +664,11 @@ export default function SwapModal({
                                             className={`flex items-center justify-between p-4 rounded-3xl transition-all cursor-pointer ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center">
+                                                <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center shrink-0">
                                                     <img src={COIN_MAP[coin].logo} alt={coin} className="w-full h-full object-contain" />
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold">{coin}</p>
+                                                    <p className="font-bold">{coin === 'TETHEREUM' ? 'T99' : coin}</p>
                                                     <p className="text-xs text-gray-500">{COIN_MAP[coin].name}</p>
                                                 </div>
                                             </div>
