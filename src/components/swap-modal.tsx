@@ -1,11 +1,88 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2 } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { X, ArrowDownUp, ArrowRight, Info, ChevronDown, ChevronLeft, Loader2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GasFeeModal from './gas-fee-modal';
 import { COIN_MAP, getDynamicExchangeRates } from '@/lib/utils';
 import StatusModal from './statusModal';
+
+// ── Securing Rate Loader ──────────────────────────────────────────────────────
+const STEPS = [
+    { label: 'Finding best route',         sub: 'Scanning liquidity pools...' },
+    { label: 'Locking exchange price',      sub: 'Securing optimal rate...' },
+    { label: 'Preparing transaction',       sub: 'Building swap payload...' },
+    { label: 'Verifying on-chain',          sub: 'Confirming network path...' },
+];
+
+function SecuringRateLoader({ theme }: { theme?: 'dark' | 'light' }) {
+    const [activeStep, setActiveStep] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        timerRef.current = setInterval(() => {
+            setActiveStep(s => (s < STEPS.length - 1 ? s + 1 : s));
+        }, 1400);
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, []);
+
+    const isDark = theme === 'dark';
+
+    return (
+        <div className={`w-full rounded-3xl border px-5 py-6 ${isDark ? 'bg-black border-white/10 text-white' : 'bg-white border-gray-100 shadow-xl text-[#0a0b0d]'}`}>
+            {/* Icon + title */}
+            <div className="flex items-center gap-3 mb-5">
+                <div className="relative w-10 h-10 flex-shrink-0">
+                    <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-pulse" />
+                    <div className="w-10 h-10 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <ArrowDownUp className="w-4 h-4 text-blue-600" />
+                    </div>
+                </div>
+                <div>
+                    <p className="font-bold text-sm">Securing Rate</p>
+                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Processing your swap request</p>
+                </div>
+            </div>
+
+            {/* Steps */}
+            <div className="space-y-3">
+                {STEPS.map((step, i) => {
+                    const done = i < activeStep;
+                    const active = i === activeStep;
+                    return (
+                        <div key={i} className={`flex items-center gap-3 rounded-2xl px-4 py-3 transition-all ${
+                            active
+                                ? isDark ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-blue-50 border border-blue-100'
+                                : isDark ? 'bg-white/5' : 'bg-gray-50'
+                        }`}>
+                            {/* Step indicator */}
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold transition-all ${
+                                done  ? 'bg-emerald-500 text-white' :
+                                active ? 'bg-blue-600 text-white' :
+                                isDark ? 'bg-white/10 text-gray-400' : 'bg-gray-200 text-gray-400'
+                            }`}>
+                                {done ? <Check className="w-3 h-3" /> : active ? (
+                                    <span className="w-2 h-2 rounded-full bg-white animate-pulse inline-block" />
+                                ) : i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className={`text-xs font-semibold ${done ? 'text-emerald-500' : active ? (isDark ? 'text-white' : 'text-blue-700') : (isDark ? 'text-gray-500' : 'text-gray-400')}`}>
+                                    {step.label}
+                                </p>
+                                {active && (
+                                    <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{step.sub}</p>
+                                )}
+                            </div>
+                            {active && <Loader2 className="w-3.5 h-3.5 text-blue-500 animate-spin flex-shrink-0" />}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 
 interface SwapModalProps {
     address: string;
@@ -524,20 +601,7 @@ export default function SwapModal({
             <>
             <div className={`w-full max-w-[600px] mx-auto ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
                 {isLoading ? (
-                    <div className={`flex flex-col items-center justify-center py-20 px-6 relative w-full min-h-[500px] rounded-[3rem] border ${
-                        theme === 'dark' ? 'bg-[#000000] border-white/10' : 'bg-white border-gray-100 shadow-xl'
-                    }`}>
-                        <div className="relative w-32 h-32 mb-10">
-                            <div className="absolute inset-0 bg-blue-600 blur-3xl opacity-20 animate-pulse" />
-                            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
-                            <div className="absolute inset-4 border-4 border-blue-400 rounded-full border-b-transparent animate-[spin_1.5s_linear_infinite_reverse]" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <ArrowDownUp className="w-10 h-10 text-blue-600 animate-bounce" />
-                            </div>
-                        </div>
-                        <h3 className="text-3xl font-bold mb-3">Securing Rate</h3>
-                        <p className="text-gray-500 font-medium text-center">Finding the best exchange path for your swap...</p>
-                    </div>
+                    <SecuringRateLoader theme={theme} />
                 ) : (
                     <div className={`md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}`}>
                             {/* Sticky Header */}
