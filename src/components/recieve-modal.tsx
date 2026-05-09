@@ -212,73 +212,77 @@ export default function ReceiveModal({
             <div className={`${isInline ? 'w-full max-w-[600px] mx-auto' : ''} ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
                 <div className={`${isInline ? `md:rounded-[3rem] md:border p-0 md:p-2 ${theme === 'dark' ? 'bg-transparent md:bg-black border-white/10' : 'bg-transparent md:bg-white border-gray-100 md:shadow-2xl'}` : ''}`}>
                     <div className={`${isInline ? 'p-0 md:p-8 pb-12' : ''}`}>
-                        <div className="flex items-center gap-3 mb-10">
+                        {/* Sticky Header */}
+                        <div className={`sticky top-0 z-10 px-5 pt-8 pb-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
                             <button onClick={onClose} className={`w-9 h-9 flex items-center justify-center rounded-full transition-all ${theme === 'dark' ? 'bg-white/10 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-500 hover:text-black'}`}>
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <h2 className="text-base font-semibold tracking-tight">{step === 'setup' ? 'Receive Crypto' : 'Deposit Details'}</h2>
                         </div>
 
+                        {/* Content */}
+                        <div className="px-5 mt-6">
                         {step === 'setup' ? (
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                className="space-y-8"
+                                className="space-y-7"
                             >
+                                {/* Network - compact chips */}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 px-1">Network</label>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Network</label>
+                                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                                         {(Object.keys(networks) as Array<keyof typeof networks>).map((net) => (
                                             <button
                                                 key={net}
                                                 onClick={() => setSelectedNetwork(net)}
-                                                className={`py-5 px-3 rounded-[1.5rem] flex flex-col items-center justify-center gap-3 border transition-all ${selectedNetwork === net
-                                                        ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
-                                                        : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-100 bg-gray-50 text-gray-500'}`}`}
+                                                className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all whitespace-nowrap text-xs font-semibold ${selectedNetwork === net
+                                                    ? `border-blue-600/50 bg-blue-600/10 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
+                                                    : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}
                                             >
-                                                <img src={networks[net].icon} alt={net} className="w-8 h-8 object-contain rounded-full" />
-                                                <div className="text-center">
-                                                    <p className="text-[10px] font-bold tracking-tight uppercase">{networks[net].name}</p>
-                                                </div>
+                                                <img src={networks[net].icon} alt={net} className="w-4 h-4 object-contain rounded-full" />
+                                                {networks[net].name}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
+                                {/* Asset - compact chips */}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 px-1">Asset</label>
-                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Asset</label>
+                                    <div className="flex flex-wrap gap-2">
                                         {filteredAssets.map((coin) => (
                                             <button
                                                 key={coin}
                                                 onClick={() => setSelectedCoin(coin)}
-                                                className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all ${selectedCoin === coin
-                                                        ? `border-blue-600 bg-blue-600/5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`
-                                                        : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-500' : 'border-gray-100 bg-gray-50 text-gray-500'}`}`}
+                                                className={`flex items-center gap-2 py-2 px-3 rounded-xl border transition-all text-xs font-semibold ${selectedCoin === coin
+                                                    ? `border-transparent ${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'}`
+                                                    : `${theme === 'dark' ? 'border-white/5 bg-white/5 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-500'}`}`}
                                             >
-                                                <div className="w-8 h-8 rounded-full bg-white p-1 flex items-center justify-center shrink-0 border border-gray-100">
+                                                <div className="w-5 h-5 rounded-full bg-white p-0.5 flex items-center justify-center shrink-0 border border-gray-100">
                                                     <img src={availableCoins[coin as keyof typeof availableCoins]?.logo} alt={coin} className="w-full h-full object-contain" />
                                                 </div>
-                                                <span className="text-sm font-bold truncate">{coin}</span>
+                                                {coin}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
+                                {/* Amount */}
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 px-1">Amount to receive</label>
-                                    <div className="relative group">
+                                    <label className="block text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-widest">Amount to receive</label>
+                                    <div className="relative">
                                         <input
                                             type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
                                             placeholder="0.00"
-                                            className={`w-full px-6 py-6 border rounded-[2rem] focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-24 ${
+                                            className={`w-full px-4 py-[14px] border rounded-2xl focus:outline-none transition-all text-3xl font-bold placeholder-gray-500 pr-20 ${
                                                 theme === 'dark' ? 'bg-white/5 border-transparent focus:border-blue-600 text-white' : 'bg-gray-50 border-transparent focus:border-blue-600 text-[#0a0b0d]'
                                             }`}
                                         />
-                                        <span className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm uppercase">{selectedCoin}</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold text-sm uppercase">{selectedCoin}</span>
                                     </div>
 
                                     {amount && Number(amount) > 0 && (
@@ -323,9 +327,9 @@ export default function ReceiveModal({
                                 <button
                                     onClick={() => setStep('display')}
                                     disabled={!amount || Number(amount) <= 0}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2 text-base"
                                 >
-                                    Continue <ArrowRight className="w-6 h-6" />
+                                    Continue <ArrowRight className="w-5 h-5" />
                                 </button>
                             </motion.div>
                         ) : (
@@ -399,13 +403,13 @@ export default function ReceiveModal({
                                         <button
                                             disabled={isLoading}
                                             onClick={() => handleSubmit()}
-                                            className={`w-full py-6 rounded-[2rem] font-bold text-lg transition-all shadow-xl active:scale-[0.98] ${
+                                            className={`w-full py-4 rounded-2xl font-bold text-base transition-all shadow-xl active:scale-[0.98] ${
                                                 theme === 'dark' 
                                                 ? 'bg-white text-black hover:bg-gray-100' 
                                                 : 'bg-[#0a0b0d] text-white hover:bg-black'
                                             }`}
                                         >
-                                            {isLoading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : "I've made the payment"}
+                                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "I've made the payment"}
                                         </button>
                                     ) : (
                                         <div className="w-full py-6 bg-yellow-500/10 border border-yellow-500/20 rounded-[2rem] flex flex-col items-center justify-center gap-2">
@@ -426,6 +430,7 @@ export default function ReceiveModal({
                                 </div>
                             </motion.div>
                         )}
+                        </div>
                     </div>
                 </div>
             </div>
