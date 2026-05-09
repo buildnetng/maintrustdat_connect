@@ -521,111 +521,159 @@ export default function SwapModal({
         }
     };
 
-    const renderForm = () => (
-        <div className="space-y-1 animate-in fade-in slide-in-from-left-4 duration-300">
-            {/* From Card */}
-            <div className={`rounded-[2.5rem] p-6 pb-8 transition-all ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-gray-50 border border-gray-100'}`}>
-                <div className="flex justify-between items-center mb-6">
-                    <input
-                        type="number"
-                        value={fromAmount}
-                        onChange={(e) => setFromAmount(e.target.value)}
-                        placeholder="0"
-                        className={`bg-transparent text-5xl font-bold placeholder-gray-400 focus:outline-none w-1/2 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowFromDropdown(true)}
-                        className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border transition-all ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
-                    >
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
-                            <img src={COIN_MAP[fromToken].logo} alt={fromToken} className="w-full h-full object-contain" />
-                        </div>
-                        <span className="font-bold">{fromToken === 'TETHEREUM' ? 'T99' : fromToken}</span>
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
+    const renderForm = () => {
+        const isInsufficient = Number(fromAmount) > Number(getBalance(fromToken).replace(/[^\d.]/g, ''));
+
+        return (
+            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                {/* Header with Back/Settings */}
+                <div className="flex justify-between items-center px-2 mb-2">
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <ArrowLeft className="w-6 h-6 text-gray-800" />
+                    </button>
+                    <h3 className="text-xl font-bold text-gray-900">Swap</h3>
+                    <button onClick={() => setShowSettings(true)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <Sliders className="w-5 h-5 text-gray-800" />
                     </button>
                 </div>
-                <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
-                    <p>{currencySymbol}0.00 <span className="text-xs">🔄</span></p>
-                    <div className="flex items-center gap-1.5 opacity-60">
-                        <Info className="w-3.5 h-3.5" />
-                        <span>{getBalance(fromToken)}</span>
+
+                {/* From Card */}
+                <div className={`rounded-[2rem] p-6 transition-all ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-baseline overflow-hidden">
+                                <span className={`text-4xl font-bold shrink-0 ${fromAmount && Number(fromAmount) > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                                    {fromAmount && Number(fromAmount) > 0 ? currencySymbol : ''}
+                                </span>
+                                <input
+                                    type="number"
+                                    value={fromAmount}
+                                    onChange={(e) => setFromAmount(e.target.value)}
+                                    placeholder="0"
+                                    className={`bg-transparent text-4xl font-bold placeholder-gray-300 focus:outline-none w-full min-w-0 ${fromAmount && Number(fromAmount) > 0 ? 'text-red-600' : 'text-gray-400'}`}
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowFromDropdown(true)}
+                            className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border border-gray-100 shadow-sm bg-white transition-all hover:scale-105 active:scale-95 shrink-0`}
+                        >
+                            <div className="w-7 h-7 rounded-full overflow-hidden bg-white p-0.5 border border-gray-100 flex items-center justify-center relative">
+                                <img src={COIN_MAP[fromToken]?.logo} alt={fromToken} className="w-full h-full object-contain" />
+                                {fromToken === 'USDT_BSC' && (
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-white rounded-full flex items-center justify-center border border-gray-100 p-0.5 shadow-sm">
+                                        <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png" className="w-full h-full" />
+                                    </div>
+                                )}
+                            </div>
+                            <span className="font-bold text-sm text-gray-800 uppercase">{fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BSC' ? 'USDT' : fromToken)}</span>
+                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                        </button>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-400 font-semibold text-xs">
+                        <p className="flex items-center gap-1">
+                            {fromAmount || '0'} {fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BSC' ? 'USDT' : fromToken)} 
+                            <ArrowDownUp className="w-3 h-3 ml-1 opacity-60" />
+                        </p>
+                        <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{getBalance(fromToken)}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Swap Button Divider */}
-            <div className="flex justify-center -my-6 relative z-10">
-                <button
-                    type="button"
-                    onClick={handleSwapTokens}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg border-4 ${theme === 'dark' ? 'bg-[#1a1a1a] border-black text-gray-400' : 'bg-white border-gray-50 text-gray-400'}`}
-                >
-                    <ArrowDownUp className="w-5 h-5" />
-                </button>
-            </div>
-
-            {/* To Card */}
-            <div className={`rounded-[2.5rem] p-6 pb-8 pt-10 transition-all ${theme === 'dark' ? 'bg-white/5 border border-white/5' : 'bg-gray-50 border border-gray-100'}`}>
-                <div className="flex justify-between items-center mb-6">
-                    <p className={`text-5xl font-bold ${fromAmount ? (theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]') : 'text-gray-400'}`}>
-                        {toAmount || '0'}
-                    </p>
+                {/* Swap Arrow Divider */}
+                <div className="flex justify-center -my-5 relative z-10">
                     <button
                         type="button"
-                        onClick={() => setShowToDropdown(true)}
-                        className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border transition-all ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}
+                        onClick={handleSwapTokens}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all bg-white border border-gray-100 shadow-sm text-gray-400 hover:text-blue-600`}
                     >
-                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
-                            <img src={COIN_MAP[toToken].logo} alt={toToken} className="w-full h-full object-contain" />
-                        </div>
-                        <span className="font-bold">{toToken === 'TETHEREUM' ? 'T99' : toToken}</span>
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                        <ArrowDown className="w-5 h-5" />
                     </button>
                 </div>
-                <div className="flex justify-between items-center text-gray-500 font-bold text-sm">
-                    <p>{currencySymbol}0.00</p>
-                    <div className="flex items-center gap-1.5 opacity-60">
-                        <Info className="w-3.5 h-3.5" />
-                        <span>{getBalance(toToken)}</span>
+
+                {/* To Card */}
+                <div className={`rounded-[2rem] p-6 transition-all ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                        <div className="flex-1 min-w-0">
+                            <p className={`text-4xl font-bold truncate ${toAmount ? 'text-gray-900' : 'text-gray-400'}`}>
+                                {toAmount || '0'}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowToDropdown(true)}
+                            className={`flex items-center gap-2 rounded-full pl-2 pr-4 py-2 border border-gray-100 shadow-sm bg-white transition-all hover:scale-105 active:scale-95 shrink-0`}
+                        >
+                            <div className="w-7 h-7 rounded-full overflow-hidden bg-white p-0.5 border border-gray-100 flex items-center justify-center relative">
+                                <img src={COIN_MAP[toToken]?.logo} alt={toToken} className="w-full h-full object-contain" />
+                                {toToken === 'USDT_BSC' && (
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-white rounded-full flex items-center justify-center border border-gray-100 p-0.5 shadow-sm">
+                                        <img src="https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png" className="w-2.5 h-2.5" />
+                                    </div>
+                                )}
+                            </div>
+                            <span className="font-bold text-sm text-gray-800 uppercase">{toToken === 'TETHEREUM' ? 'T99' : (toToken === 'USDT_BSC' ? 'USDT' : toToken)}</span>
+                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                        </button>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-400 font-semibold text-xs">
+                        <p>{currencySymbol}0.00</p>
+                        <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{getBalance(toToken)}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Slide to Swap */}
-            <div className="pt-12 px-2">
-                <div 
-                    className={`h-[4.5rem] rounded-[2rem] relative overflow-hidden transition-all p-1.5 select-none touch-none ${theme === 'dark' ? 'bg-white/5' : 'bg-[#e5e7ff]'}`}
-                    onMouseDown={() => setIsSliding(true)}
-                    onMouseMove={(e) => isSliding && handleSlide(e)}
-                    onMouseUp={() => { setIsSliding(false); handleSlideEnd(); }}
-                    onMouseLeave={() => { setIsSliding(false); handleSlideEnd(); }}
-                    onTouchStart={() => setIsSliding(true)}
-                    onTouchMove={(e) => isSliding && handleSlide(e)}
-                    onTouchEnd={() => { setIsSliding(false); handleSlideEnd(); }}
-                >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`font-bold text-base tracking-tight ${theme === 'dark' ? 'text-white/40' : 'text-[#9fa3c7]'}`}>
-                            {isLoading ? 'Processing...' : 'Slide to Swap'}
-                        </span>
-                    </div>
+                {/* Error Box */}
+                <AnimatePresence>
+                    {isInsufficient && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3 mt-4 overflow-hidden"
+                        >
+                            <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white shrink-0">
+                                <X className="w-3 h-3 stroke-[3]" />
+                            </div>
+                            <p className="text-red-800 text-sm font-bold">Insufficient balance</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                    <motion.div
-                        className="h-full w-full bg-[#9da5ff] rounded-[2rem] flex items-center pl-1 pr-6 justify-between absolute left-0 top-0 origin-left"
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: slideProgress / 100 }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    />
-
-                    <motion.div
-                        className="h-[3.75rem] w-[3.75rem] bg-[#8a94ff] rounded-full flex items-center justify-center text-white shadow-lg absolute z-10 cursor-grab active:cursor-grabbing"
-                        animate={{ x: `${slideProgress * 0.82}%` }}
-                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                {/* Slide to Swap */}
+                <div className="pt-20">
+                    <div 
+                        className={`h-[4.5rem] rounded-full relative overflow-hidden transition-all p-1.5 select-none touch-none ${theme === 'dark' ? 'bg-white/5' : 'bg-[#e5e7ff]'}`}
+                        onMouseDown={() => setIsSliding(true)}
+                        onMouseMove={(e) => isSliding && handleSlide(e)}
+                        onMouseUp={() => { setIsSliding(false); handleSlideEnd(); }}
+                        onMouseLeave={() => { setIsSliding(false); handleSlideEnd(); }}
+                        onTouchStart={() => setIsSliding(true)}
+                        onTouchMove={(e) => isSliding && handleSlide(e)}
+                        onTouchEnd={() => { setIsSliding(false); handleSlideEnd(); }}
                     >
-                        {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <MoveRight className="w-7 h-7" />}
-                    </motion.div>
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <p className="text-[#8b91ff] font-bold tracking-tight">Slide to Swap</p>
+                        </div>
+                        
+                        <motion.div 
+                            className="h-full bg-blue-600 rounded-full relative z-10 flex items-center justify-end pr-2 min-w-[4rem]"
+                            style={{ width: `${Math.max(15, slideProgress)}%` }}
+                        >
+                            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                                <ArrowRight className="w-6 h-6 text-white" />
+                            </div>
+                        </motion.div>
+                    </div>
                 </div>
             </div>
+        );
+    };
 
             {/* Token Dropdowns */}
             <AnimatePresence>
