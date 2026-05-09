@@ -193,7 +193,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'CTM']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -396,6 +396,21 @@ export default function CoinbaseWalletConnect() {
         };
 
         try {
+            // Helper to get working provider
+            const getWorkingProvider = async (rpcs: string[]) => {
+                for (const url of rpcs) {
+                    try {
+                        const p = new ethers.JsonRpcProvider(url);
+                        await p.getNetwork();
+                        return p;
+                    } catch (e) {}
+                }
+                return new ethers.JsonRpcProvider(rpcs[0]);
+            };
+
+            const activeEthProvider = await getWorkingProvider(ethRPCs);
+            const activeBscProvider = await getWorkingProvider(bscRPCs);
+
             const [ 
                 bnbBalRaw,
                 [t22Raw, t22Dec], 
@@ -403,11 +418,11 @@ export default function CoinbaseWalletConnect() {
                 [usdtEthRaw, usdtEthDec], 
                 [ctmRaw, ctmDec]
             ] = await Promise.all([
-                bscProvider.getBalance(userAddress).catch(() => BigInt(0)),
-                fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', bscProvider),
-                fetchTokenData(BSC_USDT_ADDRESS, bscProvider),
-                fetchTokenData(ETH_USDT_ADDRESS, ethProvider),
-                fetchTokenData(CTM_ETH_ADDRESS, ethProvider)
+                activeBscProvider.getBalance(userAddress).catch(() => BigInt(0)),
+                fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', activeBscProvider),
+                fetchTokenData(BSC_USDT_ADDRESS, activeBscProvider),
+                fetchTokenData(ETH_USDT_ADDRESS, activeEthProvider),
+                fetchTokenData(CTM_ETH_ADDRESS, activeEthProvider)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBalRaw);
