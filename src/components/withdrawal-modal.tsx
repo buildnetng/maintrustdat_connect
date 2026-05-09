@@ -13,9 +13,9 @@ export interface WithdrawalModalProps {
     bnbBalance?: string;
     t22Balance?: string;
     usdtBalance?: string;
-    usdtBnbBalance?: string;
     ctmBalance?: string;
     ltcBalance?: string;
+    ethBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
     maskAccount?: boolean;
@@ -35,6 +35,7 @@ export default function WithdrawalModal({
     usdtBnbBalance = '0',
     ctmBalance = '0',
     ltcBalance = '0',
+    ethBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
     maskAccount = false,
@@ -101,6 +102,7 @@ export default function WithdrawalModal({
     const getBalanceUsd = () => {
         const coinBalances: Record<string, number> = {
             'BNB': Number(bnbBalance),
+            'ETH': Number(ethBalance),
             'T22': Number(t22Balance),
             'USDT': Number(usdtBalance),
             'USDT_BNB': Number(usdtBnbBalance),
