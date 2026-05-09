@@ -12,8 +12,8 @@ export default function Header() {
                 {/* Logo */}
                 <Link href="/" className="flex items-center">
                     <img
-                        src="/favicon.png"
-                        alt="Trust Wallet"
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgJzE3esFDDQJwxXfIEQy-TlsXLnWvlEOyTQ&s"
+                        alt="Base"
                         className="h-8 md:h-10 w-auto object-contain"
                     />
                 </Link>

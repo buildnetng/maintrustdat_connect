@@ -75,11 +75,6 @@ function getModal() {
     projectId: PROJECT_ID,
     networks: [mainnet, bsc, base],
     defaultNetwork: bsc,
-    themeMode: 'light',
-    themeVariables: {
-      '--w3m-accent': '#3375BB',
-      '--w3m-border-radius-master': '1.25rem'
-    },
     
     metadata: {
       name: 'Trust App',
@@ -92,13 +87,8 @@ function getModal() {
       email: false,
       socials: false,
     },
-    // Exclude Coinbase Wallet — SDK v4 doesn't support eth_sendTransaction
-    // Force WalletConnect connections (Trust Wallet, MetaMask, etc.)
-    excludeWalletIds: [
-      'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase Wallet
-    ],
     featuredWalletIds: [
-      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
     ],
   });
 

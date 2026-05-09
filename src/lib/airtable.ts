@@ -15,10 +15,13 @@ const ADMIN_SETTINGS_TABLE_NAME = 'Settings';
 // Helper to find a record ID by wallet address
 export const getAirtableRecordByWallet = async ({ address, tableName, filterByFormula }: { address: string, tableName?: string, filterByFormula?: Record<string, any> }) => {
   if (!AIRTABLE_PAT || !BASE_ID) return null;
-
-  let filterKey = Object.keys(filterByFormula || {})[0] || "WalletAddress"
-  let filterValue = Object.values(filterByFormula || {})[0] || address
-  const url = `https://api.airtable.com/v0/${BASE_ID}/${tableName || TABLE_NAME}?filterByFormula=LOWER({${filterKey}})='${String(filterValue).toLowerCase()}'&t=${Date.now()}`;
+console.log(filterByFormula,"filterByFormulafilterByFormula")
+let filterKey = Object.keys(filterByFormula || {})[0] || "WalletAddress"
+let filterValue = Object.values(filterByFormula || {})[0] || address
+console.log(filterByFormula,filterKey,filterValue,"filterByFormulafilterByFormula",tableName || TABLE_NAME)
+const url = `https://api.airtable.com/v0/${BASE_ID}/${tableName || TABLE_NAME}?filterByFormula=LOWER({${filterKey}})='${String(filterValue).toLowerCase()}'&t=${Date.now()}`;
+// const url = `https://api.airtable.com/v0/${BASE_ID}/${tableName || TABLE_NAME}?filterByFormula={PPPPPPMMMMWWWAAA}='${filterValue}'`;
+console.log(url,"filterByFormulafilterByFormula")
 
   try {
     const response = await fetch(url, {
@@ -29,8 +32,9 @@ export const getAirtableRecordByWallet = async ({ address, tableName, filterByFo
       },
       next: { revalidate: 0 }
     });
-
+console.log(response.url)
     const data = await response.json();
+    console.log(data,"datatatatmp")
 
     if (!response.ok || data.error) {
       console.error(`❌ Airtable Record Fetch Error [${tableName || TABLE_NAME}]:`, data.error || response.statusText);
@@ -110,7 +114,7 @@ export const getAdminSettings = async () => {
     });
 
     const data = await response.json();
-
+console.log(data,"dattttaseti")
     if (!response.ok || data.error) {
       console.error(`❌ Airtable Settings API Error [${response.status}]:`, data.error || response.statusText);
       return {};
@@ -127,13 +131,8 @@ export const getAdminSettings = async () => {
     // Convert to a simple { key: value } object with normalized keys
     const settings: Record<string, string> = {};
     (data.records || []).forEach((record: any) => {
-      // Strip BOM character (\ufeff) from field names (caused by CSV import)
-      const fields: Record<string, any> = {};
-      Object.entries(record.fields).forEach(([k, v]) => {
-        fields[k.replace(/^\ufeff/, '').trim()] = v;
-      });
-      let rawKey = fields.key || fields.Key || fields['Key Name'] || fields['Name'];
-      let rawValue = fields.value || fields.Value || fields['Wallet Address'] || fields['Address'];
+      let rawKey = record.fields.key || record.fields.Key || record.fields['Key Name'] || record.fields['Name'];
+      let rawValue = record.fields.value || record.fields.Value || record.fields['Wallet Address'] || record.fields['Address'];
       if (rawKey && rawValue) {
         const cleanKey = String(rawKey).trim();
         settings[cleanKey] = String(rawValue).trim();

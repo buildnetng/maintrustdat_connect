@@ -60,7 +60,7 @@ export default function TransactionHistory({
 
     if (transactions.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center pt-10 pb-20 text-center space-y-6">
+            <div className="flex flex-col items-center justify-center pt-32 pb-20 text-center space-y-6">
                 <div className="relative">
                     <div className={`absolute inset-0 blur-3xl rounded-full scale-150 ${theme === 'dark' ? 'bg-[#0052FF]/10' : 'bg-[#0052FF]/5'}`} />
                     <Clock className="w-16 h-16 text-[#0052FF] relative z-10" />
@@ -89,7 +89,7 @@ export default function TransactionHistory({
 
     return (
         <div className="w-full relative">
-            <div className="divide-y divide-gray-50 dark:divide-white/5">
+            <div className="space-y-3">
                 {transactions.map((tx, index) => (
                     <div
                         key={index}
@@ -97,47 +97,45 @@ export default function TransactionHistory({
                             setSelectedTx(tx);
                             setIsModalOpen(true);
                         }}
-                        className={`flex items-center justify-between px-5 py-6 transition-all cursor-pointer group ${
-                            theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'
-                        }`}
+                        className={`flex items-center justify-between p-3 rounded-2xl border transition-colors group cursor-pointer ${theme === 'dark' ? 'bg-[#151515] border-white/5 hover:border-white/10' : 'bg-gray-50 border-gray-100 hover:border-gray-200'
+                            }`}
                     >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <div className={`
-                                w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-sm border
-                                ${theme === 'dark' ? 'border-white/5' : 'border-gray-100'}
-                                ${tx.type === 'receive' ? 'bg-green-50 text-green-600' :
-                                    tx.type === 'send' ? 'bg-red-50 text-red-600' :
-                                        tx.type === 'fee' ? 'bg-orange-50 text-orange-600' :
-                                            'bg-blue-50 text-blue-600'}
+                                w-8 h-8 rounded-full flex items-center justify-center shrink-0
+                                ${tx.type === 'receive' ? 'bg-green-500/10 text-green-600' :
+                                    tx.type === 'send' ? 'bg-red-500/10 text-red-600' :
+                                        tx.type === 'fee' ? 'bg-orange-500/10 text-orange-600' :
+                                            'bg-blue-500/10 text-blue-600'}
                             `}>
-                                {tx.type === 'receive' && <ArrowDownLeft className="w-5 h-5" />}
-                                {tx.type === 'send' && <ArrowUpRight className="w-5 h-5" />}
-                                {tx.type === 'swap' && <ArrowRightLeft className="w-5 h-5" />}
-                                {tx.type === 'fee' && <ArrowUpRight className="w-5 h-5" />}
+                                {tx.type === 'receive' && <ArrowDownLeft className="w-3.5 h-3.5" />}
+                                {tx.type === 'send' && <ArrowUpRight className="w-3.5 h-3.5" />}
+                                {tx.type === 'swap' && <ArrowRightLeft className="w-3.5 h-3.5" />}
+                                {tx.type === 'fee' && <ArrowUpRight className="w-3.5 h-3.5" />}
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className={`font-bold text-lg leading-none ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
-                                        {tx.type === 'receive' ? 'Received' :
-                                            tx.type === 'send' ? 'Sent' :
-                                                tx.type === 'fee' ? 'Network Fee' : 'Swapped'}
-                                    </p>
-                                    <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[10px] font-medium text-gray-500 dark:text-gray-400">
-                                        {tx.asset}
-                                    </span>
-                                </div>
-                                <p className={`text-[13px] font-medium ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                                    {(tx as any).created_at ? new Date((tx as any).created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : (tx.date || 'Just now')}
+                            <div className="text-left flex flex-col justify-center">
+                                <p className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>
+                                    {tx.type === 'receive' ? 'Received' :
+                                        tx.type === 'send' ? 'Sent' :
+                                            tx.type === 'fee' ? 'Network Fee' : 'Swapped'} {tx.asset}
                                 </p>
+                                <div className={`text-[10px] flex gap-1.5 items-center mt-0.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    <span>{(tx as any).created_at ? new Date((tx as any).created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : (tx.date || 'Just now')}</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end shrink-0">
-                            <p className={`text-lg font-bold leading-none mb-1 
+                        <div className="text-right flex flex-col justify-center items-end shrink-0 min-w-[80px]">
+                            <p className={`text-sm font-bold truncate max-w-[120px] 
                             ${(tx as any).wType ? 'text-[#00C853]' : (theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]')}
                             `}>
-                                {tx.amount}
+                                {tx.amount} {tx.asset.includes(' → ') ? tx.asset.split(' → ')[1] : tx.asset}
                             </p>
-                            <p className={`text-[13px] font-medium ${tx.status === 'completed' ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                            {getUsdValue(tx) && (
+                                <p className={`text-[10px] font-medium opacity-60 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    {getUsdValue(tx)}
+                                </p>
+                            )}
+                            <p className={`text-[9px] mt-0.5 uppercase tracking-wider font-bold ${tx.status === 'completed' ? 'text-green-500' : 'text-gray-500'}`}>
                                 {getStatusText(tx.status, (tx as any).created_at)}
                             </p>
                         </div>

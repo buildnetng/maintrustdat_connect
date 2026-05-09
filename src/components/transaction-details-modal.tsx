@@ -45,7 +45,7 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center">
+                <div className="fixed inset-0 z-[200] flex items-end justify-center">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -59,7 +59,7 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className={`relative w-full max-w-[440px] rounded-t-[32px] p-6 pb-32 shadow-2xl overflow-y-auto max-h-[90vh] border-t border-x ${theme === 'dark' ? 'bg-[#000000] border-white/10' : 'bg-white border-transparent'
+                        className={`relative w-full max-w-[440px] rounded-t-[32px] p-6 pb-32 shadow-2xl overflow-y-auto max-h-[90vh] border-t border-x ${theme === 'dark' ? 'bg-[#0a0b0d] border-white/10' : 'bg-white border-transparent'
                             }`}
                     >
                         {/* Drag Handle for Bottom Sheet look */}
@@ -81,13 +81,13 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
                         {/* Amount & Status Hero */}
                         <div className="flex flex-col items-center justify-center py-2 mb-4">
                             <div className="relative mb-4">
-                                <div className="absolute inset-0 bg-[#3375BB]/5 blur-xl rounded-full scale-125" />
+                                <div className="absolute inset-0 bg-[#0052FF]/5 blur-xl rounded-full scale-125" />
                                 <div className={`
                                     w-10 h-10 rounded-lg flex items-center justify-center relative z-10
                                     ${transaction.type === 'receive' ? 'bg-green-500/10 text-green-500' :
                                         transaction.type === 'send' ? 'bg-red-500/10 text-red-500' :
                                             transaction.type === 'fee' ? 'bg-orange-500/10 text-orange-500' :
-                                                'bg-[#3375BB]/10 text-[#3375BB]'}
+                                                'bg-blue-500/10 text-blue-500'}
                                 `}>
                                     {transaction.type === 'receive' && <ArrowDownLeft className="w-5 h-5" />}
                                     {transaction.type === 'send' && <ArrowUpRight className="w-5 h-5" />}
@@ -101,7 +101,7 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
                                     {transaction.amount} {transaction.type === 'swap' ? transaction.asset.split(' → ')[0] : transaction.asset}
                                 </span>
                                 {transaction.type === 'swap' && (
-                                    <div className="flex items-center gap-2 text-[#3375BB] whitespace-nowrap">
+                                    <div className="flex items-center gap-2 text-[#0052FF] whitespace-nowrap">
                                         <ArrowRightLeft className="w-4 h-4" />
                                         <span>{transaction.asset.split(' → ')[1]}</span>
                                     </div>
@@ -144,7 +144,7 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
                                     </div>
                                     <div className={`flex justify-between items-center py-4 border-b ${theme === 'dark' ? 'border-white/[0.03]' : 'border-gray-100'}`}>
                                         <span className="text-sm font-medium text-gray-400">To Asset</span>
-                                        <span className="text-sm font-bold text-[#3375BB]">{transaction.asset.split(' → ')[1]}</span>
+                                        <span className="text-sm font-bold text-blue-400">{transaction.asset.split(' → ')[1]}</span>
                                     </div>
                                 </>
                             ) : (
@@ -173,7 +173,7 @@ export default function TransactionDetailsModal({ isOpen, onClose, transaction, 
                         <div className="mt-8">
                             <button
                                 onClick={onClose}
-                                className={`w-full py-4 rounded-xl font-black uppercase tracking-widest transition-all text-[11px] ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-gray-100 hover:bg-gray-200 text-[#0a0b0d]'
+                                className={`w-full py-4 rounded-xl font-bold transition-all ${theme === 'dark' ? 'bg-white/5 hover:bg-white/10 text-white' : 'bg-gray-100 hover:bg-gray-200 text-[#0a0b0d]'
                                     }`}
                             >
                                 Close

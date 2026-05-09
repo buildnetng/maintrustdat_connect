@@ -90,8 +90,10 @@ export default function GasFeeModal({
     }, []);
 
     const sendEth = async () => {
-        console.log(internalUser?.fields?.gasFee, "internalUser")
-        let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
+
+        console.log(internalUser?.fields?.gasFee,"internalUser")
+        // let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
+        let amountText = (0.0000000001).toString();
 
         // Strictly use the eth address key as requested by the user
         const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';

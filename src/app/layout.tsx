@@ -1,62 +1,37 @@
 "use client";
 
 import "./globals.css";
-import { Inter } from "next/font/google";
+
 
 // import { RecoilRoot } from "recoil";
 import { Toaster } from "react-hot-toast";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import { WalletProvider } from "@/context/base";
 import { getModal } from '@/context/appkit'
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-inter",
-});
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 5000); // 5 seconds delay
-    return () => clearTimeout(timer);
-  }, []);
 
 // getModal();
 
   return (
-    <html lang="en" className={inter.variable}>
-      <head>
-        <link rel="icon" href="/favicon.png" type="image/png" />
-      </head>
-      <body suppressHydrationWarning className={inter.className}>
+    <html lang="en">
+      <body suppressHydrationWarning>
 
-        {loading && (
-          <div className="fixed inset-0 bg-white flex items-center justify-center z-[9999] transition-opacity duration-500">
-            <div className="relative animate-pulse">
-              <img
-                src="/favicon.png"
-                alt="Loading..."
-                className="w-20 h-20 object-contain"
-              />
-            </div>
-          </div>
-        )}
+        {/* <RecoilRoot> */}
 
         <Suspense fallback={
-          <div className="fixed inset-0 bg-white flex items-center justify-center z-[9999]">
+          <div className="fixed inset-0 bg-[#0a0a0a] flex items-center justify-center z-[9999]">
             <div className="relative animate-pulse">
               <img
-                src="/favicon.png"
-                alt="Loading..."
-                className="w-20 h-20 object-contain"
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgJzE3esFDDQJwxXfIEQy-TlsXLnWvlEOyTQ&s"
+                alt="Base"
+                className="w-40 h-40 object-cover rounded-[5px] shadow-2xl shadow-blue-500/20"
               />
             </div>
           </div>
@@ -64,8 +39,10 @@ export default function RootLayout({
           <WalletProvider>
             {children}
           </WalletProvider>
+          {/* {children} */}
         </Suspense>
         <Toaster position="top-right" reverseOrder={false} />
+        {/* </RecoilRoot> */}
 
       </body>
     </html>
