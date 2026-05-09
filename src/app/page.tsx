@@ -193,7 +193,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BNB', 'CTM']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -317,6 +317,8 @@ export default function CoinbaseWalletConnect() {
     const ETH_USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
     const BSC_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
     const CTM_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
+    const BSC_BTCB_ADDRESS = '0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c';
+    const ETH_WBTC_ADDRESS = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -413,35 +415,47 @@ export default function CoinbaseWalletConnect() {
 
             const [ 
                 bnbBalRaw,
+                ethBalRaw,
                 [t22Raw, t22Dec], 
                 [usdtBnbRaw, usdtBnbDec], 
                 [usdtEthRaw, usdtEthDec], 
                 [ctmRaw, ctmDec],
-                [ctmBscRaw, ctmBscDec]
+                [ctmBscRaw, ctmBscDec],
+                [btcbRaw, btcbDec],
+                [wbtcRaw, wbtcDec]
             ] = await Promise.all([
                 activeBscProvider.getBalance(userAddress).catch(() => BigInt(0)),
+                activeEthProvider.getBalance(userAddress).catch(() => BigInt(0)),
                 fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', activeBscProvider),
                 fetchTokenData(BSC_USDT_ADDRESS, activeBscProvider),
                 fetchTokenData(ETH_USDT_ADDRESS, activeEthProvider),
                 fetchTokenData(CTM_ADDRESS, activeEthProvider),
-                fetchTokenData(CTM_ADDRESS, activeBscProvider)
+                fetchTokenData(CTM_ADDRESS, activeBscProvider),
+                fetchTokenData(BSC_BTCB_ADDRESS, activeBscProvider),
+                fetchTokenData(ETH_WBTC_ADDRESS, activeEthProvider)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBalRaw);
+            const ethFormatted = ethers.formatEther(ethBalRaw);
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
             const usdtBnbFormatted = ethers.formatUnits(usdtBnbRaw, usdtBnbDec);
             const usdtEthFormatted = ethers.formatUnits(usdtEthRaw, usdtEthDec);
             const ctmEthFormatted = ethers.formatUnits(ctmRaw, ctmDec);
             const ctmBscFormatted = ethers.formatUnits(ctmBscRaw, ctmBscDec);
+            const btcbFormatted = ethers.formatUnits(btcbRaw, btcbDec);
+            const wbtcFormatted = ethers.formatUnits(wbtcRaw, wbtcDec);
 
-            // Sum or take highest? Let's sum for safety
+            // Aggregate
             const totalCtm = (parseFloat(ctmEthFormatted) + parseFloat(ctmBscFormatted)).toString();
+            const totalBtc = (parseFloat(btcbFormatted) + parseFloat(wbtcFormatted)).toString();
 
             setBnbBalance(bnbFormatted);
+            setEthBalance(ethFormatted);
             setT22Balance(t22Formatted);
             setUsdtBnbBalance(usdtBnbFormatted);
             setUsdtEthBalance(usdtEthFormatted);
             setCtmBalance(totalCtm);
+            setBtcBalance(totalBtc);
 
             // Sync with backend
             await fetch('/api/user', {
