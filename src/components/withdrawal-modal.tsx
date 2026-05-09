@@ -62,7 +62,8 @@ export default function WithdrawalModal({
         'USDC': { supportedNetworks: ["BNB", "ETH"], name: "USDC", logo: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png' },
         'BTC': { supportedNetworks: ["BTC"], name: "Bitcoin", logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/btc.png' },
         'TETHEREUM': { supportedNetworks: ["BNB"], name: "Tethereum T99", logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715' },
-        'CTM': { supportedNetworks: ["BNB"], name: "CTM", logo: '/ctm_logo.png' }
+        'CTM': { supportedNetworks: ["BNB"], name: "CTM", logo: '/ctm_logo.png' },
+        'USDT_BSC': { supportedNetworks: ["BNB"], name: "USDT (BSC)", logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png' }
     };
 
     const filteredAssets = useMemo(() => {

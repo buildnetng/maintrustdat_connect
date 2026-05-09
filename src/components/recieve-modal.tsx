@@ -88,6 +88,10 @@ export default function ReceiveModal({
         'CTM': {
             name: 'CTM', logo: '/ctm_logo.png',
             walletAddress: null, supportedNetworks: { "BNB": {} }
+        },
+        'USDT_BSC': {
+            name: 'USDT (BSC)', logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+            walletAddress: null, supportedNetworks: { "BNB": {} }
         }
     }), [adminAddresses]);
 

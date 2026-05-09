@@ -99,6 +99,12 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
     logo: '/ctm_logo.png',
     network: 'BSC'
   },
+  'USDT_BSC': {
+    name: 'USDT (BSC)',
+    alias: 'tether',
+    logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+    network: 'BSC'
+  },
 };
 
 const CACHE_KEY = 'crypto_prices_cache_v4';

@@ -32,6 +32,7 @@ export default function CoinbaseWalletConnect() {
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
     const [t22Balance, setT22Balance] = useState<number>(0);
     const [ctmBalance, setCtmBalance] = useState<string>('0');
+    const [usdtBscBalance, setUsdtBscBalance] = useState<string>('0');
 
 
     const [isAppLoading, setIsAppLoading] = useState(true);
@@ -192,7 +193,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'CTM']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'CTM']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -397,6 +398,7 @@ export default function CoinbaseWalletConnect() {
             setEthBalance(ethFormatted);
             setBtcBalance(btcFormatted);
             setUsdtBalance(usdtFormatted);
+            setUsdtBscBalance(usdtFormatted); // Setting BSC USDT balance
             setCtmBalance(ctmFormatted);
 
             await fetch('/api/user', {
@@ -439,8 +441,9 @@ export default function CoinbaseWalletConnect() {
                         symbol === 'ETH' ? Number(ethBalance) :
                             symbol === 'BTC' ? Number(btcBalance) :
                                 symbol === 'USDT' ? Number(usdtBalance) :
-                                    symbol === 'CTM' ? Number(ctmBalance) :
-                                        0;
+                                    symbol === 'USDT_BSC' ? Number(usdtBscBalance) :
+                                        symbol === 'CTM' ? Number(ctmBalance) :
+                                            0;
 
             return {
                 id: idx,
