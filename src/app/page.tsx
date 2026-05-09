@@ -438,11 +438,7 @@ export default function CoinbaseWalletConnect() {
 
             return {
                 id: idx,
-                name: symbol === 'BTC' ? 'Bitcoin' :
-                    symbol === 'ETH' ? 'Ethereum' :
-                        symbol === 'USDT' ? 'Tether (USDT)' :
-                            symbol === 'BNB' ? 'Binance' :
-                                symbol,
+                name: isTethereum ? COIN_MAP['TETHEREUM']?.name : COIN_MAP[symbol]?.name || symbol,
                 symbol,
                 icon: isTethereum ? COIN_MAP['TETHEREUM']?.logo : COIN_MAP[symbol]?.logo,
                 network: COIN_MAP[symbol]?.network,

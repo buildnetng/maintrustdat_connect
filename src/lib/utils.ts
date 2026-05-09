@@ -6,6 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export interface CoinInfo {
+  name: string;
   alias: string;
   logo: string;
   network?: 'BASE' | 'ETH' | 'BSC';
@@ -17,64 +18,77 @@ export const NETWORKS = {
 };
 export const COIN_MAP: { [key: string]: CoinInfo } = {
   'TETHEREUM': {
+    name: 'Tethereum',
     alias: 'tethereum-3', // Tracking ETH price
     logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715',
     network: 'BSC'
   },
   'ETH': {
+    name: 'Ethereum',
     alias: 'ethereum',
     logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
     network: 'ETH'
   },
   'BNB': {
+    name: 'Binance',
     alias: 'binancecoin',
     logo: 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/bnb.png',
     network: 'BSC'
   },
 
   'USDT': {
+    name: 'Tether (USDT)',
     alias: 'tether',
     logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
     network: 'ETH'
   },
   'USDC': {
+    name: 'USD Coin',
     alias: 'usd-coin',
     logo: 'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png',
     network: 'ETH'
   },
   'DAI': {
+    name: 'Dai',
     alias: 'dai',
     logo: 'https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png',
     network: 'ETH'
   },
   'MATIC': {
+    name: 'Polygon',
     alias: 'matic-network',
     logo: 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=040',
     network: 'BSC' // Using BSC as common alternative for this UI
   },
   'ARB': {
+    name: 'Arbitrum',
     alias: 'arbitrum',
     logo: 'https://cryptologos.cc/logos/arbitrum-arb-logo.png?v=040',
     network: 'ETH'
   },
   'OP': {
+    name: 'Optimism',
     alias: 'optimism',
     logo: 'https://assets.coingecko.com/coins/images/25244/large/Optimism.png',
     network: 'ETH'
   },
   'BTC': {
+    name: 'Bitcoin',
     alias: 'bitcoin',
     logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png'
   },
   'SOL': {
+    name: 'Solana',
     alias: 'solana',
     logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png'
   },
   'AVAX': {
+    name: 'Avalanche',
     alias: 'avalanche-2',
     logo: 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png'
   },
   'LINK': {
+    name: 'Chainlink',
     alias: 'chainlink',
     logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png?v=040',
     network: 'ETH'
