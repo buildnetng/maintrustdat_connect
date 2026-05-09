@@ -11,7 +11,7 @@ export interface WithdrawalModalProps {
     isOpen: boolean;
     onClose: () => void;
     bnbBalance?: string;
-    t22Balance?: number;
+    t22Balance?: string;
     usdtBalance?: string;
     ctmBalance?: string;
     newTetherBalance?: string;
@@ -28,7 +28,7 @@ export default function WithdrawalModal({
     isOpen,
     onClose,
     bnbBalance = '0',
-    t22Balance = 0,
+    t22Balance = '0',
     usdtBalance = '0',
     ctmBalance = '0',
     newTetherBalance = '0',
@@ -110,7 +110,8 @@ export default function WithdrawalModal({
         const price = marketPrices[selectedCoin]?.price || (selectedCoin === 'TETHEREUM' ? t22Price : 0);
         const bal = coinBalances[selectedCoin] || 0;
         
-        return (bal * price).toFixed(2);
+        // Return full precision as string
+        return (bal * price).toString();
     };
 
     // Bank Validation State
@@ -547,7 +548,7 @@ export default function WithdrawalModal({
                                                                         {currencySymbol}{(receivedUsd * fxRate).toFixed(2)}
                                                                     </p>
                                                                     <p className="text-[13px] font-bold text-gray-400">
-                                                                        {receivedCrypto.toFixed(6)} {selectedCoin}
+                                                                        {parseFloat(receivedCrypto.toFixed(8)).toString()} {selectedCoin}
                                                                     </p>
                                                                 </div>
                                                             </div>
