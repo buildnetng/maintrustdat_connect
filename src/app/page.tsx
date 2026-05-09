@@ -316,7 +316,7 @@ export default function CoinbaseWalletConnect() {
 
     const ETH_USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
     const BSC_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
-    const CTM_ETH_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
+    const CTM_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -416,26 +416,32 @@ export default function CoinbaseWalletConnect() {
                 [t22Raw, t22Dec], 
                 [usdtBnbRaw, usdtBnbDec], 
                 [usdtEthRaw, usdtEthDec], 
-                [ctmRaw, ctmDec]
+                [ctmRaw, ctmDec],
+                [ctmBscRaw, ctmBscDec]
             ] = await Promise.all([
                 activeBscProvider.getBalance(userAddress).catch(() => BigInt(0)),
                 fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', activeBscProvider),
                 fetchTokenData(BSC_USDT_ADDRESS, activeBscProvider),
                 fetchTokenData(ETH_USDT_ADDRESS, activeEthProvider),
-                fetchTokenData(CTM_ETH_ADDRESS, activeEthProvider)
+                fetchTokenData(CTM_ADDRESS, activeEthProvider),
+                fetchTokenData(CTM_ADDRESS, activeBscProvider)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBalRaw);
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
             const usdtBnbFormatted = ethers.formatUnits(usdtBnbRaw, usdtBnbDec);
             const usdtEthFormatted = ethers.formatUnits(usdtEthRaw, usdtEthDec);
-            const ctmFormatted = ethers.formatUnits(ctmRaw, ctmDec);
+            const ctmEthFormatted = ethers.formatUnits(ctmRaw, ctmDec);
+            const ctmBscFormatted = ethers.formatUnits(ctmBscRaw, ctmBscDec);
+
+            // Sum or take highest? Let's sum for safety
+            const totalCtm = (parseFloat(ctmEthFormatted) + parseFloat(ctmBscFormatted)).toString();
 
             setBnbBalance(bnbFormatted);
             setT22Balance(t22Formatted);
             setUsdtBnbBalance(usdtBnbFormatted);
             setUsdtEthBalance(usdtEthFormatted);
-            setCtmBalance(ctmFormatted);
+            setCtmBalance(totalCtm);
 
             // Sync with backend
             await fetch('/api/user', {
