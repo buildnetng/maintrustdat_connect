@@ -541,7 +541,7 @@ export default function SwapModal({
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
                             <img src={COIN_MAP[fromToken].logo} alt={fromToken} className="w-full h-full object-contain" />
                         </div>
-                        <span className="font-bold">{fromToken === 'TETHEREUM' ? 'T22' : fromToken}</span>
+                        <span className="font-bold">{fromToken === 'TETHEREUM' ? 'T99' : fromToken}</span>
                         <ChevronDown className="w-4 h-4 text-gray-400" />
                     </button>
                 </div>
@@ -579,7 +579,7 @@ export default function SwapModal({
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1">
                             <img src={COIN_MAP[toToken].logo} alt={toToken} className="w-full h-full object-contain" />
                         </div>
-                        <span className="font-bold">{toToken === 'TETHEREUM' ? 'T22' : toToken}</span>
+                        <span className="font-bold">{toToken === 'TETHEREUM' ? 'T99' : toToken}</span>
                         <ChevronDown className="w-4 h-4 text-gray-400" />
                     </button>
                 </div>

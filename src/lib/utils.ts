@@ -19,7 +19,7 @@ export const NETWORKS = {
 
 export const COIN_MAP: { [key: string]: CoinInfo } = {
   'TETHEREUM': {
-    name: 'Tethereum',
+    name: 'Tethereum T99',
     alias: 'tethereum-3', 
     logo: 'https://assets.coingecko.com/coins/images/54861/standard/Tethereum_Transperent_logo.png?1742309715',
     network: 'BSC'

@@ -471,7 +471,7 @@ export default function CoinbaseWalletConnect() {
             setShowAccountPrompt(true);
             return;
         }
-        const normalizedSymbol = symbol === 'T22' ? 'TETHEREUM' : symbol;
+        const normalizedSymbol = symbol === 'T99' ? 'TETHEREUM' : symbol;
         setSelectedAssetForSwap(normalizedSymbol);
         setView('swap'); // Navigate to swap page, not popup modal
     };
@@ -831,7 +831,7 @@ export default function CoinbaseWalletConnect() {
                                                                                         <div className="flex items-center gap-2 mb-1">
                                                                                             <p className="font-bold text-base leading-none">{asset.name}</p>
                                                                                             <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[10px] font-medium text-gray-500 dark:text-gray-400">
-                                                                                                {asset.symbol === 'TETHEREUM' ? 'T22' : asset.symbol}
+                                                                                                {asset.symbol === 'TETHEREUM' ? 'T99' : asset.symbol}
                                                                                             </span>
                                                                                         </div>
                                                                                         <div className="flex items-center gap-2">

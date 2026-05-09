@@ -85,7 +85,7 @@ export default function WithdrawalModal({
 
     const getBalanceUsd = () => {
         if (selectedCoin === 'BNB') return (Number(bnbBalance) * 620).toFixed(2);
-        if (selectedCoin === 'T22' || selectedCoin === 'TETHEREUM') return (Number(t22Balance) * (t22Price || 0.45)).toFixed(2);
+        if (selectedCoin === 'T99' || selectedCoin === 'T22' || selectedCoin === 'TETHEREUM') return (Number(t22Balance) * (t22Price || 0.45)).toFixed(2);
         return '0.00';
     };
 
