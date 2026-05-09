@@ -145,6 +145,8 @@ export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: num
   'BNB': { price: 600, change: 0.1 },
   'TETHEREUM': { price: 1.0, change: 0 },
   'USDT': { price: 1, change: 0 },
+  'USDT_BSC': { price: 1, change: 0 },
+  'TETH': { price: 1, change: 0 },
   'USDC': { price: 1, change: 0 },
   'DAI': { price: 1, change: 0 },
   'CTM': { price: 0.5, change: 0 },

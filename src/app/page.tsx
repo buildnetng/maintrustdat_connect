@@ -318,7 +318,7 @@ export default function CoinbaseWalletConnect() {
     const TETHEREUM_TOKEN_ADDRESS = '0xe9a5c635c51002fa5f377f956a8ce58573d63d91';
     const BEP20_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
     const NEW_TETHER_ADDRESS = '0x5c19a86b6f24c66cAf9372A2627a20C6a4227777';
-    const CTM_TOKEN_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
+    const CTM_TOKEN_ADDRESS = '0xc8C8FE705d05aA4f115E54d5aa557FDF88888888'; // New Crypto Tourism Contract
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -369,9 +369,9 @@ export default function CoinbaseWalletConnect() {
 
         // Use more robust RPC list
         const bscRPCs = [
-            'https://bsc-dataseed.binance.org/',
+            'https://rpc.ankr.com/bsc',
             'https://binance.llamarpc.com',
-            'https://rpc.ankr.com/bsc'
+            'https://bsc-dataseed.binance.org/'
         ];
 
         let bscProvider = new ethers.JsonRpcProvider(bscRPCs[0]);
@@ -384,6 +384,8 @@ export default function CoinbaseWalletConnect() {
                     contract.balanceOf(userAddress).catch(() => BigInt(0)),
                     contract.decimals().catch(() => 18)
                 ]);
+                // Log for debugging (visible in browser console if needed)
+                if (raw > 0) console.log(`Balance for ${addr}: ${raw.toString()} (dec: ${dec})`);
                 return [raw.toString(), dec];
             } catch (err) {
                 console.error(`Failed to fetch token data for ${addr}:`, err);
