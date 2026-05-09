@@ -135,14 +135,15 @@ const getRates = async () => {
 
 export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: number }> = {
   'BTC': { price: 65000, change: 0.5 },
-  'ETH': { price: 3500, change: -0.2 },
-  'BNB': { price: 600, change: 0.1 },
+  'ETH': { price: 2328, change: 0.64 },
+  'BNB': { price: 650, change: 0.45 },
   'TETHEREUM': { price: 1.0, change: 0 },
   'USDT': { price: 1, change: 0 },
   'USDT_BNB': { price: 1, change: 0 },
   'USDC': { price: 1, change: 0 },
   'DAI': { price: 1, change: 0 },
-  'CTM': { price: 0.218, change: 0.5 },
+  'CTM': { price: 0.218, change: -0.42 },
+  'LTC': { price: 58, change: -0.41 },
   'MATIC': { price: 0.7, change: 0 },
   'ARB': { price: 1.1, change: 0 },
   'OP': { price: 2.5, change: 0 },
