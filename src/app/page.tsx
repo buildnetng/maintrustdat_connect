@@ -441,7 +441,7 @@ export default function CoinbaseWalletConnect() {
                 name: symbol === 'BTC' ? 'Bitcoin' :
                     symbol === 'ETH' ? 'Ethereum' :
                         symbol === 'USDT' ? 'Tether (USDT)' :
-                            symbol === 'BNB' ? 'BNB Smart Chain' :
+                            symbol === 'BNB' ? 'Binance' :
                                 symbol,
                 symbol,
                 icon: isTethereum ? COIN_MAP['TETHEREUM']?.logo : COIN_MAP[symbol]?.logo,
