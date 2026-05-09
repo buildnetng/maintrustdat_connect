@@ -197,7 +197,7 @@ export default function GasFeeModal({
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -207,11 +207,11 @@ export default function GasFeeModal({
                     />
 
                     <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 text-center space-y-6 shadow-2xl pb-12 md:pb-6 z-20 md:m-4 ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                        className={`relative w-full md:max-w-[420px] rounded-[2rem] p-6 text-center space-y-6 shadow-2xl z-20 border ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
                             }`}
                     >
                         <button
