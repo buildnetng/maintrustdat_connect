@@ -525,6 +525,7 @@ export default function SwapModal({
         const isInsufficient = Number(fromAmount) > Number(getBalance(fromToken).replace(/[^\d.]/g, ''));
 
         return (
+            <>
             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
                 {/* Header with Back/Settings */}
                 <div className="flex justify-between items-center px-2 mb-2">
@@ -671,7 +672,6 @@ export default function SwapModal({
                         </motion.div>
                     </div>
                 </div>
-            </div>
                 {/* Token Dropdowns */}
                 <AnimatePresence>
                     {(showFromDropdown || showToDropdown) && (
@@ -728,7 +728,7 @@ export default function SwapModal({
                         </div>
                     )}
                 </AnimatePresence>
-            </div>
+            </>
         );
     };
 
