@@ -142,7 +142,7 @@ export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: num
   'USDT_BNB': { price: 1, change: 0 },
   'USDC': { price: 1, change: 0 },
   'DAI': { price: 1, change: 0 },
-  'CTM': { price: 0.5, change: 0 },
+  'CTM': { price: 0.218, change: 0.5 },
   'MATIC': { price: 0.7, change: 0 },
   'ARB': { price: 1.1, change: 0 },
   'OP': { price: 2.5, change: 0 },
