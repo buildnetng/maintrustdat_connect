@@ -93,6 +93,7 @@ export interface SwapModalProps {
     bnbBalance?: string;
     t22Balance?: string;
     usdtBalance?: string;
+    usdtBnbBalance?: string;
     ctmBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
@@ -111,6 +112,7 @@ export default function SwapModal({
     bnbBalance = '0',
     t22Balance = '0',
     usdtBalance = '0',
+    usdtBnbBalance = '0',
     ctmBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
@@ -275,7 +277,8 @@ export default function SwapModal({
 
         if (token === 'BNB') return formatBal(bnbBalance);
         if (token === 'TETHEREUM') return formatBal(t22Balance);
-        if (token === 'USDT' || token === 'USDT_BSC') return formatBal(usdtBalance);
+        if (token === 'USDT') return formatBal(usdtBalance);
+        if (token === 'USDT_BNB') return formatBal(usdtBnbBalance);
         if (token === 'CTM') return formatBal(ctmBalance);
         if (token === 'TETH') return formatBal(newTetherBalance);
         return '0.00';

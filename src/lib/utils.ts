@@ -37,10 +37,16 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
     network: 'BSC'
   },
   'USDT': {
-    name: 'Tether (USDT)',
+    name: 'Tether',
     alias: 'tether',
     logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
     network: 'ETH'
+  },
+  'USDT_BNB': {
+    name: 'Tether',
+    alias: 'tether',
+    logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
+    network: 'BSC'
   },
   'USDC': {
     name: 'USD Coin',
@@ -97,19 +103,7 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
     name: 'CTM',
     alias: 'ctm', 
     logo: '/ctm_logo.png',
-    network: 'BSC'
-  },
-  'USDT_BSC': {
-    name: 'USDT (BSC)',
-    alias: 'tether',
-    logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
-    network: 'BSC'
-  },
-  'TETH': {
-    name: 'Tether',
-    alias: 'tether',
-    logo: 'https://assets.coingecko.com/coins/images/325/large/tether.png',
-    network: 'BSC'
+    network: 'ETH'
   },
 };
 
@@ -145,8 +139,7 @@ export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: num
   'BNB': { price: 600, change: 0.1 },
   'TETHEREUM': { price: 1.0, change: 0 },
   'USDT': { price: 1, change: 0 },
-  'USDT_BSC': { price: 1, change: 0 },
-  'TETH': { price: 1, change: 0 },
+  'USDT_BNB': { price: 1, change: 0 },
   'USDC': { price: 1, change: 0 },
   'DAI': { price: 1, change: 0 },
   'CTM': { price: 0.5, change: 0 },

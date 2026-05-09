@@ -13,6 +13,7 @@ export interface WithdrawalModalProps {
     bnbBalance?: string;
     t22Balance?: string;
     usdtBalance?: string;
+    usdtBnbBalance?: string;
     ctmBalance?: string;
     newTetherBalance?: string;
     marketPrices?: Record<string, { price: number; change: number }>;
@@ -30,6 +31,7 @@ export default function WithdrawalModal({
     bnbBalance = '0',
     t22Balance = '0',
     usdtBalance = '0',
+    usdtBnbBalance = '0',
     ctmBalance = '0',
     newTetherBalance = '0',
     marketPrices = {},
@@ -102,7 +104,7 @@ export default function WithdrawalModal({
             'T22': Number(t22Balance),
             'T99': Number(t22Balance),
             'USDT': Number(usdtBalance),
-            'USDT_BSC': Number(usdtBalance),
+            'USDT_BNB': Number(usdtBnbBalance),
             'CTM': Number(ctmBalance),
             'TETH': Number(newTetherBalance)
         };

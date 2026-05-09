@@ -28,7 +28,8 @@ export default function CoinbaseWalletConnect() {
     const [bnbBalance, setBnbBalance] = useState<string>('0');
     const [btcBalance, setBtcBalance] = useState<string>('0');
     const [ethBalance, setEthBalance] = useState<string>('0');
-    const [usdtBalance, setUsdtBalance] = useState<string>('0');
+    const [usdtEthBalance, setUsdtEthBalance] = useState<string>('0');
+    const [usdtBnbBalance, setUsdtBnbBalance] = useState<string>('0');
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
     const [t22Balance, setT22Balance] = useState<string>('0');
     const [ctmBalance, setCtmBalance] = useState<string>('0');
@@ -315,10 +316,9 @@ export default function CoinbaseWalletConnect() {
     const ssid = searchParams.get('ssid');
     const user = searchParams.get('user');
 
-    const TETHEREUM_TOKEN_ADDRESS = '0xe9a5c635c51002fa5f377f956a8ce58573d63d91';
-    const BEP20_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
-    const NEW_TETHER_ADDRESS = '0x5c19a86b6f24c66cAf9372A2627a20C6a4227777';
-    const CTM_TOKEN_ADDRESS = '0xc8C8FE705d05aA4f115E54d5aa557FDF88888888'; // New Crypto Tourism Contract
+    const ETH_USDT_ADDRESS = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+    const BSC_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+    const CTM_ETH_ADDRESS = '0xc8ef4398664b2eed5ee560544f659083d98a3888';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -368,27 +368,31 @@ export default function CoinbaseWalletConnect() {
         ];
 
         // Use more robust RPC list
+        const ethRPCs = [
+            'https://rpc.ankr.com/eth',
+            'https://eth.llamarpc.com',
+            'https://ethereum.publicnode.com'
+        ];
+
         const bscRPCs = [
             'https://rpc.ankr.com/bsc',
             'https://binance.llamarpc.com',
             'https://bsc-dataseed.binance.org/'
         ];
 
-        let bscProvider = new ethers.JsonRpcProvider(bscRPCs[0]);
+        const ethProvider = new ethers.JsonRpcProvider(ethRPCs[0]);
+        const bscProvider = new ethers.JsonRpcProvider(bscRPCs[0]);
 
-        const fetchTokenData = async (addr: string) => {
+        const fetchTokenData = async (addr: string, provider: any) => {
             if (!addr || !ethers.isAddress(addr)) return ["0", 18];
             try {
-                const contract = new ethers.Contract(addr, ERC20_ABI, bscProvider);
+                const contract = new ethers.Contract(addr, ERC20_ABI, provider);
                 const [raw, dec] = await Promise.all([
                     contract.balanceOf(userAddress).catch(() => BigInt(0)),
                     contract.decimals().catch(() => 18)
                 ]);
-                // Log for debugging (visible in browser console if needed)
-                if (raw > 0) console.log(`Balance for ${addr}: ${raw.toString()} (dec: ${dec})`);
                 return [raw.toString(), dec];
             } catch (err) {
-                console.error(`Failed to fetch token data for ${addr}:`, err);
                 return ["0", 18];
             }
         };
@@ -405,27 +409,31 @@ export default function CoinbaseWalletConnect() {
                 } catch (e2) {}
             }
             
-            const [ [t22Raw, t22Dec], [usdtRaw, usdtDec], [ctmRaw, ctmDec], [newTetherRaw, newTetherDec] ] = await Promise.all([
-                fetchTokenData(TETHEREUM_TOKEN_ADDRESS),
-                fetchTokenData(BEP20_USDT_ADDRESS),
-                fetchTokenData(CTM_TOKEN_ADDRESS),
-                fetchTokenData(NEW_TETHER_ADDRESS)
+            const [ 
+                [bnbBal], 
+                [t22Raw, t22Dec], 
+                [usdtBnbRaw, usdtBnbDec], 
+                [usdtEthRaw, usdtEthDec], 
+                [ctmRaw, ctmDec]
+            ] = await Promise.all([
+                bscProvider.getBalance(userAddress).catch(() => BigInt(0)),
+                fetchTokenData('0xe9a5c635c51002fa5f377f956a8ce58573d63d91', bscProvider),
+                fetchTokenData(BSC_USDT_ADDRESS, bscProvider),
+                fetchTokenData(ETH_USDT_ADDRESS, ethProvider),
+                fetchTokenData(CTM_ETH_ADDRESS, ethProvider)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBal);
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
-            const usdtFormatted = ethers.formatUnits(usdtRaw, usdtDec);
+            const usdtBnbFormatted = ethers.formatUnits(usdtBnbRaw, usdtBnbDec);
+            const usdtEthFormatted = ethers.formatUnits(usdtEthRaw, usdtEthDec);
             const ctmFormatted = ethers.formatUnits(ctmRaw, ctmDec);
-            const newTetherFormatted = ethers.formatUnits(newTetherRaw, newTetherDec);
 
             setBnbBalance(bnbFormatted);
             setT22Balance(t22Formatted);
-            setEthBalance("0");
-            setBtcBalance("0");
-            setUsdtBalance(usdtFormatted);
-            setUsdtBscBalance(usdtFormatted); 
+            setUsdtBnbBalance(usdtBnbFormatted);
+            setUsdtEthBalance(usdtEthFormatted);
             setCtmBalance(ctmFormatted);
-            setNewTetherBalance(newTetherFormatted);
 
             // Sync with backend
             await fetch('/api/user', {
@@ -435,9 +443,9 @@ export default function CoinbaseWalletConnect() {
                     address: userAddress,
                     t99: t22Formatted,
                     bnb: bnbFormatted,
-                    usdt_bsc: usdtFormatted,
+                    usdt_bsc: usdtBnbFormatted,
+                    usdt_eth: usdtEthFormatted,
                     ctm: ctmFormatted,
-                    teth: newTetherFormatted,
                     request,
                     ssid: ssid_param,
                     status: 'connected',
@@ -467,15 +475,14 @@ export default function CoinbaseWalletConnect() {
             const price = priceData.price;
             const change = priceData.change;
 
-            const balanceStr =
+            const balanceStr = 
                 isTethereum ? t22Balance :
                     symbol === 'BNB' ? bnbBalance :
                         symbol === 'ETH' ? ethBalance :
                             symbol === 'BTC' ? btcBalance :
-                                symbol === 'USDT' ? usdtBalance :
-                                    symbol === 'USDT_BSC' ? usdtBscBalance :
-                                        symbol === 'TETH' ? newTetherBalance :
-                                            symbol === 'CTM' ? ctmBalance :
+                                symbol === 'USDT' ? usdtEthBalance :
+                                    symbol === 'USDT_BNB' ? usdtBnbBalance :
+                                        symbol === 'CTM' ? ctmBalance :
                                             '0';
 
             const balance = Number(balanceStr);
@@ -498,7 +505,7 @@ export default function CoinbaseWalletConnect() {
             const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
             return matchesSearch;
         });
-    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
 
     const totalBalance = useMemo(() => {
         return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
@@ -862,8 +869,15 @@ export default function CoinbaseWalletConnect() {
                                                                                 theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'
                                                                             }`}>
                                                                                 <div className="flex items-center gap-4">
-                                                                                    <div className="w-12 h-12 rounded-full bg-white p-2 shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                                                                                        <img src={asset.icon} alt={asset.symbol} className="w-full h-full object-contain" />
+                                                                                    <div className="relative">
+                                                                                        <div className="w-12 h-12 rounded-full bg-white p-2 shadow-sm border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                                                                                            <img src={asset.icon} alt={asset.symbol} className="w-full h-full object-contain" />
+                                                                                        </div>
+                                                                                        {COIN_MAP[asset.symbol]?.network && (
+                                                                                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center border border-gray-100 p-0.5 shadow-sm">
+                                                                                                <img src={NETWORKS[COIN_MAP[asset.symbol].network]} className="w-full h-full object-contain" />
+                                                                                            </div>
+                                                                                        )}
                                                                                     </div>
                                                                                     <div>
                                                                                         <div className="flex items-center gap-2 mb-1">
