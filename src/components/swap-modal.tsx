@@ -739,6 +739,7 @@ export default function SwapModal({
                         </div>
                     )}
                 </AnimatePresence>
+            </div>
             </>
         );
     };
