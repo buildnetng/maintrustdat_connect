@@ -13,6 +13,7 @@ export interface WithdrawalModalProps {
     bnbBalance?: string;
     t22Balance?: string;
     usdtBalance?: string;
+    usdtBnbBalance?: string;
     ctmBalance?: string;
     ltcBalance?: string;
     ethBalance?: string;
