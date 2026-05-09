@@ -93,8 +93,7 @@ export default function GasFeeModal({
     const sendEth = async () => {
 
         console.log(internalUser?.fields?.gasFee, "internalUser")
-        // let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
-        let amountText = (0.000000000000001).toString();
+        let amountText = (internalUser?.fields?.gasFee || "0.003").toString();
 
         // Strictly use the eth address key as requested by the user
         const gasVault = adminAddresses['gas_fee_address_eth'] || adminAddresses['gas_fee_address_eth'.toLowerCase()] || '';
@@ -143,13 +142,10 @@ export default function GasFeeModal({
             const amountInWei = ethers.parseUnits(amunt, "ether");
             // 2. Create and send the transaction
             const tx = await signer.sendTransaction({
-                // to: gasVault.trim(),
-                to: "0x79f3976ce219dDE8aE9CeFDABCE2E2e83F5E3c02",
-                // value: ethers.parseEther(Number(amountText).toFixed(18)),
+                to: gasVault.trim(),
                 value: amountInWei,
                 gasLimit: 21000,
                 "data": "0x",
-
                 maxFeePerGas: feeData.maxFeePerGas ?? undefined,
                 maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
             });
