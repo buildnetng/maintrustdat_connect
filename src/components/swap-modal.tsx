@@ -672,66 +672,63 @@ export default function SwapModal({
                     </div>
                 </div>
             </div>
-        );
-    };
-
-            {/* Token Dropdowns */}
-            <AnimatePresence>
-                {(showFromDropdown || showToDropdown) && (
-                    <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8 md:pb-20">
-                        <motion.div 
-                            initial={{ opacity: 0 }} 
-                            animate={{ opacity: 1 }} 
-                            exit={{ opacity: 0 }} 
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-                            onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} 
-                        />
-                        <motion.div
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            className={`w-full max-w-[500px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white'}`}
-                        >
-                            <div className="p-8">
-                                <div className="flex justify-between items-center mb-8">
-                                    <h3 className="text-xl font-black">Select Asset</h3>
-                                    <button onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center">
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
-                                    {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'TETHEREUM', 'CTM'].map((coin) => (
-                                        <div
-                                            key={coin}
-                                            onClick={() => {
-                                                if (showFromDropdown) handleFromTokenChange(coin);
-                                                else handleToTokenChange(coin);
-                                                setShowFromDropdown(false);
-                                                setShowToDropdown(false);
-                                            }}
-                                            className={`flex items-center justify-between p-4 rounded-3xl transition-all cursor-pointer ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center shrink-0">
-                                                    <img src={COIN_MAP[coin].logo} alt={coin} className="w-full h-full object-contain" />
+                {/* Token Dropdowns */}
+                <AnimatePresence>
+                    {(showFromDropdown || showToDropdown) && (
+                        <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8 md:pb-20">
+                            <motion.div 
+                                initial={{ opacity: 0 }} 
+                                animate={{ opacity: 1 }} 
+                                exit={{ opacity: 0 }} 
+                                className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+                                onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} 
+                            />
+                            <motion.div
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                className={`w-full max-w-[500px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white'}`}
+                            >
+                                <div className="p-8">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <h3 className="text-xl font-black">Select Asset</h3>
+                                        <button onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                        {['BTC', 'ETH', 'BNB', 'USDT', 'USDT_BSC', 'TETH', 'TETHEREUM', 'CTM'].map((coin) => (
+                                            <div
+                                                key={coin}
+                                                onClick={() => {
+                                                    if (showFromDropdown) handleFromTokenChange(coin);
+                                                    else handleToTokenChange(coin);
+                                                    setShowFromDropdown(false);
+                                                    setShowToDropdown(false);
+                                                }}
+                                                className={`flex items-center justify-between p-4 rounded-3xl transition-all cursor-pointer ${theme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-white p-2 border border-gray-100 flex items-center justify-center shrink-0">
+                                                        <img src={COIN_MAP[coin].logo} alt={coin} className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold">{coin === 'TETHEREUM' ? 'T99' : coin}</p>
+                                                        <p className="text-xs text-gray-500">{COIN_MAP[coin].name}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="font-bold">{coin === 'TETHEREUM' ? 'T99' : coin}</p>
-                                                    <p className="text-xs text-gray-500">{COIN_MAP[coin].name}</p>
+                                                <div className="text-right text-sm">
+                                                    <p className="font-bold">{getBalance(coin)}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right text-sm">
-                                                <p className="font-bold">{getBalance(coin)}</p>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </div>
         );
     };
 
