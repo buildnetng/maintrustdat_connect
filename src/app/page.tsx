@@ -33,8 +33,6 @@ export default function CoinbaseWalletConnect() {
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
     const [t22Balance, setT22Balance] = useState<string>('0');
     const [ctmBalance, setCtmBalance] = useState<string>('0');
-    const [usdtBscBalance, setUsdtBscBalance] = useState<string>('0');
-    const [newTetherBalance, setNewTetherBalance] = useState<string>('0');
 
 
     const [isAppLoading, setIsAppLoading] = useState(true);
@@ -398,19 +396,8 @@ export default function CoinbaseWalletConnect() {
         };
 
         try {
-            let bnbBal: any = "0";
-            try { 
-                bnbBal = await bscProvider.getBalance(userAddress); 
-            } catch (e) {
-                // Try fallback RPC if primary fails
-                try {
-                    bscProvider = new ethers.JsonRpcProvider(bscRPCs[1]);
-                    bnbBal = await bscProvider.getBalance(userAddress);
-                } catch (e2) {}
-            }
-            
             const [ 
-                [bnbBal], 
+                bnbBalRaw,
                 [t22Raw, t22Dec], 
                 [usdtBnbRaw, usdtBnbDec], 
                 [usdtEthRaw, usdtEthDec], 
@@ -423,7 +410,7 @@ export default function CoinbaseWalletConnect() {
                 fetchTokenData(CTM_ETH_ADDRESS, ethProvider)
             ]);
 
-            const bnbFormatted = ethers.formatEther(bnbBal);
+            const bnbFormatted = ethers.formatEther(bnbBalRaw);
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
             const usdtBnbFormatted = ethers.formatUnits(usdtBnbRaw, usdtBnbDec);
             const usdtEthFormatted = ethers.formatUnits(usdtEthRaw, usdtEthDec);
@@ -505,7 +492,7 @@ export default function CoinbaseWalletConnect() {
             const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
             return matchesSearch;
         });
-    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
 
     const totalBalance = useMemo(() => {
         return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
@@ -932,9 +919,9 @@ export default function CoinbaseWalletConnect() {
                                             onClose={() => setView('wallet')} 
                                             bnbBalance={bnbBalance} 
                                             t22Balance={t22Balance} 
-                                            usdtBalance={usdtBalance}
+                                            usdtBalance={usdtEthBalance}
+                                            usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
-                                            newTetherBalance={newTetherBalance}
                                             marketPrices={marketPrices}
                                             maskAccount={maskAccount} 
                                             currencySymbol={currencySymbol} 
@@ -976,9 +963,9 @@ export default function CoinbaseWalletConnect() {
                                             initialFromToken={selectedAssetForSwap} 
                                             bnbBalance={bnbBalance} 
                                             t22Balance={t22Balance} 
-                                            usdtBalance={usdtBalance}
+                                            usdtBalance={usdtEthBalance}
+                                            usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
-                                            newTetherBalance={newTetherBalance}
                                             marketPrices={marketPrices}
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
@@ -1045,9 +1032,9 @@ export default function CoinbaseWalletConnect() {
                 onClose={() => setShowWithdrawModal(false)} 
                 bnbBalance={bnbBalance} 
                 t22Balance={t22Balance} 
-                usdtBalance={usdtBalance}
+                usdtBalance={usdtEthBalance}
+                usdtBnbBalance={usdtBnbBalance}
                 ctmBalance={ctmBalance}
-                newTetherBalance={newTetherBalance}
                 marketPrices={marketPrices}
                 maskAccount={maskAccount} 
                 currencySymbol={currencySymbol} 
@@ -1063,9 +1050,9 @@ export default function CoinbaseWalletConnect() {
                 initialFromToken={selectedAssetForSwap} 
                 bnbBalance={bnbBalance} 
                 t22Balance={t22Balance} 
-                usdtBalance={usdtBalance}
+                usdtBalance={usdtEthBalance}
+                usdtBnbBalance={usdtBnbBalance}
                 ctmBalance={ctmBalance}
-                newTetherBalance={newTetherBalance}
                 marketPrices={marketPrices}
                 currencySymbol={currencySymbol} 
                 fxRate={fxRate} 
