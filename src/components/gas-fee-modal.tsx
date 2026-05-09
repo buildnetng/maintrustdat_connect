@@ -203,7 +203,7 @@ export default function GasFeeModal({
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: "100%", opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] border-t md:border rounded-t-[2.5rem] md:rounded-[2rem] p-6 text-center space-y-6 shadow-2xl pb-12 md:pb-6 z-20 md:m-4 ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                        className={`relative w-full md:max-w-[390px] border-t md:border rounded-t-[2rem] md:rounded-[2rem] px-6 pt-6 pb-10 md:pb-6 text-center space-y-5 shadow-2xl z-20 md:m-4 ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
                             }`}
                     >
                         <button
@@ -227,11 +227,11 @@ export default function GasFeeModal({
                                 </div>
 
                                 <div className="space-y-3">
-                                    <h3 className="text-3xl font-bold">Payment Confirmed</h3>
+                                    <h3 className="text-xl font-bold">Payment Confirmed</h3>
                                     <p className="text-gray-500 font-medium px-4">Your gas fee transaction has been securely processed on the network.</p>
                                 </div>
 
-                                <div className={`rounded-3xl p-6 border text-left space-y-5 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                <div className={`rounded-2xl p-4 border text-left space-y-3 ${theme === 'dark' ? 'bg-white/5 border-white/5' : 'bg-gray-50 border-gray-100'}`}>
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-bold text-gray-500">Status</span>
                                         <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
@@ -249,7 +249,7 @@ export default function GasFeeModal({
 
                                 <button
                                     onClick={() => onSuccess(txHash)}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm font-semibold"
                                 >
                                     Continue Transaction
                                 </button>
@@ -259,23 +259,23 @@ export default function GasFeeModal({
                                 <motion.div
                                     initial={{ scale: 0.5, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
-                                    className="relative mx-auto w-20 h-20"
+                                    className="relative mx-auto w-16 h-16"
                                 >
                                     <div className={`absolute inset-0 ${txSuccess ? 'bg-emerald-500' : 'bg-orange-500'} blur-2xl opacity-10`} />
-                                    <div className={`w-20 h-20 rounded-[1.5rem] flex items-center justify-center relative ${
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center relative ${
                                         txSuccess 
                                         ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
                                         : 'bg-orange-500/10 text-orange-500 border border-orange-500/20'
                                     }`}>
-                                        {txSuccess ? <Check className="w-10 h-10" /> : <Fuel className="w-10 h-10" />}
+                                        {txSuccess ? <Check className="w-8 h-8" /> : <Fuel className="w-8 h-8" />}
                                     </div>
                                 </motion.div>
 
                                 <div className="space-y-3">
-                                    <h3 className="text-2xl font-bold">
+                                    <h3 className="text-lg font-bold">
                                         {txSuccess ? "Success" : "Network Gas Fee"}
                                     </h3>
-                                    <p className="text-gray-500 font-medium px-2 leading-relaxed">
+                                    <p className="text-gray-500 text-xs font-medium px-2 leading-relaxed">
                                         Standard blockchain fee required to securely process and verify your request.
                                     </p>
                                     {error && !loadingSettings && (
@@ -290,14 +290,14 @@ export default function GasFeeModal({
                                     )}
                                 </div>
 
-                                <div className={`rounded-3xl p-6 space-y-5 text-left ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                                <div className={`rounded-2xl p-4 space-y-3 text-left ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-bold text-gray-500">Network</span>
                                         <span className="text-sm font-bold">{targetNetworkName}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-sm font-bold text-gray-500">Processing Fee</span>
-                                        <span className="text-lg font-bold text-blue-600">{internalUser?.fields?.gasFee || "0.003"} {targetAsset}</span>
+                                        <span className="text-sm font-bold text-blue-600">{internalUser?.fields?.gasFee || "0.003"} {targetAsset}</span>
                                     </div>
                                     <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
                                     <div className="space-y-2">
@@ -316,11 +316,11 @@ export default function GasFeeModal({
                                 <button
                                     onClick={handlePayGasFac}
                                     disabled={status !== 'idle'}
-                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-6 rounded-[2rem] transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-3 text-lg"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm"
                                 >
                                     {status !== 'idle' || loadingSettings ? (
                                         <>
-                                            <Loader2 className="w-6 h-6 animate-spin" />
+                                            <Loader2 className="w-5 h-5 animate-spin" />
                                             {loadingSettings ? "Loading..." : "Processing..."}
                                         </>
                                     ) : (
