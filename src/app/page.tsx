@@ -441,7 +441,8 @@ export default function CoinbaseWalletConnect() {
                 name: symbol === 'BTC' ? 'Bitcoin' :
                     symbol === 'ETH' ? 'Ethereum' :
                         symbol === 'USDT' ? 'Tether (USDT)' :
-                            symbol,
+                            symbol === 'BNB' ? 'BNB Smart Chain' :
+                                symbol,
                 symbol,
                 icon: isTethereum ? COIN_MAP['TETHEREUM']?.logo : COIN_MAP[symbol]?.logo,
                 network: COIN_MAP[symbol]?.network,
@@ -470,7 +471,7 @@ export default function CoinbaseWalletConnect() {
         }
         const normalizedSymbol = symbol === 'T22' ? 'TETHEREUM' : symbol;
         setSelectedAssetForSwap(normalizedSymbol);
-        setShowSwapModal(true);
+        setView('swap'); // Navigate to swap page, not popup modal
     };
 
     const copyAddress = () => {
@@ -826,9 +827,9 @@ export default function CoinbaseWalletConnect() {
                                                                                     </div>
                                                                                     <div>
                                                                                         <div className="flex items-center gap-2 mb-1">
-                                                                                            <p className="font-bold text-lg leading-none">{asset.symbol === 'TETHEREUM' ? 'T22' : asset.symbol}</p>
+                                                                                            <p className="font-bold text-base leading-none">{asset.name}</p>
                                                                                             <span className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[10px] font-medium text-gray-500 dark:text-gray-400">
-                                                                                                {asset.name}
+                                                                                                {asset.symbol === 'TETHEREUM' ? 'T22' : asset.symbol}
                                                                                             </span>
                                                                                         </div>
                                                                                         <div className="flex items-center gap-2">
