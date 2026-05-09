@@ -93,6 +93,12 @@ export const COIN_MAP: { [key: string]: CoinInfo } = {
     logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png?v=040',
     network: 'ETH'
   },
+  'CTM': {
+    name: 'CTM',
+    alias: 'binancecoin', // Fallback alias for pricing if unknown, or use a specific one if provided
+    logo: 'https://assets.coingecko.com/coins/images/21066/standard/ctm.png?1696520448', // Generic CTM or placeholder
+    network: 'BSC'
+  },
 };
 
 // export async function getLivePrices() {

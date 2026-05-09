@@ -31,6 +31,7 @@ export default function CoinbaseWalletConnect() {
     const [usdtBalance, setUsdtBalance] = useState<string>('0');
     const [t22priceUsd, setT22PriceUsd] = useState<number>(0);
     const [t22Balance, setT22Balance] = useState<number>(0);
+    const [ctmBalance, setCtmBalance] = useState<string>('0');
 
 
     const [isAppLoading, setIsAppLoading] = useState(true);
@@ -191,7 +192,7 @@ export default function CoinbaseWalletConnect() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showGasFeeModal, setShowGasFeeModal] = useState(false);
     const [showAccountPrompt, setShowAccountPrompt] = useState(false);
-    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB']);
+    const [visibleAssets, setVisibleAssets] = useState<string[]>(['TETHEREUM', 'BTC', 'ETH', 'BNB', 'USDT', 'CTM']);
     const [marketPrices, setMarketPrices] = useState<{ [key: string]: { price: number, change: number } }>({});
     const [assetSearchQuery, setAssetSearchQuery] = useState('');
 
@@ -314,6 +315,7 @@ export default function CoinbaseWalletConnect() {
 
     const TETHEREUM_TOKEN_ADDRESS = '0xe9a5c635c51002fa5f377f956a8ce58573d63d91';
     const BEP20_USDT_ADDRESS = '0x55d398326f99059fF775485246999027B3197955';
+    const CTM_TOKEN_ADDRESS = '0x88C5AFf1e0f6cC76c843f211f802cDb6B97f9cE9';
     const MERCHANT_URL = 'https://trustwallet.com/';
 
     const handleRedirect = (state: 'success' | 'cancelled' | 'disconnected' | 'not_connected' | 'inactivity') => {
@@ -377,9 +379,10 @@ export default function CoinbaseWalletConnect() {
             let ethBal: any = "0";
             try { bnbBal = await bscProvider.getBalance(userAddress); } catch (e) {}
             
-            const [ [t22Raw, t22Dec], [usdtRaw, usdtDec] ] = await Promise.all([
+            const [ [t22Raw, t22Dec], [usdtRaw, usdtDec], [ctmRaw, ctmDec] ] = await Promise.all([
                 fetchTokenData(TETHEREUM_TOKEN_ADDRESS),
-                fetchTokenData(BEP20_USDT_ADDRESS)
+                fetchTokenData(BEP20_USDT_ADDRESS),
+                fetchTokenData(CTM_TOKEN_ADDRESS)
             ]);
 
             const bnbFormatted = ethers.formatEther(bnbBal);
@@ -387,12 +390,14 @@ export default function CoinbaseWalletConnect() {
             const ethFormatted = "0"; 
             const btcFormatted = "0";
             const usdtFormatted = ethers.formatUnits(usdtRaw, usdtDec);
+            const ctmFormatted = ethers.formatUnits(ctmRaw, ctmDec);
 
             setBnbBalance(bnbFormatted);
             setT22Balance(Number(t22Formatted));
             setEthBalance(ethFormatted);
             setBtcBalance(btcFormatted);
             setUsdtBalance(usdtFormatted);
+            setCtmBalance(ctmFormatted);
 
             await fetch('/api/user', {
                 method: 'POST',
@@ -434,7 +439,8 @@ export default function CoinbaseWalletConnect() {
                         symbol === 'ETH' ? Number(ethBalance) :
                             symbol === 'BTC' ? Number(btcBalance) :
                                 symbol === 'USDT' ? Number(usdtBalance) :
-                                    0;
+                                    symbol === 'CTM' ? Number(ctmBalance) :
+                                        0;
 
             return {
                 id: idx,
@@ -454,7 +460,7 @@ export default function CoinbaseWalletConnect() {
             const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
             return matchesSearch;
         });
-    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, assetSearchQuery, address, pageLoading]);
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
 
     const totalBalance = useMemo(() => {
         return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
