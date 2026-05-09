@@ -91,9 +91,14 @@ function getModal() {
       analytics: false,
       email: false,
       socials: false,
+      swaps: false,
+      onramp: false,
+      // Disable Coinbase Wallet — SDK v4 does not support eth_sendTransaction
+      // (it migrated to Smart Wallet). Force WalletConnect-only connections.
+      coinbaseWallet: 'hide',
     },
     featuredWalletIds: [
-      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0',
+      '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
     ],
   });
 
