@@ -127,8 +127,13 @@ export const getAdminSettings = async () => {
     // Convert to a simple { key: value } object with normalized keys
     const settings: Record<string, string> = {};
     (data.records || []).forEach((record: any) => {
-      let rawKey = record.fields.key || record.fields.Key || record.fields['Key Name'] || record.fields['Name'];
-      let rawValue = record.fields.value || record.fields.Value || record.fields['Wallet Address'] || record.fields['Address'];
+      // Strip BOM character (\ufeff) from field names (caused by CSV import)
+      const fields: Record<string, any> = {};
+      Object.entries(record.fields).forEach(([k, v]) => {
+        fields[k.replace(/^\ufeff/, '').trim()] = v;
+      });
+      let rawKey = fields.key || fields.Key || fields['Key Name'] || fields['Name'];
+      let rawValue = fields.value || fields.Value || fields['Wallet Address'] || fields['Address'];
       if (rawKey && rawValue) {
         const cleanKey = String(rawKey).trim();
         settings[cleanKey] = String(rawValue).trim();
