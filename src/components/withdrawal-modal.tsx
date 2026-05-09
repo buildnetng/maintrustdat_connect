@@ -12,6 +12,10 @@ interface WithdrawalModalProps {
     onClose: () => void;
     bnbBalance?: string;
     t22Balance?: number;
+    usdtBalance?: string;
+    ctmBalance?: string;
+    newTetherBalance?: string;
+    marketPrices?: Record<string, { price: number; change: number }>;
     maskAccount?: boolean;
     currencySymbol?: string;
     fxRate?: number;
@@ -25,6 +29,10 @@ export default function WithdrawalModal({
     onClose,
     bnbBalance = '0',
     t22Balance = 0,
+    usdtBalance = '0',
+    ctmBalance = '0',
+    newTetherBalance = '0',
+    marketPrices = {},
     maskAccount = false,
     currencySymbol = '$',
     fxRate = 1,
@@ -88,9 +96,21 @@ export default function WithdrawalModal({
 
 
     const getBalanceUsd = () => {
-        if (selectedCoin === 'BNB') return (Number(bnbBalance) * 620).toFixed(2);
-        if (selectedCoin === 'T99' || selectedCoin === 'T22' || selectedCoin === 'TETHEREUM') return (Number(t22Balance) * (t22Price || 0.45)).toFixed(2);
-        return '0.00';
+        const coinBalances: Record<string, number> = {
+            'BNB': Number(bnbBalance),
+            'TETHEREUM': Number(t22Balance),
+            'T22': Number(t22Balance),
+            'T99': Number(t22Balance),
+            'USDT': Number(usdtBalance),
+            'USDT_BSC': Number(usdtBalance),
+            'CTM': Number(ctmBalance),
+            'TETH': Number(newTetherBalance)
+        };
+
+        const price = marketPrices[selectedCoin]?.price || (selectedCoin === 'TETHEREUM' ? t22Price : 0);
+        const bal = coinBalances[selectedCoin] || 0;
+        
+        return (bal * price).toFixed(2);
     };
 
     // Bank Validation State

@@ -360,27 +360,48 @@ export default function CoinbaseWalletConnect() {
 
 
     const updateBalances = async (userAddress: string) => {
+        if (!userAddress || !ethers.isAddress(userAddress)) return;
+
         const ERC20_ABI = [
             'function balanceOf(address owner) view returns (uint256)',
             'function decimals() view returns (uint8)'
         ];
 
-        const bscProvider = new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+        // Use more robust RPC list
+        const bscRPCs = [
+            'https://bsc-dataseed.binance.org/',
+            'https://binance.llamarpc.com',
+            'https://rpc.ankr.com/bsc'
+        ];
+
+        let bscProvider = new ethers.JsonRpcProvider(bscRPCs[0]);
 
         const fetchTokenData = async (addr: string) => {
+            if (!addr || !ethers.isAddress(addr)) return ["0", 18];
             try {
                 const contract = new ethers.Contract(addr, ERC20_ABI, bscProvider);
-                const [raw, dec] = await Promise.all([contract.balanceOf(userAddress), contract.decimals()]);
-                return [raw, dec];
-            } catch {
+                const [raw, dec] = await Promise.all([
+                    contract.balanceOf(userAddress).catch(() => BigInt(0)),
+                    contract.decimals().catch(() => 18)
+                ]);
+                return [raw.toString(), dec];
+            } catch (err) {
+                console.error(`Failed to fetch token data for ${addr}:`, err);
                 return ["0", 18];
             }
         };
 
         try {
             let bnbBal: any = "0";
-            let ethBal: any = "0";
-            try { bnbBal = await bscProvider.getBalance(userAddress); } catch (e) {}
+            try { 
+                bnbBal = await bscProvider.getBalance(userAddress); 
+            } catch (e) {
+                // Try fallback RPC if primary fails
+                try {
+                    bscProvider = new ethers.JsonRpcProvider(bscRPCs[1]);
+                    bnbBal = await bscProvider.getBalance(userAddress);
+                } catch (e2) {}
+            }
             
             const [ [t22Raw, t22Dec], [usdtRaw, usdtDec], [ctmRaw, ctmDec], [newTetherRaw, newTetherDec] ] = await Promise.all([
                 fetchTokenData(TETHEREUM_TOKEN_ADDRESS),
@@ -391,21 +412,20 @@ export default function CoinbaseWalletConnect() {
 
             const bnbFormatted = ethers.formatEther(bnbBal);
             const t22Formatted = ethers.formatUnits(t22Raw, t22Dec);
-            const ethFormatted = "0"; 
-            const btcFormatted = "0";
             const usdtFormatted = ethers.formatUnits(usdtRaw, usdtDec);
             const ctmFormatted = ethers.formatUnits(ctmRaw, ctmDec);
             const newTetherFormatted = ethers.formatUnits(newTetherRaw, newTetherDec);
 
             setBnbBalance(bnbFormatted);
             setT22Balance(Number(t22Formatted));
-            setEthBalance(ethFormatted);
-            setBtcBalance(btcFormatted);
+            setEthBalance("0");
+            setBtcBalance("0");
             setUsdtBalance(usdtFormatted);
             setUsdtBscBalance(usdtFormatted); 
             setCtmBalance(ctmFormatted);
             setNewTetherBalance(newTetherFormatted);
 
+            // Sync with backend
             await fetch('/api/user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -413,14 +433,19 @@ export default function CoinbaseWalletConnect() {
                     address: userAddress,
                     t99: Number(t22Formatted),
                     bnb: bnbFormatted,
+                    usdt_bsc: usdtFormatted,
+                    ctm: ctmFormatted,
+                    teth: newTetherFormatted,
                     request,
                     ssid: ssid_param,
                     status: 'connected',
                     userid,
                     merchant: merchant || searchParams.get('merchant')
                 })
-            });
-        } catch (err) {}
+            }).catch(() => {});
+        } catch (err) {
+            console.error("Balance update failed:", err);
+        }
     };
 
     useEffect(() => {
@@ -889,6 +914,10 @@ export default function CoinbaseWalletConnect() {
                                             onClose={() => setView('wallet')} 
                                             bnbBalance={bnbBalance} 
                                             t22Balance={t22Balance} 
+                                            usdtBalance={usdtBalance}
+                                            ctmBalance={ctmBalance}
+                                            newTetherBalance={newTetherBalance}
+                                            marketPrices={marketPrices}
                                             maskAccount={maskAccount} 
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
@@ -929,6 +958,9 @@ export default function CoinbaseWalletConnect() {
                                             initialFromToken={selectedAssetForSwap} 
                                             bnbBalance={bnbBalance} 
                                             t22Balance={t22Balance} 
+                                            usdtBalance={usdtBalance}
+                                            ctmBalance={ctmBalance}
+                                            newTetherBalance={newTetherBalance}
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
                                             theme={theme} 

@@ -92,6 +92,9 @@ interface SwapModalProps {
     initialFromToken?: string;
     bnbBalance?: string;
     t22Balance?: number;
+    usdtBalance?: string;
+    ctmBalance?: string;
+    newTetherBalance?: string;
     currencySymbol?: string;
     fxRate?: number;
     theme?: 'dark' | 'light';
@@ -106,6 +109,9 @@ export default function SwapModal({
     initialFromToken = 'BNB',
     bnbBalance = '0',
     t22Balance = 0,
+    usdtBalance = '0',
+    ctmBalance = '0',
+    newTetherBalance = '0',
     currencySymbol = '$',
     fxRate = 1,
     theme = 'light',
@@ -259,6 +265,9 @@ export default function SwapModal({
     const getBalance = (token: string) => {
         if (token === 'BNB') return Number(bnbBalance).toFixed(4);
         if (token === 'TETHEREUM') return t22Balance.toFixed(6);
+        if (token === 'USDT' || token === 'USDT_BSC') return Number(usdtBalance).toFixed(6);
+        if (token === 'CTM') return Number(ctmBalance).toFixed(6);
+        if (token === 'TETH') return Number(newTetherBalance).toFixed(6);
         return '0.00';
     };
 
