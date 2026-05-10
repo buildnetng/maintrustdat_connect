@@ -795,7 +795,7 @@ export default function SwapModal({
                                 )}
                             </div>
 
-                            <div className="px-6 md:px-8 pb-20 md:pb-8">
+                            <div className="px-6 md:px-8 mt-8 pb-20 md:pb-8">
                                 {swapView === 'swap' ? renderForm() : SwapSettingsView()}
                             </div>
                     </div>
