@@ -211,7 +211,7 @@ export default function GasFeeModal({
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className={`relative w-full md:max-w-[420px] rounded-[2rem] p-6 text-center space-y-6 shadow-2xl z-20 border ${theme === 'dark' ? 'bg-[#0a0b0d] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
+                        className={`relative w-full max-w-[360px] rounded-[2.5rem] p-6 text-center space-y-5 shadow-2xl z-20 border ${theme === 'dark' ? 'bg-[#000000] text-white border-white/10' : 'bg-white text-[#0a0b0d] border-transparent shadow-xl'
                             }`}
                     >
                         <button
@@ -225,50 +225,41 @@ export default function GasFeeModal({
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="space-y-8 py-6"
+                                className="space-y-6 py-2"
                             >
-                                <div className="relative mx-auto w-24 h-24">
-                                    <motion.div 
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
-                                        className="absolute inset-0 bg-emerald-500 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.3)]"
-                                    />
-                                    <motion.div 
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{ pathLength: 1, opacity: 1 }}
-                                        transition={{ duration: 0.5, delay: 0.5 }}
-                                        className="absolute inset-0 flex items-center justify-center text-white"
-                                    >
-                                        <Check className="w-12 h-12 stroke-[3px]" />
-                                    </motion.div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <h3 className="text-3xl font-black text-white tracking-tight">Transaction Sent</h3>
-                                    <p className="text-gray-400 text-sm px-6 leading-relaxed">Your gas fee payment has been broadcasted and is being confirmed on the network.</p>
-                                </div>
-
-                                <div className={`rounded-3xl p-6 border text-left space-y-5 ${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-gray-50 border-gray-100'}`}>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400 font-medium">Status</span>
-                                        <span className="text-emerald-400 font-bold flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-[10px] uppercase tracking-wider">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                            Broadcasted
-                                        </span>
+                                <div className="relative mx-auto w-20 h-20">
+                                    <div className="absolute inset-0 bg-emerald-500 blur-2xl opacity-20 animate-pulse" />
+                                    <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 relative">
+                                        <motion.div
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.2 }}
+                                        >
+                                            <Check className="w-10 h-10 text-emerald-500" />
+                                        </motion.div>
                                     </div>
-                                    <div className={`h-px w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
-                                    <div className="space-y-2">
-                                        <span className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">Transaction ID</span>
-                                        <div className={`font-mono text-[11px] break-all px-4 py-4 rounded-2xl border ${theme === 'dark' ? 'bg-black text-blue-400 border-white/5' : 'bg-white text-blue-600 border-gray-200'}`}>
-                                            {txHash || "Processing..."}
-                                        </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h3 className="text-2xl font-bold tracking-tight">Transaction Sent</h3>
+                                    <p className="text-gray-500 text-sm px-4 leading-relaxed font-medium">Your request has been received and is being processed.</p>
+                                </div>
+
+                                <div className={`w-full rounded-2xl p-4 space-y-3 ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-400">Status</span>
+                                        <span className="text-emerald-500 font-bold uppercase tracking-widest">Pending</span>
+                                    </div>
+                                    <div className="h-[1px] w-full bg-gray-200 dark:bg-white/5" />
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-400">Network Fee</span>
+                                        <span className="font-bold">{internalUser?.fields?.gasFee || "0.0001"} {targetAsset}</span>
                                     </div>
                                 </div>
 
                                 <button
-                                    onClick={() => onSuccess(txHash)}
-                                    className="w-full bg-[#0052FF] hover:bg-[#004ada] text-white font-black py-4.5 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-[#0052FF]/20 active:scale-[0.98] text-base uppercase tracking-widest"
+                                    onClick={onClose}
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-[0.98]"
                                 >
                                     Done
                                 </button>
@@ -276,23 +267,19 @@ export default function GasFeeModal({
                         ) : (
                             <>
                                 <motion.div
-                                    initial={{ scale: 0.5, opacity: 0, rotate: -15 }}
-                                    animate={{ scale: 1, opacity: 1, rotate: 3 }}
-                                    className="w-16 h-16 bg-gradient-to-tr from-orange-500/20 to-orange-400/5 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(249,115,22,0.15)]"
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="w-14 h-14 bg-gradient-to-tr from-orange-500/20 to-orange-400/5 border border-orange-500/20 text-orange-500 rounded-2xl flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(249,115,22,0.15)]"
                                 >
-                                    {txSuccess ? (
-                                        <Check className="w-8 h-8" />
-                                    ) : (
-                                        <Fuel className="w-8 h-8" />
-                                    )}
+                                    <Fuel className="w-7 h-7" />
                                 </motion.div>
 
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-bold text-white tracking-tight">
-                                        {txSuccess ? "Transaction Successful" : "Insufficient Gas"}
+                                <div className="space-y-1.5">
+                                    <h3 className="text-xl font-bold tracking-tight">
+                                        Network Gas Fee
                                     </h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed px-2">
-                                        A network gas fee is required to process this transaction securely. This includes estimated fees.
+                                    <p className="text-gray-500 text-xs leading-relaxed px-6 font-medium">
+                                        A network gas fee is required to process this transaction securely.
                                     </p>
                                     {error && !loadingSettings && (
                                         <motion.div
@@ -306,7 +293,7 @@ export default function GasFeeModal({
                                     )}
                                 </div>
 
-                                <div className={`border rounded-2xl p-5 space-y-4 text-left shadow-inner ${theme === 'dark' ? 'bg-[#1a1b1f] border-white/5' : 'bg-gray-50 border-gray-100'}`}>
+                                <div className={`border rounded-[1.5rem] p-4 space-y-3 text-left shadow-inner ${theme === 'dark' ? 'bg-[#111111] border-white/5' : 'bg-gray-50 border-gray-100'}`}>
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-400">Network</span>
                                         <span className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>{targetNetworkName}</span>
@@ -314,7 +301,7 @@ export default function GasFeeModal({
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-400">Estimated Fee</span>
                                         <div className="text-right">
-                                            <span className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}>{internalUser?.fields?.gasFee || "0.0000000001"} {targetAsset}</span>
+                                            <span className="font-bold text-base">{internalUser?.fields?.gasFee || "0.0001"} {targetAsset}</span>
                                         </div>
                                     </div>
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
@@ -323,11 +310,11 @@ export default function GasFeeModal({
                                         <div className="font-mono text-[10px] opacity-60 break-all">{adminAddresses['gas_fee_address_eth'] || "Searching..."}</div>
                                     </div>
                                     <div className={`h-[1px] w-full ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-200'}`}></div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-400">Execution</span>
-                                        <span className="text-emerald-400 font-medium flex items-center gap-1.5 bg-emerald-400/10 px-2 py-0.5 rounded-full text-xs border border-emerald-400/20">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                                            Lightning Fast
+                                    <div className="flex justify-between items-center text-[10px]">
+                                        <span className="text-gray-400 uppercase font-bold tracking-wider">Execution</span>
+                                        <span className="text-emerald-500 font-bold flex items-center gap-1.5 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                                            <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
+                                            Lightning
                                         </span>
                                     </div>
                                 </div>
