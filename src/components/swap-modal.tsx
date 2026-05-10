@@ -566,7 +566,7 @@ export default function SwapModal({
                     <div className="flex items-center justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-baseline overflow-hidden">
-                                <span className={`text-3xl font-bold shrink-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'} ${!fromAmount || Number(fromAmount) === 0 ? 'opacity-20' : ''}`}>
+                                <span className={`text-2xl font-bold shrink-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'} ${!fromAmount || Number(fromAmount) === 0 ? 'opacity-20' : ''}`}>
                                     {currencySymbol}
                                 </span>
                                 <input
@@ -574,7 +574,7 @@ export default function SwapModal({
                                     value={fromAmount}
                                     onChange={(e) => setFromAmount(e.target.value)}
                                     placeholder="0"
-                                    className={`bg-transparent text-3xl font-bold placeholder-gray-300 focus:outline-none w-full min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
+                                    className={`bg-transparent text-2xl font-bold placeholder-gray-300 focus:outline-none w-full min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
                                 />
                             </div>
                         </div>
@@ -629,7 +629,7 @@ export default function SwapModal({
                 <div className={`rounded-[2rem] p-6 transition-all ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-50'}`}>
                     <div className="flex items-center justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
-                            <p className={`text-4xl font-bold truncate ${toAmount ? 'text-gray-900' : 'text-gray-400'}`}>
+                            <p className={`text-2xl font-bold truncate ${toAmount && theme === 'dark' ? 'text-white' : toAmount ? 'text-gray-900' : 'text-gray-400'}`}>
                                 {toAmount || '0'}
                             </p>
                         </div>
@@ -721,9 +721,9 @@ export default function SwapModal({
                                 exit={{ y: '100%' }}
                                 className={`w-full max-w-[500px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white'}`}
                             >
-                                <div className="p-8">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <h3 className="text-xl font-black">Select Asset</h3>
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-base font-semibold tracking-tight">Select Asset</h3>
                                         <button onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center">
                                             <X className="w-5 h-5" />
                                         </button>
@@ -782,7 +782,7 @@ export default function SwapModal({
                                     >
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
-                                    <h2 className="text-2xl font-bold tracking-tight">{swapView === 'settings' ? 'Swap settings' : 'Swap'}</h2>
+                                    <h2 className="text-base font-semibold tracking-tight">{swapView === 'settings' ? 'Swap settings' : 'Swap'}</h2>
                                 </div>
 
                                 {swapView === 'swap' && (
