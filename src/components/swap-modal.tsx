@@ -704,10 +704,9 @@ export default function SwapModal({
                         </motion.div>
                     </div>
                 </div>
-                {/* Token Dropdowns */}
                 <AnimatePresence>
                     {(showFromDropdown || showToDropdown) && (
-                        <div className="fixed inset-0 z-[100] flex items-end justify-center px-4 pb-8 md:pb-20">
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                             <motion.div 
                                 initial={{ opacity: 0 }} 
                                 animate={{ opacity: 1 }} 
@@ -716,10 +715,10 @@ export default function SwapModal({
                                 onClick={() => { setShowFromDropdown(false); setShowToDropdown(false); }} 
                             />
                             <motion.div
-                                initial={{ y: '100%' }}
-                                animate={{ y: 0 }}
-                                exit={{ y: '100%' }}
-                                className={`w-full max-w-[500px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white'}`}
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className={`w-full max-w-[380px] rounded-[2.5rem] overflow-hidden relative z-10 ${theme === 'dark' ? 'bg-[#0a0b0d]' : 'bg-white shadow-2xl'}`}
                             >
                                 <div className="p-6">
                                     <div className="flex justify-between items-center mb-6">
