@@ -566,15 +566,15 @@ export default function SwapModal({
                     <div className="flex items-center justify-between gap-4 mb-2">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-baseline overflow-hidden">
-                                <span className={`text-4xl font-bold shrink-0 ${fromAmount && Number(fromAmount) > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                                    {fromAmount && Number(fromAmount) > 0 ? currencySymbol : ''}
+                                <span className={`text-3xl font-bold shrink-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'} ${!fromAmount || Number(fromAmount) === 0 ? 'opacity-20' : ''}`}>
+                                    {currencySymbol}
                                 </span>
                                 <input
                                     type="number"
                                     value={fromAmount}
                                     onChange={(e) => setFromAmount(e.target.value)}
                                     placeholder="0"
-                                    className={`bg-transparent text-4xl font-bold placeholder-gray-300 focus:outline-none w-full min-w-0 ${fromAmount && Number(fromAmount) > 0 ? 'text-red-600' : 'text-gray-400'}`}
+                                    className={`bg-transparent text-3xl font-bold placeholder-gray-300 focus:outline-none w-full min-w-0 ${theme === 'dark' ? 'text-white' : 'text-[#0a0b0d]'}`}
                                 />
                             </div>
                         </div>
@@ -598,11 +598,18 @@ export default function SwapModal({
                     <div className="flex justify-between items-center text-gray-400 font-semibold text-xs">
                         <p className="flex items-center gap-1">
                             {fromAmount || '0'} {fromToken === 'TETHEREUM' ? 'T99' : (fromToken === 'USDT_BNB' || fromToken === 'USDT_BSC' ? 'USDT' : fromToken)} 
-                            <ArrowDownUp className="w-3 h-3 ml-1 opacity-60" />
                         </p>
-                        <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{getBalance(fromToken)}</span>
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => {
+                                    const bal = getBalance(fromToken).replace(/[^\d.]/g, '');
+                                    setFromAmount(bal);
+                                }}
+                                className="text-blue-600 font-bold uppercase tracking-wider hover:opacity-70 transition-opacity"
+                            >
+                                Max
+                            </button>
+                            <span>Balance: {getBalance(fromToken)}</span>
                         </div>
                     </div>
                 </div>
@@ -669,10 +676,12 @@ export default function SwapModal({
                     )}
                 </AnimatePresence>
 
-                {/* Slide to Swap */}
-                <div className="pt-20">
+                {/* Slide Button */}
+                <div className="pt-24 pb-8">
                     <div 
-                        className={`h-[4.5rem] rounded-full relative overflow-hidden transition-all p-1.5 select-none touch-none ${theme === 'dark' ? 'bg-white/5' : 'bg-[#e5e7ff]'}`}
+                        className={`relative w-full h-[4.5rem] rounded-full p-1 cursor-pointer select-none overflow-hidden ${
+                            theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'
+                        }`}
                         onMouseDown={() => setIsSliding(true)}
                         onMouseMove={(e) => isSliding && handleSlide(e)}
                         onMouseUp={() => { setIsSliding(false); handleSlideEnd(); }}
@@ -773,7 +782,7 @@ export default function SwapModal({
                                     >
                                         <ChevronLeft className="w-6 h-6" />
                                     </button>
-                                    <h2 className="text-2xl font-black">{swapView === 'settings' ? 'Swap settings' : 'Swap'}</h2>
+                                    <h2 className="text-2xl font-bold tracking-tight">{swapView === 'settings' ? 'Swap settings' : 'Swap'}</h2>
                                 </div>
 
                                 {swapView === 'swap' && (
