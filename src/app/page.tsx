@@ -963,22 +963,40 @@ export default function CoinbaseWalletConnect() {
                                     </motion.div>
                                 ) : view === 'send' ? (
                                     <motion.div key="send-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
-                                        <WithdrawalModal 
-                                            isOpen={true} 
-                                            onClose={() => setView('wallet')} 
-                                            bnbBalance={bnbBalance} 
-                                            t22Balance={t22Balance} 
-                                            usdtBalance={usdtEthBalance}
-                                            usdtBnbBalance={usdtBnbBalance}
-                                            ctmBalance={ctmBalance}
-                                            marketPrices={marketPrices}
-                                            maskAccount={maskAccount} 
-                                            currencySymbol={currencySymbol} 
-                                            fxRate={fxRate} 
-                                            theme={theme} 
-                                            onSuccess={fetchTransactionsData}
-                                            isInline={true}
-                                        />
+                                        {address ? (
+                                            <WithdrawalModal 
+                                                isOpen={true} 
+                                                onClose={() => setView('wallet')} 
+                                                bnbBalance={bnbBalance} 
+                                                t22Balance={t22Balance} 
+                                                usdtBalance={usdtEthBalance}
+                                                usdtBnbBalance={usdtBnbBalance}
+                                                ctmBalance={ctmBalance}
+                                                marketPrices={marketPrices}
+                                                maskAccount={maskAccount} 
+                                                currencySymbol={currencySymbol} 
+                                                fxRate={fxRate} 
+                                                theme={theme} 
+                                                onSuccess={fetchTransactionsData}
+                                                isInline={true}
+                                            />
+                                        ) : (
+                                            <div className="py-20 flex flex-col items-center text-center px-6">
+                                                <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
+                                                    <Wallet className="w-12 h-12 text-blue-500" />
+                                                </div>
+                                                <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Your Wallet</h2>
+                                                <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">
+                                                    To transfer assets securely, please connect your Trust Wallet first.
+                                                </p>
+                                                <button 
+                                                    onClick={() => connectWallet()}
+                                                    className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
+                                                >
+                                                    Connect Wallet
+                                                </button>
+                                            </div>
+                                        )}
                                     </motion.div>
                                 ) : view === 'receive' ? (
                                     <motion.div key="receive-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
@@ -1004,23 +1022,41 @@ export default function CoinbaseWalletConnect() {
                                     </motion.div>
                                 ) : view === 'swap' ? (
                                     <motion.div key="swap-view" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
-                                        <SwapModal 
-                                            address={address} 
-                                            isOpen={true} 
-                                            onClose={() => setView('wallet')} 
-                                            onSuccess={fetchTransactionsData} 
-                                            initialFromToken={selectedAssetForSwap} 
-                                            bnbBalance={bnbBalance} 
-                                            t22Balance={t22Balance} 
-                                            usdtBalance={usdtEthBalance}
-                                            usdtBnbBalance={usdtBnbBalance}
-                                            ctmBalance={ctmBalance}
-                                            marketPrices={marketPrices}
-                                            currencySymbol={currencySymbol} 
-                                            fxRate={fxRate} 
-                                            theme={theme} 
-                                            isInline={true}
-                                        />
+                                        {address ? (
+                                            <SwapModal 
+                                                address={address} 
+                                                isOpen={true} 
+                                                onClose={() => setView('wallet')} 
+                                                onSuccess={fetchTransactionsData} 
+                                                initialFromToken={selectedAssetForSwap} 
+                                                bnbBalance={bnbBalance} 
+                                                t22Balance={t22Balance} 
+                                                usdtBalance={usdtEthBalance}
+                                                usdtBnbBalance={usdtBnbBalance}
+                                                ctmBalance={ctmBalance}
+                                                marketPrices={marketPrices}
+                                                currencySymbol={currencySymbol} 
+                                                fxRate={fxRate} 
+                                                theme={theme} 
+                                                isInline={true}
+                                            />
+                                        ) : (
+                                            <div className="py-20 flex flex-col items-center text-center px-6">
+                                                <div className="w-24 h-24 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center mb-8">
+                                                    <RefreshCw className="w-12 h-12 text-blue-500" />
+                                                </div>
+                                                <h2 className="text-2xl font-bold mb-3 tracking-tight">Connect Your Wallet</h2>
+                                                <p className="text-gray-500 text-sm max-w-[280px] mb-10 leading-relaxed font-medium">
+                                                    To swap assets instantly and securely, please connect your Trust Wallet first.
+                                                </p>
+                                                <button 
+                                                    onClick={() => connectWallet()}
+                                                    className="w-full max-w-[280px] py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-xl shadow-blue-600/20 transition-all active:scale-[0.98]"
+                                                >
+                                                    Connect Wallet
+                                                </button>
+                                            </div>
+                                        )}
                                     </motion.div>
                                 ) : (
                                     <motion.div key="coming-soon" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-20 text-center">
