@@ -1015,7 +1015,6 @@ export default function CoinbaseWalletConnect() {
                                             usdtBalance={usdtEthBalance}
                                             usdtBnbBalance={usdtBnbBalance}
                                             ctmBalance={ctmBalance}
-                                            ltcBalance={ltcBalance}
                                             marketPrices={marketPrices}
                                             currencySymbol={currencySymbol} 
                                             fxRate={fxRate} 
