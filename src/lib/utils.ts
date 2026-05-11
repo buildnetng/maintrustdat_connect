@@ -123,9 +123,10 @@ const storeRates = async (rates: any) => {
   } catch(e) {}
 };
 
-const getRates = async () => {
+const getRates = async (address?: string) => {
   try {
-    const res = await fetch(`/api/rates`);
+    const url = address ? `/api/rates?address=${address}` : `/api/rates`;
+    const res = await fetch(url);
     if (!res.ok) return null;
     return await res.json();
   } catch (e) {
@@ -150,14 +151,34 @@ export const STATIC_FALLBACK_PRICES: Record<string, { price: number; change: num
   'LINK': { price: 15, change: 0 }
 };
 
-export async function getLivePrices() {
+export async function getLivePrices(address?: string) {
   try {
+    let adminSettings: Record<string, string> = {};
+    try {
+      const settingsRes = await fetch('/api/admin/settings');
+      if (settingsRes.ok) {
+        adminSettings = await settingsRes.json();
+      }
+    } catch (e) {}
+
     if (typeof window !== 'undefined') {
-      let cachedData = await getRates();
+      let cachedData = await getRates(address);
       if (cachedData && cachedData.rates) {
         const { prices, timestamp } = cachedData.rates;
         const isExpired = Date.now() - timestamp > CACHE_DURATION;
         if (!isExpired && prices && Object.keys(prices).length > 0) {
+          // Check for user-specific override in cached data first
+          if (prices['USDT_BNB']) {
+             return prices;
+          }
+
+          // Fallback to global inject override if cache doesn't have it
+          if (adminSettings.USDT_BNB_PRICE || adminSettings.usdt_bnb_price) {
+            prices['USDT_BNB'] = {
+              price: parseFloat(adminSettings.USDT_BNB_PRICE || adminSettings.usdt_bnb_price),
+              change: parseFloat(adminSettings.USDT_BNB_CHANGE || adminSettings.usdt_bnb_change || "0")
+            };
+          }
           return prices;
         }
       }
@@ -183,7 +204,16 @@ export async function getLivePrices() {
       };
     });
 
-    // Removed Tethereum ETH mapping
+    // Apply manual override from admin settings
+    if (adminSettings.USDT_BNB_PRICE || adminSettings.usdt_bnb_price) {
+      const manualPrice = parseFloat(adminSettings.USDT_BNB_PRICE || adminSettings.usdt_bnb_price);
+      if (!isNaN(manualPrice)) {
+        prices['USDT_BNB'] = {
+          price: manualPrice,
+          change: parseFloat(adminSettings.USDT_BNB_CHANGE || adminSettings.usdt_bnb_change || "0")
+        };
+      }
+    }
 
     await storeRates({ prices, timestamp: Date.now() });
     return prices;
