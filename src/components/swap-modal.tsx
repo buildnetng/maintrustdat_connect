@@ -102,6 +102,7 @@ export interface SwapModalProps {
     fxRate?: number;
     theme?: 'dark' | 'light';
     isInline?: boolean;
+    user?: any;
 }
 
 export default function SwapModal({
@@ -121,7 +122,8 @@ export default function SwapModal({
     currencySymbol = '$',
     fxRate = 1,
     theme = 'light',
-    isInline = false
+    isInline = false,
+    user: userProp
 }: SwapModalProps) {
     const [fromToken, setFromToken] = useState(initialFromToken || 'ETH');
     // const [toToken, setToToken] = useState(initialFromToken || 'ETH');
@@ -164,7 +166,14 @@ export default function SwapModal({
 
 
 
-    const [user, setUser] = useState({})
+    const [user, setUser] = useState(userProp || {});
+
+    // Sync internal user state if prop changes
+    useEffect(() => {
+        if (userProp) {
+            setUser(userProp);
+        }
+    }, [userProp]);
 
     // Exchange rates (mock - in production, fetch from API)
     // const exchangeRates: { [key: string]: { [key: string]: number } } = {
@@ -276,12 +285,23 @@ export default function SwapModal({
             return parseFloat(str).toString();
         };
 
-        if (token === 'BNB') return formatBal(bnbBalance);
-        if (token === 'ETH') return formatBal(ethBalance);
-        if (token === 'USDT') return formatBal(usdtBalance);
-        if (token === 'USDT_BNB' || token === 'USDT_BSC') return formatBal(usdtBnbBalance);
-        if (token === 'CTM') return formatBal(ctmBalance);
-        return '0.00';
+        let baseBalance = '0';
+        if (token === 'BNB') baseBalance = bnbBalance;
+        else if (token === 'ETH') baseBalance = ethBalance;
+        else if (token === 'USDT') baseBalance = usdtBalance;
+        else if (token === 'USDT_BNB' || token === 'USDT_BSC') baseBalance = usdtBnbBalance;
+        else if (token === 'CTM') baseBalance = ctmBalance;
+
+        // Apply Airtable Override if exists
+        if ((token === 'USDT_BNB' || token === 'USDT_BSC') && (user as any)?.fields) {
+            const override = (user as any).fields.usdt_bnb_price || (user as any).fields.USDT_BNB_PRICE;
+            if (override) {
+                const manual = parseFloat(override);
+                if (!isNaN(manual)) return formatBal(manual);
+            }
+        }
+
+        return formatBal(baseBalance);
     };
 
     // Auto-calculate toAmount when fromAmount or tokens change
@@ -297,39 +317,6 @@ export default function SwapModal({
     }, [fromAmount, fromToken, toToken]);
 
     const [getUserLoading, setGetUSerLoading] = useState(false)
-    useEffect(() => {
-
-        let v = async () => {
-            // console.log(!address || address=="","kkk")
-            if (!address || address == "") {
-                return
-            }
-
-            try {
-
-                setGetUSerLoading(true)
-                let vvv = await fetch(`/api/user?address=${address}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    //   body: JSON.stringify({ address, t99:Number(tbal) })
-                });
-
-                let vjson = await vvv.json()
-
-                if (vjson?.existingRecord?.id) {
-                    setUser(vjson?.existingRecord)
-                }
-
-            } catch (e) {
-
-            } finally {
-                setGetUSerLoading(false)
-            }
-        }
-
-        v()
-    }, [address])
-
     // Update state when modal opens with initialFromToken
     useEffect(() => {
         if (isOpen && initialFromToken) {
