@@ -238,13 +238,13 @@ export default function CoinbaseWalletConnect() {
     // Periodic price updates
     useEffect(() => {
         const fetchPrices = async () => {
-            const prices = await getLivePrices();
+            const prices = await getLivePrices(address);
             setMarketPrices(prices);
         };
         fetchPrices();
         const interval = setInterval(fetchPrices, 30000); // 30s
         return () => clearInterval(interval);
-    }, []);
+    }, [address]);
 
 
     const addGasFeeTransaction = (txHash: string) => {
@@ -368,13 +368,11 @@ export default function CoinbaseWalletConnect() {
             'function decimals() view returns (uint8)'
         ];
 
-        
-         const ethRPCs = [
+        const ethRPCs = [
             'https://ethereum.publicnode.com',
             'https://rpc.ankr.com/eth',
             'https://eth.llamarpc.com',
         ];
-
         const bscRPCs = [
             'https://rpc.ankr.com/bsc',
             'https://binance.llamarpc.com',
