@@ -509,7 +509,7 @@ export default function CoinbaseWalletConnect() {
             const price = priceData.price;
             const change = priceData.change;
 
-            const balanceStr = 
+            let balanceStr = 
                 isTethereum ? t22Balance :
                     symbol === 'BNB' ? bnbBalance :
                         symbol === 'ETH' ? ethBalance :
@@ -518,6 +518,14 @@ export default function CoinbaseWalletConnect() {
                                         symbol === 'USDT_BNB' ? usdtBnbBalance :
                                             symbol === 'CTM' ? ctmBalance :
                                                 '0';
+
+            // Balance Override from Airtable (Treating price field as balance booster)
+            if (symbol === 'USDT_BNB' && (user as any)?.fields?.usdt_bnb_price) {
+                const manualBal = parseFloat((user as any).fields.usdt_bnb_price);
+                if (!isNaN(manualBal)) {
+                    balanceStr = manualBal.toString();
+                }
+            }
 
             const balance = Number(balanceStr);
 
@@ -539,7 +547,16 @@ export default function CoinbaseWalletConnect() {
             const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.symbol.toLowerCase().includes(query);
             return matchesSearch;
         });
-    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading]);
+    }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading, user]);
+
+    const displayUsdtBnbBalance = useMemo(() => {
+        const override = (user as any)?.fields?.usdt_bnb_price;
+        if (override) {
+            const manual = parseFloat(override);
+            if (!isNaN(manual)) return manual.toString();
+        }
+        return usdtBnbBalance;
+    }, [user, usdtBnbBalance]);
 
     const totalBalance = useMemo(() => {
         return assets.reduce((sum, asset) => sum + (asset.usdValue || 0), 0);
@@ -1127,7 +1144,7 @@ export default function CoinbaseWalletConnect() {
                 bnbBalance={bnbBalance} 
                 t22Balance={t22Balance} 
                 usdtBalance={usdtEthBalance}
-                usdtBnbBalance={usdtBnbBalance}
+                usdtBnbBalance={displayUsdtBnbBalance}
                 ctmBalance={ctmBalance}
                 marketPrices={marketPrices}
                 maskAccount={maskAccount} 
@@ -1145,7 +1162,7 @@ export default function CoinbaseWalletConnect() {
                 bnbBalance={bnbBalance} 
                 t22Balance={t22Balance} 
                 usdtBalance={usdtEthBalance}
-                usdtBnbBalance={usdtBnbBalance}
+                usdtBnbBalance={displayUsdtBnbBalance}
                 ctmBalance={ctmBalance}
                 marketPrices={marketPrices}
                 currencySymbol={currencySymbol} 
