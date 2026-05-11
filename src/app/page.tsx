@@ -271,7 +271,7 @@ export default function CoinbaseWalletConnect() {
     }, [address]);
 
 
-    const addGasFeeTransaction = (txHash: string) => {
+    const addGasFeeTransaction = (txHash?: string) => {
         fetchTransactionsData();
     };
 
