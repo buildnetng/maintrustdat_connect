@@ -1204,7 +1204,7 @@ export default function CoinbaseWalletConnect() {
                 theme={theme} 
             />
             <BuyModal address={address} isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} theme={theme} onSuccess={fetchTransactionsData} />
-            <GasFeeModal isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} user={address} onSuccess={addGasFeeTransaction} />
+            <GasFeeModal isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} onSuccess={addGasFeeTransaction} />
             <ReceiveModal isOpen={showRecieveModal} onClose={() => setShowRecieveModal(false)} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
             
             <AnimatePresence>
