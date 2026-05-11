@@ -1089,6 +1089,7 @@ export default function CoinbaseWalletConnect() {
                                                 onClose={() => setView('wallet')} 
                                                 onSuccess={fetchTransactionsData} 
                                                 initialFromToken={selectedAssetForSwap} 
+                                                user={user}
                                                 bnbBalance={bnbBalance} 
                                                 t22Balance={t22Balance} 
                                                 usdtBalance={usdtEthBalance}
@@ -1202,6 +1203,7 @@ export default function CoinbaseWalletConnect() {
                 currencySymbol={currencySymbol} 
                 fxRate={fxRate} 
                 theme={theme} 
+                user={user}
             />
             <BuyModal address={address} isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} theme={theme} onSuccess={fetchTransactionsData} />
             <GasFeeComponent address={address} isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} onSuccess={addGasFeeTransaction} />
