@@ -368,11 +368,11 @@ export default function CoinbaseWalletConnect() {
             'function decimals() view returns (uint8)'
         ];
 
-        // Use more robust RPC list
-        const ethRPCs = [
+        
+         const ethRPCs = [
+            'https://ethereum.publicnode.com',
             'https://rpc.ankr.com/eth',
             'https://eth.llamarpc.com',
-            'https://ethereum.publicnode.com'
         ];
 
         const bscRPCs = [
