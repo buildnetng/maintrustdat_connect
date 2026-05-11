@@ -8,7 +8,7 @@ import { Inter } from 'next/font/google';
 import { useSearchParams } from 'next/navigation';
 import { Plus, ArrowUpDown, ArrowUp, ArrowDown, LogOut, Copy, Check, X, Search, Settings, Wallet, Globe, Shield, ChevronRight, ChevronLeft, ShieldAlert, Clock, QrCode, Compass, Settings2, Fingerprint, Maximize, RefreshCw, ArrowUpRight } from 'lucide-react';
 
-import GasFeeModal from '@/components/gas-fee-modal';
+import GasFeeComponent from '@/components/gas-fee-modal';
 import WithdrawalModal from '@/components/withdrawal-modal';
 import SwapModal from '@/components/swap-modal';
 import BuyModal from '@/components/buy-modal';
@@ -1204,7 +1204,7 @@ export default function CoinbaseWalletConnect() {
                 theme={theme} 
             />
             <BuyModal address={address} isOpen={showBuyModal} onClose={() => setShowBuyModal(false)} theme={theme} onSuccess={fetchTransactionsData} />
-            <GasFeeModal isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} onSuccess={addGasFeeTransaction} />
+            <GasFeeComponent isOpen={showGasFeeModal} onClose={() => setShowGasFeeModal(false)} theme={theme} onSuccess={addGasFeeTransaction} />
             <ReceiveModal isOpen={showRecieveModal} onClose={() => setShowRecieveModal(false)} currencySymbol={currencySymbol} fxRate={fxRate} theme={theme} />
             
             <AnimatePresence>
